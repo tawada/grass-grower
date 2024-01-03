@@ -40,7 +40,7 @@ def update_issue():
         }
     )
 
-    message = "You are a programmer of the highest caliber.Please read the code of the existing program and make additional comments on the issue. Please precede and follow your comments with ```."
+    message = "You are a programmer of the highest caliber.Please read the code of the existing program and make additional comments on the issue."
     messages.append(
         {
             "role": "system",
