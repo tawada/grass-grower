@@ -13,7 +13,7 @@ def enumerate_python_files():
     for file in Path(".").glob("**/*.py"):
         with open(file, "r") as f:
             content = f.read()
-            python_files.append({"filename": file.name, "content": content})
+            python_files.append({"filename": str(file), "content": content})
     return python_files
 
 
