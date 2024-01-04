@@ -1,5 +1,4 @@
 from pathlib import Path
-
 from services import (
     generate_text,
     get_issue,
@@ -8,131 +7,84 @@ from services import (
 )
 
 
+def enumerate_python_files():
+    """Enumerate all Python files in the directory structure."""
+    python_files = []
+    for file in Path(".").glob("**/*.py"):
+        with open(file, "r") as f:
+            content = f.read()
+            python_files.append({"filename": file.name, "content": content})
+    return python_files
+
+
+def prepare_messages_from_files(python_files, additional_message):
+    """Prepare messages from enumerated Python files with an additional context message."""
+    messages = []
+    for file_info in python_files:
+        message = f"```{file_info['filename']}\n{file_info['content']}```"
+        messages.append({"role": "user", "content": message})
+    messages.append({"role": "user", "content": additional_message})
+    return messages
+
+
+def send_messages_to_system(messages, system_instruction):
+    """Send messages to AI system for code generation."""
+    messages.append({"role": "system", "content": system_instruction})
+    generated_text = generate_text(messages)
+    print(generated_text)
+    return generated_text
+
+
 def generate_code_from_issue(issue_id: int):
-    """issueからコードを生成する"""
+    """Generate code from an issue."""
 
     issue = get_issue_by_id(issue_id)
     if issue is None:
-        print("issueが取得できませんでした")
+        print("Issue could not be retrieved.")
         return
 
-    # issueの内容からどのようなコードを生成するかを決定する
-    messages = []
-
-    # 既存の拡張子.pyのファイルをすべて列挙する
-    for file in Path(".").glob("**/*.py"):
-        with open(file, "r") as f:
-            message = "```" + file.name + "\n"
-            message += f.read() + "```"
-            messages.append(
-                {
-                    "role": "user",
-                    "content": message,
-                }
-            )
-
-    # issueをpromptに追加する
-    message = "```" + issue.title + "\n"
-    message += issue.body + "```\n"
-    messages.append(
-        {
-            "role": "user",
-            "content": message,
-        }
+    python_files = enumerate_python_files()
+    issue_message = f"```{issue.title}\n{issue.body}```\n"
+    messages = prepare_messages_from_files(python_files, issue_message)
+    generated_text = send_messages_to_system(
+        messages,
+        "You are a programmer of the highest caliber.Please read the code of the existing program and rewrite any one based on the issue."
     )
-    message = "You are a programmer of the highest caliber.Please read the code of the existing program and rewrite any one based on the issue. You must output the file name on the first row and whole code on the second row and below."
-    messages.append(
-        {
-            "role": "system",
-            "content": message,
-        }
-    )
-
-    generated_text = generate_text(messages)
-    print(generated_text)
+    return generated_text
+    # Add any post-processing if necessary...
 
 
 def update_issue():
-    """issueにコメントを追加する"""
+    """Update an issue with a comment."""
 
     issue = get_issue()
     if issue is None:
-        print("issueが取得できませんでした")
+        print("Issue could not be retrieved.")
         return
-    print(issue)
 
-    messages = []
-
-    # 既存の拡張子.pyのファイルをすべて列挙する
-    for file in Path(".").glob("**/*.py"):
-        with open(file, "r") as f:
-            message = "```" + file.name + "\n"
-            message += f.read() + "```"
-            messages.append(
-                {
-                    "role": "user",
-                    "content": message,
-                }
-            )
-
-    # issueをpromptに追加する
-    message = "```" + issue.title + "\n"
-    message += issue.body + "```\n"
-    messages.append(
-        {
-            "role": "user",
-            "content": message,
-        }
+    python_files = enumerate_python_files()
+    issue_message = f"```{issue.title}\n{issue.body}```\n"
+    messages = prepare_messages_from_files(python_files, issue_message)
+    generated_text = send_messages_to_system(
+        messages,
+        "You are a programmer of the highest caliber.Please read the code of the existing program and make additional comments on the issue."
     )
-
-    message = "You are a programmer of the highest caliber.Please read the code of the existing program and make additional comments on the issue."
-    messages.append(
-        {
-            "role": "system",
-            "content": message,
-        }
-    )
-
-    generated_text = generate_text(messages)
-    print(generated_text)
-
     reply_issue(issue.id, generated_text)
+    # Add any post-processing if necessary...
 
 
 def generate_readme():
-    """プログラム全体を見てREADME.mdを生成する"""
+    """Generate README.md documentation for the entire program."""
 
-    messages = []
-
-    # 既存の拡張子.pyのファイルをすべて列挙する
-    for file in Path(".").glob("**/*.py"):
-        with open(file, "r") as f:
-            message = "```" + str(file) + "\n"
-            message += f.read() + "```"
-            messages.append(
-                {
-                    "role": "user",
-                    "content": message,
-                }
-            )
+    python_files = enumerate_python_files()
     with open("README.md", "r") as f:
-        message = "```Current README.md\n"
-        message += f.read() + "```"
-        messages.append(
-            {
-                "role": "user",
-                "content": message,
-            }
-        )
-    message = "You are a programmer of the highest caliber.Please read the code of the existing program and generate README.md."
-    messages.append(
-        {
-            "role": "system",
-            "content": message,
-        }
+        readme_content = f.read()
+    readme_message = f"```Current README.md\n{readme_content}```"
+    messages = prepare_messages_from_files(python_files, readme_message)
+    generated_text = send_messages_to_system(
+        messages,
+        "You are a programmer of the highest caliber.Please read the code of the existing program and generate README.md."
     )
-    generated_text = generate_text(messages)
-    print(generated_text)
-
     with open("README.md", "w") as f:
         f.write(generated_text)
+    # Add any post-processing if necessary...
