@@ -51,7 +51,6 @@ def generate_code_from_issue(issue_id: int):
         "You are a programmer of the highest caliber.Please read the code of the existing program and rewrite any one based on the issue."
     )
     return generated_text
-    # Add any post-processing if necessary...
 
 
 def update_issue():
@@ -70,7 +69,6 @@ def update_issue():
         "You are a programmer of the highest caliber.Please read the code of the existing program and make additional comments on the issue."
     )
     reply_issue(issue.id, generated_text)
-    # Add any post-processing if necessary...
 
 
 def generate_readme():
@@ -87,4 +85,3 @@ def generate_readme():
     )
     with open("README.md", "w") as f:
         f.write(generated_text)
-    # Add any post-processing if necessary...
