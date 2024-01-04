@@ -18,6 +18,11 @@ def get_issue() -> Issue:
     issue_row = res.stdout.decode().split("\t")
     # 先頭の1個目のissue_idを取得
     issue_id = int(issue_row[0])
+    return get_issue_by_id(issue_id)
+
+
+def get_issue_by_id(issue_id: int) -> Issue:
+    """idからissueを取得する"""
 
     try:
         res = subprocess.run(
@@ -39,7 +44,7 @@ def get_issue() -> Issue:
             is_body = True
 
     return Issue(
-        id=int(issue_row[0]),
+        id=issue_id,
         title=title,
         body=body,
     )
@@ -57,3 +62,5 @@ def reply_issue(issue_id: int, body: str) -> None:
         print(e)
         return None
     print(res)
+
+
