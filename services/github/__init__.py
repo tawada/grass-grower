@@ -3,6 +3,20 @@ import subprocess
 from schemas import Issue
 
 
+def create_issue(title: str, body: str) -> None:
+    """issueを追加する"""
+
+    try:
+        res = subprocess.run(
+            ["gh", "issue", "create", "-t", title, "-b", body],
+            stdout=subprocess.PIPE,
+        )
+    except Exception as e:
+        print(e)
+        return None
+    print(res)
+
+
 def get_issue() -> Issue:
     """issueを取得する"""
 
@@ -62,5 +76,3 @@ def reply_issue(issue_id: int, body: str) -> None:
         print(e)
         return None
     print(res)
-
-
