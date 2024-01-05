@@ -1,11 +1,13 @@
 from pathlib import Path
 from typing import Union
-from services import (
+from services.github import (
     create_issue,
-    generate_text,
     get_issue,
     get_issue_by_id,
     reply_issue,
+)
+from services.llm import (
+    generate_text,
 )
 
 

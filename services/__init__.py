@@ -1,2 +1,2 @@
-from .github import *
-from .llm import *
+from . import github
+from . import llm
