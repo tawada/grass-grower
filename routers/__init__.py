@@ -1,5 +1,7 @@
 from pathlib import Path
+from typing import Union
 from services import (
+    create_issue,
     generate_text,
     get_issue,
     get_issue_by_id,
@@ -23,7 +25,8 @@ def prepare_messages_from_files(python_files, additional_message):
     for file_info in python_files:
         message = f"```{file_info['filename']}\n{file_info['content']}```"
         messages.append({"role": "user", "content": message})
-    messages.append({"role": "user", "content": additional_message})
+    if additional_message:
+        messages.append({"role": "user", "content": additional_message})
     return messages
 
 
@@ -33,6 +36,23 @@ def send_messages_to_system(messages, system_instruction):
     generated_text = generate_text(messages)
     print(generated_text)
     return generated_text
+
+
+def add_issue():
+    """Add an issue to the repository."""
+
+    python_files = enumerate_python_files()
+    messages = prepare_messages_from_files(python_files, "")
+    issue_body = send_messages_to_system(
+        messages,
+        "You are a programmer of the highest caliber. Please read the code of the existing program and point out only one issue of whole code. Never refer to yourself as an AI assistant when doing so."
+    )
+    issue_title = send_messages_to_system(
+        [{"role": "assistant", "content": issue_body}],
+        "You are a programmer of the highest caliber. Please summarize the above GitHub issue text to one sentense as an issue title."
+    )
+    issue_title = issue_title.strip().strip('"`').strip("'")
+    create_issue(issue_title, issue_body)
 
 
 def generate_code_from_issue(issue_id: int):
@@ -53,10 +73,14 @@ def generate_code_from_issue(issue_id: int):
     return generated_text
 
 
-def update_issue():
+def update_issue(issue_id: Union[int, None] = None):
     """Update an issue with a comment."""
 
-    issue = get_issue()
+    if issue_id is None:
+        issue = get_issue()
+    else:
+        issue = get_issue_by_id(issue_id)
+
     if issue is None:
         print("Issue could not be retrieved.")
         return
