@@ -41,6 +41,9 @@ def setup_repository(repo: str) -> bool:
     # リポジトリが存在するか確認する
     if not os.path.exists(path):
         # リポジトリが存在しない場合はcloneする
+        os.makedirs(
+            path[:-len(repo) + repo.index("/")], exist_ok=True
+        )
         return clone_repository(repo)
     else:
         # リポジトリが存在する場合はpullする
@@ -50,8 +53,8 @@ def setup_repository(repo: str) -> bool:
 def clone_repository(repo: str) -> bool:
     """リポジトリをcloneする"""
     return exec_command_with_repo(
-        repo,
-        ["gh", "repo", "clone", repo],
+        repo[:repo.index("/")],
+        ["git", "clone", "git@github.com:" + repo],
         "Cloning repository",
     )
 

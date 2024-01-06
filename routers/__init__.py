@@ -98,7 +98,7 @@ def update_issue(repo: str, issue_id: int):
     """Update an issue with a comment."""
 
     setup_repository(repo)
-    issue = get_issue_by_id(issue_id)
+    issue = get_issue_by_id(repo, issue_id)
 
     if issue is None:
         logger.error(f"Failed to retrieve issue with ID: {issue_id}")
