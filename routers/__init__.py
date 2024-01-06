@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from typing import Union
 from services.github import (
@@ -9,6 +10,10 @@ from services.github import (
 from services.llm import (
     generate_text,
 )
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def enumerate_python_files():
@@ -36,7 +41,6 @@ def send_messages_to_system(messages, system_instruction):
     """Send messages to AI system for code generation."""
     messages.append({"role": "system", "content": system_instruction})
     generated_text = generate_text(messages)
-    print(generated_text)
     return generated_text
 
 
@@ -57,13 +61,20 @@ def add_issue():
     create_issue(issue_title, issue_body)
 
 
-def generate_code_from_issue(issue_id: int):
-    """Generate code from an issue."""
+def generate_code_from_issue(issue_id: int) -> Union[str, None]:
+    """Generate code from an issue and return the generated code.
+
+    Args:
+    - issue_id (int): The identifier for the issue to generate code from.
+
+    Returns:
+    - str: The generated code based on the issue, or none if the issue cannot be retrieved.
+    """
 
     issue = get_issue_by_id(issue_id)
     if issue is None:
-        print("Issue could not be retrieved.")
-        return
+        logger.error(f"Failed to retrieve issue with ID: {issue_id}")
+        return None
 
     python_files = enumerate_python_files()
     issue_message = f"```{issue.title}\n{issue.body}```\n"
@@ -72,6 +83,7 @@ def generate_code_from_issue(issue_id: int):
         messages,
         "You are a programmer of the highest caliber.Please read the code of the existing program and rewrite any one based on the issue."
     )
+    print(generated_text)
     return generated_text
 
 
@@ -84,7 +96,7 @@ def update_issue(issue_id: Union[int, None] = None):
         issue = get_issue_by_id(issue_id)
 
     if issue is None:
-        print("Issue could not be retrieved.")
+        logger.error(f"Failed to retrieve issue with ID: {issue_id}")
         return
 
     python_files = enumerate_python_files()
@@ -109,14 +121,14 @@ def generate_readme():
         with open("README.md", "r") as f:
             readme_content = f.read()
     except FileNotFoundError:
-        print(
+        logger.error(
             "README.md file does not exist. A new README.md will be created with generated content."
         )
         # Not returning from the function here, as we might still want to generate a new README.md
     except OSError as e:
         # Catching any other OS-related errors (like file permission issues) 
         # and displaying the error message to the user.
-        print(f"Error while reading README.md: {e}")
+        logger.error(f"Error while reading README.md: {e}")
         return  # Exit the function as we cannot proceed without the existing README.md content
 
     readme_message = f"```Current README.md\n{readme_content}```"
@@ -131,4 +143,4 @@ def generate_readme():
         with open("README.md", "w") as f:
             f.write(generated_text)
     except OSError as e:
-        print(f"Error while writing to README.md: {e}")
+        logger.error(f"Error while writing to README.md: {e}")
