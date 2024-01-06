@@ -65,7 +65,7 @@ def add_issue(repo: str):
         "You are a programmer of the highest caliber. Please summarize the above GitHub issue text to one sentense as an issue title."
     )
     issue_title = issue_title.strip().strip('"`').strip("'")
-    create_issue(issue_title, issue_body)
+    create_issue(repo, issue_title, issue_body)
 
 
 def generate_code_from_issue(repo: str, issue_id: int) -> Union[str, None]:
