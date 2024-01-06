@@ -1,6 +1,7 @@
 import os
 import logging
 import subprocess
+from typing import List
 
 from schemas import Issue
 
@@ -9,6 +10,29 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 DEFAULT_PATH = "downloads"
+
+
+def exec_command_with_repo(
+        repo: str,
+        command: List[str],
+        description: str,
+):
+    """リポジトリを指定してコマンドを実行する"""
+    repo_path = DEFAULT_PATH + "/" + repo
+    try:
+        logger.info(f"Starting: {description}: {repo}")
+        res = subprocess.run(
+            command,
+            stdout=subprocess.PIPE,
+            cwd=repo_path,
+        )
+        logger.info(f"Successfully: {description}: {res.stdout.decode().strip()}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed: {description}: {e}")
+        return False
+
+
 
 
 def setup_repository(repo: str) -> bool:
@@ -25,65 +49,39 @@ def setup_repository(repo: str) -> bool:
 
 def clone_repository(repo: str) -> bool:
     """リポジトリをcloneする"""
-    try:
-        logger.info(f"Cloning repository: {repo}")
-        res = subprocess.run(
-            ["gh", "repo", "clone", repo, DEFAULT_PATH + "/" + repo],
-            stdout=subprocess.PIPE,
-        )
-        logger.info(f"Repository cloned successfully: {res.stdout.decode().strip()}")
-        return True
-    except Exception as e:
-        logger.error(f"Failed to clone repository: {e}")
-        return False
+    return exec_command_with_repo(
+        repo,
+        ["gh", "repo", "clone", repo],
+        "Cloning repository",
+    )
 
 
 def pull_repository(repo: str) -> bool:
     """リポジトリをpullする"""
-    try:
-        logger.info(f"Pulling repository: {repo}")
-        res = subprocess.run(
-            ["git", "pull"],
-            stdout=subprocess.PIPE,
-            cwd=DEFAULT_PATH + "/" + repo,
-        )
-        logger.info(f"Repository pulled successfully: {res.stdout.decode().strip()}")
-        return True
-    except Exception as e:
-        logger.error(f"Failed to pull repository: {e}")
-        return False
-
+    return exec_command_with_repo(
+        repo,
+        ["git", "pull"],
+        "Pulling repository",
+    )
+ 
 
 def create_issue(repo: str, title: str, body: str) -> None:
     """Create a new issue on GitHub."""
-    try:
-        logger.info(f"Creating issue with title: {title}")
-        res = subprocess.run(
-            ["gh", "issue", "create", "-t", title, "-b", body],
-            stdout=subprocess.PIPE,
-            cwd=DEFAULT_PATH + "/" + repo,
-        )
-        logger.info(f"Issue created successfully: {res.stdout}")
-    except Exception as e:
-        logger.error(f"Failed to create issue: {e}")
-        return None
+    return exec_command_with_repo(
+        repo,
+        ["gh", "issue", "create", "-t", title, "-b", body],
+        f"Creating issue with title: {title}",
+    )
 
 
-def get_issue(repo: str) -> Issue:
+def list_issues(repo: str) -> List[Issue]:
     """issueを取得する"""
 
-    try:
-        logger.info("Listing issues")
-        res = subprocess.run(
-            ["gh", "issue", "list"],
-            stdout=subprocess.PIPE,
-            cwd=DEFAULT_PATH + "/" + repo,
-        )
-        logger.info("Issue listed successfully")
-    except Exception as e:
-        logger.error(f"Failed to list issues: {e}")
-        return None
-
+    res = exec_command_with_repo(
+        repo,
+        ["gh", "issue", "list"],
+        "Listing issues",
+    )
     issue_row = res.stdout.decode().split("\t")
     # 先頭の1個目のissue_idを取得
     issue_id = int(issue_row[0])
@@ -124,83 +122,44 @@ def get_issue_by_id(repo: str, issue_id: int) -> Issue:
 
 def reply_issue(repo: str, issue_id: int, body: str) -> None:
     """issueに返信する"""
-
-    try:
-        logger.info(f"Replying issue with id: {issue_id}")
-        res = subprocess.run(
-            ["gh", "issue", "comment", str(issue_id), "-b", body],
-            stdout=subprocess.PIPE,
-            cwd=DEFAULT_PATH + "/" + repo,
-        )
-        logger.info(f"Issue commented successfully: {res.stdout.decode().strip()}")
-    except Exception as e:
-        logger.error(f"Failed to get issue: {e}")
-        return None
+    return exec_command_with_repo(
+        repo,
+        ["gh", "issue", "comment", str(issue_id), "-b", body],
+        f"Replying issue with id: {issue_id}",
+    )
 
 
 def checkout_branch(repo: str, branch_name: str) -> bool:
     """ブランチをチェックアウトする"""
-
-    try:
-        logger.info(f"Checking out to branch: {branch_name}")
-        res = subprocess.run(
-            ["git", "checkout", branch_name],
-            stdout=subprocess.PIPE,
-            cwd=DEFAULT_PATH + "/" + repo,
-        )
-        logger.info(f"Branch checked out successfully: {res.stdout.decode().strip()}")
-        return True
-    except Exception as e:
-        logger.error(f"Failed to checkout branch: {e}")
-        return False
+    return exec_command_with_repo(
+        repo,
+        ["git", "checkout", branch_name],
+        f"Checking out to branch: {branch_name}",
+    )
 
 
 def checkout_new_branch(repo: str, branch_name: str) -> bool:
     """新しいブランチを作成する"""
-
-    try:
-        logger.info(f"Creating new branch: {branch_name}")
-        res = subprocess.run(
-            ["git", "checkout", "-b", branch_name],
-            stdout=subprocess.PIPE,
-            cwd=DEFAULT_PATH + "/" + repo,
-        )
-        logger.info(f"New branch created successfully: {res.stdout.decode().strip()}")
-        return True
-    except Exception as e:
-        logger.error(f"Failed to create new branch: {e}")
-        return False
+    return exec_command_with_repo(
+        repo,
+        ["git", "checkout", "-b", branch_name],
+        f"Creating new branch: {branch_name}",
+    )
 
 
 def commit(repo: str, message: str) -> bool:
     """コミットする"""
-
-    try:
-        logger.info(f"Committing changes: {message}")
-        res = subprocess.run(
-            ["git", "commit", "-a", "-m", message],
-            stdout=subprocess.PIPE,
-            cwd=DEFAULT_PATH + "/" + repo,
-        )
-        logger.info(f"Changes committed successfully: {res.stdout.decode().strip()}")
-        return True
-    except Exception as e:
-        logger.error(f"Failed to commit changes: {e}")
-        return False
+    return exec_command_with_repo(
+        repo,
+        ["git", "commit", "-a", "-m", message],
+        f"Committing changes: {message}",
+    )
 
 
 def push_repository(repo: str, branch_name: str) -> bool:
     """リポジトリをpushする"""
-
-    try:
-        logger.info(f"Pushing repository: {repo}")
-        res = subprocess.run(
-            ["git", "push", "origin", branch_name],
-            stdout=subprocess.PIPE,
-            cwd=DEFAULT_PATH + "/" + repo,
-        )
-        logger.info(f"Repository pushed successfully: {res.stdout.decode().strip()}")
-        return True
-    except Exception as e:
-        logger.error(f"Failed to push repository: {e}")
-        return False
+    return exec_command_with_repo(
+        repo,
+        ["git", "push", "origin", branch_name],
+        f"Pushing repository: {repo}",
+    )
