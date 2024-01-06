@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 import logging
 import sys
 from routers import (
@@ -17,19 +18,32 @@ logging.basicConfig(
 )
 
 if __name__ == "__main__":
-    args = sys.argv
-    if len(args) > 2:
-        if (
-            args[1] == "generate_code_from_issue"
-            and args[2].isdecimal()
-        ):
-            generate_code_from_issue(int(args[2]))
-        elif args[1] == "update_issue" and args[2].isdecimal():
-            update_issue(int(args[2]))
-    elif len(args) > 1:
-        if args[1] == "add_issue":
-            add_issue()
-        elif args[1] == "generate_readme":
-            generate_readme()
-        elif args[1] == "update_issue":
-            update_issue()
+    parser = ArgumentParser(description="Tool to automate issue handling on GitHub")
+    parser.add_argument("action", help="Action to perform", choices=[
+        "add_issue", "generate_code_from_issue", "generate_readme", "update_issue"
+    ])
+    parser.add_argument("--issue-id", type=int, help="ID of the GitHub issue")
+    parser.add_argument("--repo", help="Target GitHub repository in the format 'owner/repo'")
+
+    args = parser.parse_args()
+
+    repo = "tawada/grass-grower"
+    if args.repo:
+        try:
+            owner, repo_ = args.repo.split('/')
+            repo = f"{owner}/{repo_}"
+        except ValueError:
+            logging.error("Invalid repository format. Use 'owner/repo'.")
+            sys.exit(1)
+
+    if args.action == "generate_code_from_issue" and args.issue_id:
+        generate_code_from_issue(repo, args.issue_id)
+    elif args.action == "update_issue" and args.issue_id:
+        update_issue(repo, args.issue_id)
+    elif args.action == "add_issue":
+        add_issue(repo)
+    elif args.action == "generate_readme":
+        generate_readme(repo)
+    else:
+        logging.error("Invalid action.")
+        sys.exit(1)

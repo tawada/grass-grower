@@ -2,10 +2,14 @@ import logging
 from pathlib import Path
 from typing import Union
 from services.github import (
+    setup_repository,
+    checkout_branch,
+    checkout_new_branch,
+    commit,
     create_issue,
-    get_issue,
     get_issue_by_id,
     reply_issue,
+    push_repository,
 )
 from services.llm import (
     generate_text,
@@ -16,13 +20,15 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-def enumerate_python_files():
+def enumerate_python_files(repo: str):
     """Enumerate all Python files in the directory structure."""
     python_files = []
-    for file in Path(".").glob("**/*.py"):
+    # downloads/リポジトリ名/以下のファイルを列挙する
+    repo_path = "./downloads/" + repo
+    for file in Path(repo_path).glob("**/*.py"):
         with open(file, "r") as f:
             content = f.read()
-            python_files.append({"filename": str(file), "content": content})
+            python_files.append({"filename": str(file)[len(repo_path) - 1:], "content": content})
     return python_files
 
 
@@ -44,10 +50,10 @@ def send_messages_to_system(messages, system_instruction):
     return generated_text
 
 
-def add_issue():
+def add_issue(repo: str):
     """Add an issue to the repository."""
 
-    python_files = enumerate_python_files()
+    python_files = enumerate_python_files(repo)
     messages = prepare_messages_from_files(python_files, "")
     issue_body = send_messages_to_system(
         messages,
@@ -61,7 +67,7 @@ def add_issue():
     create_issue(issue_title, issue_body)
 
 
-def generate_code_from_issue(issue_id: int) -> Union[str, None]:
+def generate_code_from_issue(repo: str, issue_id: int) -> Union[str, None]:
     """Generate code from an issue and return the generated code.
 
     Args:
@@ -70,13 +76,13 @@ def generate_code_from_issue(issue_id: int) -> Union[str, None]:
     Returns:
     - str: The generated code based on the issue, or none if the issue cannot be retrieved.
     """
-
-    issue = get_issue_by_id(issue_id)
+    setup_repository(repo)
+    issue = get_issue_by_id(repo, issue_id)
     if issue is None:
         logger.error(f"Failed to retrieve issue with ID: {issue_id}")
         return None
 
-    python_files = enumerate_python_files()
+    python_files = enumerate_python_files(repo)
     issue_message = f"```{issue.title}\n{issue.body}```\n"
     messages = prepare_messages_from_files(python_files, issue_message)
     generated_text = send_messages_to_system(
@@ -87,38 +93,36 @@ def generate_code_from_issue(issue_id: int) -> Union[str, None]:
     return generated_text
 
 
-def update_issue(issue_id: Union[int, None] = None):
+def update_issue(repo: str, issue_id: int):
     """Update an issue with a comment."""
 
-    if issue_id is None:
-        issue = get_issue()
-    else:
-        issue = get_issue_by_id(issue_id)
+    issue = get_issue_by_id(issue_id)
 
     if issue is None:
         logger.error(f"Failed to retrieve issue with ID: {issue_id}")
         return
 
-    python_files = enumerate_python_files()
+    python_files = enumerate_python_files(repo)
     issue_message = f"```{issue.title}\n{issue.body}```\n"
     messages = prepare_messages_from_files(python_files, issue_message)
     generated_text = send_messages_to_system(
         messages,
         "You are a programmer of the highest caliber.Please read the code of the existing program and make additional comments on the issue."
     )
-    reply_issue(issue.id, generated_text)
+    reply_issue(repo, issue.id, generated_text)
 
 
-def generate_readme():
+def generate_readme(repo: str):
     """Generate README.md documentation for the entire program."""
 
-    python_files = enumerate_python_files()
+    python_files = enumerate_python_files(repo)
 
     # Initialize readme_content as empty string to handle the case when file doesn't exist
     readme_content = ""
 
     try:
-        with open("README.md", "r") as f:
+        repo_path = "./downloads/" + repo
+        with open(repo_path + "/README.md", "r") as f:
             readme_content = f.read()
     except FileNotFoundError:
         logger.error(
@@ -138,9 +142,28 @@ def generate_readme():
         "You are a programmer of the highest caliber.Please read the code of the existing program and generate README.md."
     )
 
+    # Checkout to the a new branch
+    try:
+        checkout_new_branch(repo, "update-readme")
+    except Exception as e:
+        logger.error(f"Error to checkout a new branch: {e}")
+        return False
+
     # Attempt to write the README.md file.
     try:
-        with open("README.md", "w") as f:
+        with open(repo_path + "/README.md", "w") as f:
             f.write(generated_text)
     except OSError as e:
         logger.error(f"Error while writing to README.md: {e}")
+        checkout_branch(repo, "main")
+        return False
+    
+    # Commit the changes
+    res = commit(repo, "Update README.md")
+    if not res:
+        return False
+    res = push_repository(repo, "update-readme")
+    if not res:
+        return False
+    checkout_branch(repo, "main")
+    return True
