@@ -23,18 +23,17 @@ if __name__ == "__main__":
         "add_issue", "generate_code_from_issue", "generate_readme", "update_issue"
     ])
     parser.add_argument("--issue-id", type=int, help="ID of the GitHub issue")
-    parser.add_argument("--repo", help="Target GitHub repository in the format 'owner/repo'")
+    parser.add_argument("--repo", help="Target GitHub repository in the format 'owner/repo'", default="tawada/grass-grower")
 
     args = parser.parse_args()
 
-    repo = "tawada/grass-grower"
-    if args.repo:
-        try:
-            owner, repo_ = args.repo.split('/')
-            repo = f"{owner}/{repo_}"
-        except ValueError:
-            logging.error("Invalid repository format. Use 'owner/repo'.")
-            sys.exit(1)
+    # Parse repository
+    try:
+        owner, repo_ = args.repo.split('/')
+        repo = f"{owner}/{repo_}"
+    except ValueError:
+        logging.error("Invalid repository format. Use 'owner/repo'.")
+        sys.exit(1)
 
     if args.action == "generate_code_from_issue" and args.issue_id:
         generate_code_from_issue(repo, args.issue_id)
