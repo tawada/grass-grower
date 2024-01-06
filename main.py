@@ -1,3 +1,4 @@
+import logging
 import sys
 from routers import (
     add_issue,
@@ -6,6 +7,14 @@ from routers import (
     update_issue,
 )
 
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler("debug.log"),  # Log to a file
+        logging.StreamHandler()            # Log to standard output
+    ]
+)
 
 if __name__ == "__main__":
     args = sys.argv
