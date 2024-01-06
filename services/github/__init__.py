@@ -1,32 +1,35 @@
+import logging
 import subprocess
 
 from schemas import Issue
 
 
 def create_issue(title: str, body: str) -> None:
-    """issueを追加する"""
-
+    """Create a new issue on GitHub."""
     try:
+        logging.info(f"Creating issue with title: {title}")
         res = subprocess.run(
             ["gh", "issue", "create", "-t", title, "-b", body],
             stdout=subprocess.PIPE,
         )
+        logging.info(f"Issue created successfully: {res.stdout}")
     except Exception as e:
-        print(e)
+        logging.error(f"Failed to create issue: {e}")
         return None
-    print(res)
 
 
 def get_issue() -> Issue:
     """issueを取得する"""
 
     try:
+        logging.info("Listing issues")
         res = subprocess.run(
             ["gh", "issue", "list"],
             stdout=subprocess.PIPE,
         )
+        logging.info("Issue listed successfully")
     except Exception as e:
-        print(e)
+        logging.error(f"Failed to list issues: {e}")
         return None
 
     issue_row = res.stdout.decode().split("\t")
@@ -39,12 +42,14 @@ def get_issue_by_id(issue_id: int) -> Issue:
     """idからissueを取得する"""
 
     try:
+        logging.info(f"Getting issue with id: {issue_id}")
         res = subprocess.run(
             ["gh", "issue", "view", str(issue_id)],
             stdout=subprocess.PIPE,
         )
+        logging.info("Issue had successfully")
     except Exception as e:
-        print(e)
+        logging.error(f"Failed to get issue: {e}")
         return None
 
     is_body = False
@@ -68,11 +73,12 @@ def reply_issue(issue_id: int, body: str) -> None:
     """issueに返信する"""
 
     try:
+        logging.info(f"Replying issue with id: {issue_id}")
         res = subprocess.run(
             ["gh", "issue", "comment", str(issue_id), "-b", body],
             stdout=subprocess.PIPE,
         )
+        logging.info(f"Issue commented successfully: {res.stdout}")
     except Exception as e:
-        print(e)
+        logging.error(f"Failed to get issue: {e}")
         return None
-    print(res)
