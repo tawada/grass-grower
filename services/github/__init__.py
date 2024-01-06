@@ -4,17 +4,21 @@ import subprocess
 from schemas import Issue
 
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+
 def create_issue(title: str, body: str) -> None:
     """Create a new issue on GitHub."""
     try:
-        logging.info(f"Creating issue with title: {title}")
+        logger.info(f"Creating issue with title: {title}")
         res = subprocess.run(
             ["gh", "issue", "create", "-t", title, "-b", body],
             stdout=subprocess.PIPE,
         )
-        logging.info(f"Issue created successfully: {res.stdout}")
+        logger.info(f"Issue created successfully: {res.stdout}")
     except Exception as e:
-        logging.error(f"Failed to create issue: {e}")
+        logger.error(f"Failed to create issue: {e}")
         return None
 
 
@@ -22,14 +26,14 @@ def get_issue() -> Issue:
     """issueを取得する"""
 
     try:
-        logging.info("Listing issues")
+        logger.info("Listing issues")
         res = subprocess.run(
             ["gh", "issue", "list"],
             stdout=subprocess.PIPE,
         )
-        logging.info("Issue listed successfully")
+        logger.info("Issue listed successfully")
     except Exception as e:
-        logging.error(f"Failed to list issues: {e}")
+        logger.error(f"Failed to list issues: {e}")
         return None
 
     issue_row = res.stdout.decode().split("\t")
@@ -42,14 +46,14 @@ def get_issue_by_id(issue_id: int) -> Issue:
     """idからissueを取得する"""
 
     try:
-        logging.info(f"Getting issue with id: {issue_id}")
+        logger.info(f"Getting issue with id: {issue_id}")
         res = subprocess.run(
             ["gh", "issue", "view", str(issue_id)],
             stdout=subprocess.PIPE,
         )
-        logging.info("Issue had successfully")
+        logger.info("Issue had successfully")
     except Exception as e:
-        logging.error(f"Failed to get issue: {e}")
+        logger.error(f"Failed to get issue: {e}")
         return None
 
     is_body = False
@@ -73,12 +77,12 @@ def reply_issue(issue_id: int, body: str) -> None:
     """issueに返信する"""
 
     try:
-        logging.info(f"Replying issue with id: {issue_id}")
+        logger.info(f"Replying issue with id: {issue_id}")
         res = subprocess.run(
             ["gh", "issue", "comment", str(issue_id), "-b", body],
             stdout=subprocess.PIPE,
         )
-        logging.info(f"Issue commented successfully: {res.stdout}")
+        logger.info(f"Issue commented successfully: {res.stdout}")
     except Exception as e:
-        logging.error(f"Failed to get issue: {e}")
+        logger.error(f"Failed to get issue: {e}")
         return None
