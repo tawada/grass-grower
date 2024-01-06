@@ -53,6 +53,7 @@ def send_messages_to_system(messages, system_instruction):
 def add_issue(repo: str):
     """Add an issue to the repository."""
 
+    setup_repository(repo)
     python_files = enumerate_python_files(repo)
     messages = prepare_messages_from_files(python_files, "")
     issue_body = send_messages_to_system(
@@ -96,6 +97,7 @@ def generate_code_from_issue(repo: str, issue_id: int) -> Union[str, None]:
 def update_issue(repo: str, issue_id: int):
     """Update an issue with a comment."""
 
+    setup_repository(repo)
     issue = get_issue_by_id(issue_id)
 
     if issue is None:
@@ -115,6 +117,7 @@ def update_issue(repo: str, issue_id: int):
 def generate_readme(repo: str):
     """Generate README.md documentation for the entire program."""
 
+    setup_repository(repo)
     python_files = enumerate_python_files(repo)
 
     # Initialize readme_content as empty string to handle the case when file doesn't exist
