@@ -111,7 +111,7 @@ def get_issue_by_id(repo: str, issue_id: int) -> Issue:
     try:
         logger.info(f"Getting issue with id: {issue_id}")
         res = subprocess.run(
-            ["gh", "issue", "view", str(issue_id)],
+            ["gh", "issue", "view", str(issue_id), "-c"],
             stdout=subprocess.PIPE,
             cwd=DEFAULT_PATH + "/" + repo,
         )
