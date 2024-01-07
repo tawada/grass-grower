@@ -31,7 +31,8 @@ def exec_command_with_repo(
     repo_path = DEFAULT_PATH + "/" + repo
     try:
         logger.info(f"Starting: {description}: {repo}")
-        logger.info(f"Executing command: {' '.join(command)}")
+        shorted_commands = " ".join(command)[:50]
+        logger.info(f"Executing command: {shorted_commands}")
         res = subprocess.run(
             command,
             stdout=subprocess.PIPE,
