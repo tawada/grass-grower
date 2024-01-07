@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
-from typing import Union
+from typing import Union, List
+from schemas import Issue
 from services.github import (
     setup_repository,
     checkout_branch,
@@ -41,6 +42,20 @@ def prepare_messages_from_files(python_files, additional_message):
     if additional_message:
         messages.append({"role": "user", "content": additional_message})
     return messages
+
+
+def prepare_messages_from_issue(messages: List, issue: Issue):
+    """Prepare messages from enumerated Python files with an additional context message."""
+    messages.append({
+        "role": "user",
+        "content": f"```{issue.title}\n{issue.body}```\n"
+    })
+    for comment in issue.comments:
+        messages.append({
+            "role": "user",
+            "content": f"```issue comment\n{comment.body}```\n"
+        })
+    return messages 
 
 
 def send_messages_to_system(messages, system_instruction):
@@ -84,8 +99,8 @@ def generate_code_from_issue(repo: str, issue_id: int) -> Union[str, None]:
         return None
 
     python_files = enumerate_python_files(repo)
-    issue_message = f"```{issue.title}\n{issue.body}```\n"
-    messages = prepare_messages_from_files(python_files, issue_message)
+    messages = prepare_messages_from_files(python_files, "")
+    messages = prepare_messages_from_issue(messages, issue)
     generated_text = send_messages_to_system(
         messages,
         "You are a programmer of the highest caliber.Please read the code of the existing program and rewrite any one based on the issue."
@@ -105,8 +120,8 @@ def update_issue(repo: str, issue_id: int):
         return
 
     python_files = enumerate_python_files(repo)
-    issue_message = f"```{issue.title}\n{issue.body}```\n"
-    messages = prepare_messages_from_files(python_files, issue_message)
+    messages = prepare_messages_from_files(python_files, "")
+    messages = prepare_messages_from_issue(messages, issue)
     generated_text = send_messages_to_system(
         messages,
         "You are a programmer of the highest caliber.Please read the code of the existing program and make additional comments on the issue."

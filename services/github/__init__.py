@@ -3,7 +3,7 @@ import logging
 import subprocess
 from typing import List
 
-from schemas import Issue
+from schemas import IssueComment, Issue
 
 
 logger = logging.getLogger(__name__)
@@ -111,7 +111,7 @@ def get_issue_by_id(repo: str, issue_id: int) -> Issue:
     try:
         logger.info(f"Getting issue with id: {issue_id}")
         res = subprocess.run(
-            ["gh", "issue", "view", str(issue_id), "-c"],
+            ["gh", "issue", "view", str(issue_id)],
             stdout=subprocess.PIPE,
             cwd=DEFAULT_PATH + "/" + repo,
         )
@@ -130,11 +130,47 @@ def get_issue_by_id(repo: str, issue_id: int) -> Issue:
         elif line.startswith("--"):
             is_body = True
 
-    return Issue(
+    issue = Issue(
         id=issue_id,
         title=title,
         body=body,
     )
+
+    try:
+        logger.info(f"Getting comments with id: {issue_id}")
+        res = subprocess.run(
+            ["gh", "issue", "view", str(issue_id), "-c"],
+            stdout=subprocess.PIPE,
+            cwd=DEFAULT_PATH + "/" + repo,
+        )
+        logger.info("Comments had successfully")
+    except Exception as e:
+        logger.error(f"Failed to get comments: {e}")
+        return None
+
+    comment_attrs = [
+        "author", "association", "edited", "status",
+    ]
+
+    is_body = False
+    body = ""
+    comment = {}
+    for line in res.stdout.decode().splitlines():
+        if is_body and line.startswith("--"):
+            issue.comments.append(IssueComment(**comment, body=body))
+            comment = {}
+            body = ""
+            is_body = False
+        elif is_body:
+            body += line + "\n"
+        elif line.startswith("--"):
+            is_body = True
+        else:
+            for attr in comment_attrs:
+                if line.startswith(attr + ":\t"):
+                    comment[attr] = line[len(attr + ":\t"):].strip()
+
+    return issue
 
 
 def reply_issue(repo: str, issue_id: int, body: str) -> None:
