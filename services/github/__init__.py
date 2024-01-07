@@ -17,10 +17,21 @@ def exec_command_with_repo(
         command: List[str],
         description: str,
 ):
-    """リポジトリを指定してコマンドを実行する"""
+    """
+    Execute a shell command within the specified git repository path.
+    
+    Args:
+        repo (str): The GitHub repository to which the command is applied.
+        command (List[str]): A list of strings representing the command and its arguments.
+        description (str): A brief description of the command for logging purposes.
+    
+    Returns:
+        bool: True if the command was successful, False otherwise.
+    """
     repo_path = DEFAULT_PATH + "/" + repo
     try:
         logger.info(f"Starting: {description}: {repo}")
+        logger.info(f"Executing command: {' '.join(command)}")
         res = subprocess.run(
             command,
             stdout=subprocess.PIPE,
