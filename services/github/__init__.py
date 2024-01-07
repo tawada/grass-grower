@@ -28,26 +28,25 @@ def exec_command_with_repo(
     Returns:
         bool: True if the command was successful, False otherwise.
     """
-    repo_path = DEFAULT_PATH + "/" + repo
+    repo_path = os.path.join(DEFAULT_PATH, repo)
     try:
         logger.info(f"Starting: {description}: {repo}")
         shorted_commands = " ".join(command)[:50]
-        logger.info(f"Executing command: {shorted_commands}")
+        logger.info(f"Executing command: {shorted_commands} in {repo_path}")
         res = subprocess.run(
             command,
             stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             cwd=repo_path,
         )
         if res.returncode != 0:
-            logger.error(f"Failed: {description}: {res.stdout.decode().strip()}")
+            logger.error(f"Failed: {description}: {res.stderr.decode().strip()}")
             return False
         logger.info(f"Successfully: {description}: {res.stdout.decode().strip()}")
         return True
     except Exception as e:
-        logger.error(f"Failed: {description}: {e}")
+        logger.error(f"Exception during {description}: {e}")
         return False
-
-
 
 
 def setup_repository(repo: str) -> bool:
