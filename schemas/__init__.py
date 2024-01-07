@@ -21,3 +21,4 @@ class Issue:
     title: str
     body: str
     comments: List[IssueComment] = field(default_factory=list)
+    summary: str = ""

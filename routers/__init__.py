@@ -129,6 +129,24 @@ def update_issue(repo: str, issue_id: int):
     reply_issue(repo, issue.id, generated_text)
 
 
+def summarize_issue(repo: str, issue_id: int):
+    setup_repository(repo)
+    issue = get_issue_by_id(repo, issue_id)
+    if issue is None or issue.summary:
+        logger.error(f"Failed to retrieve issue or issue already summarized with ID: {issue_id}")
+        return None
+    
+    messages = prepare_messages_from_issue([], issue)
+    
+    # Message to the system for summarization instruction
+    system_instruction = "Please summarize the following issue and its discussion succinctly."
+    
+    issue.summary = send_messages_to_system(messages, system_instruction)
+    
+    # Persist the summary back to the issue as a comment
+    reply_issue(repo, issue.id, f"Summary:\n{issue.summary}")
+
+
 def generate_readme(repo: str):
     """Generate README.md documentation for the entire program."""
 
