@@ -26,6 +26,9 @@ def exec_command_with_repo(
             stdout=subprocess.PIPE,
             cwd=repo_path,
         )
+        if res.returncode != 0:
+            logger.error(f"Failed: {description}: {res.stdout.decode().strip()}")
+            return False
         logger.info(f"Successfully: {description}: {res.stdout.decode().strip()}")
         return True
     except Exception as e:
