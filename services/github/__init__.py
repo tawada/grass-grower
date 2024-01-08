@@ -49,23 +49,27 @@ def exec_command_with_repo(
         return False
 
 
-def setup_repository(repo: str) -> bool:
-    """リポジトリをセットアップする"""
-    path = DEFAULT_PATH + "/" + repo
+def setup_repository(repo: str, branch_name: str = "main") -> bool:
+    """Set up the repository to point to a specific branch."""
+    path = os.path.join(DEFAULT_PATH, repo)
     # リポジトリが存在するか確認する
     if not os.path.exists(path):
         # リポジトリが存在しない場合はcloneする
         os.makedirs(
             path[:-len(repo) + repo.index("/")], exist_ok=True
         )
-        return clone_repository(repo)
+        ret = clone_repository(repo)
     else:
         # リポジトリが存在する場合はpullする
-        return pull_repository(repo)
+        ret = pull_repository(repo)
+    if ret:
+        # リポジトリのブランチを指定する
+        return checkout_branch(repo, branch_name)
+    return False
 
 
 def clone_repository(repo: str) -> bool:
-    """リポジトリをcloneする"""
+    """Clone the repository."""
     return exec_command_with_repo(
         repo[:repo.index("/")],
         ["git", "clone", "git@github.com:" + repo],

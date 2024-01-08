@@ -65,10 +65,13 @@ def send_messages_to_system(messages, system_instruction):
     return generated_text
 
 
-def add_issue(repo: str):
+def add_issue(
+    repo: str,
+    branch_name: str = "main",
+):
     """Add an issue to the repository."""
 
-    setup_repository(repo)
+    setup_repository(repo, branch_name)
     python_files = enumerate_python_files(repo)
     messages = prepare_messages_from_files(python_files, "")
     issue_body = send_messages_to_system(
@@ -83,7 +86,11 @@ def add_issue(repo: str):
     create_issue(repo, issue_title, issue_body)
 
 
-def generate_code_from_issue(repo: str, issue_id: int) -> Union[str, None]:
+def generate_code_from_issue(
+    issue_id: int,
+    repo: str,
+    branch_name: str = "main",
+) -> Union[str, None]:
     """Generate code from an issue and return the generated code.
 
     Args:
@@ -92,7 +99,7 @@ def generate_code_from_issue(repo: str, issue_id: int) -> Union[str, None]:
     Returns:
     - str: The generated code based on the issue, or none if the issue cannot be retrieved.
     """
-    setup_repository(repo)
+    setup_repository(repo, branch_name)
     issue = get_issue_by_id(repo, issue_id)
     if issue is None:
         logger.error(f"Failed to retrieve issue with ID: {issue_id}")
@@ -109,10 +116,14 @@ def generate_code_from_issue(repo: str, issue_id: int) -> Union[str, None]:
     return generated_text
 
 
-def update_issue(repo: str, issue_id: int):
+def update_issue(
+    issue_id: int,
+    repo: str,
+    branch_name: str = "main",
+):
     """Update an issue with a comment."""
 
-    setup_repository(repo)
+    setup_repository(repo, branch_name)
     issue = get_issue_by_id(repo, issue_id)
 
     if issue is None:
@@ -129,8 +140,12 @@ def update_issue(repo: str, issue_id: int):
     reply_issue(repo, issue.id, generated_text)
 
 
-def summarize_issue(repo: str, issue_id: int):
-    setup_repository(repo)
+def summarize_issue(
+    issue_id: int,
+    repo: str,
+    branch_name: str = "main",
+):
+    setup_repository(repo, branch_name)
     issue = get_issue_by_id(repo, issue_id)
     if issue is None or issue.summary:
         logger.error(f"Failed to retrieve issue or issue already summarized with ID: {issue_id}")
@@ -147,10 +162,13 @@ def summarize_issue(repo: str, issue_id: int):
     reply_issue(repo, issue.id, f"Summary:\n{issue.summary}")
 
 
-def generate_readme(repo: str):
+def generate_readme(
+    repo: str,
+    branch_name: str = "main",
+):
     """Generate README.md documentation for the entire program."""
 
-    setup_repository(repo)
+    setup_repository(repo, branch_name)
     python_files = enumerate_python_files(repo)
 
     # Initialize readme_content as empty string to handle the case when file doesn't exist
