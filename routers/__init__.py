@@ -67,11 +67,11 @@ def send_messages_to_system(messages, system_instruction):
 
 def add_issue(
     repo: str,
-    branch_name: str = "main",
+    branch: str = "main",
 ):
     """Add an issue to the repository."""
 
-    setup_repository(repo, branch_name)
+    setup_repository(repo, branch)
     python_files = enumerate_python_files(repo)
     messages = prepare_messages_from_files(python_files, "")
     issue_body = send_messages_to_system(
@@ -89,7 +89,7 @@ def add_issue(
 def generate_code_from_issue(
     issue_id: int,
     repo: str,
-    branch_name: str = "main",
+    branch: str = "main",
 ) -> Union[str, None]:
     """Generate code from an issue and return the generated code.
 
@@ -99,7 +99,7 @@ def generate_code_from_issue(
     Returns:
     - str: The generated code based on the issue, or none if the issue cannot be retrieved.
     """
-    setup_repository(repo, branch_name)
+    setup_repository(repo, branch)
     issue = get_issue_by_id(repo, issue_id)
     if issue is None:
         logger.error(f"Failed to retrieve issue with ID: {issue_id}")
@@ -119,11 +119,11 @@ def generate_code_from_issue(
 def update_issue(
     issue_id: int,
     repo: str,
-    branch_name: str = "main",
+    branch: str = "main",
 ):
     """Update an issue with a comment."""
 
-    setup_repository(repo, branch_name)
+    setup_repository(repo, branch)
     issue = get_issue_by_id(repo, issue_id)
 
     if issue is None:
@@ -143,9 +143,9 @@ def update_issue(
 def summarize_issue(
     issue_id: int,
     repo: str,
-    branch_name: str = "main",
+    branch: str = "main",
 ):
-    setup_repository(repo, branch_name)
+    setup_repository(repo, branch)
     issue = get_issue_by_id(repo, issue_id)
     if issue is None or issue.summary:
         logger.error(f"Failed to retrieve issue or issue already summarized with ID: {issue_id}")
@@ -164,11 +164,11 @@ def summarize_issue(
 
 def generate_readme(
     repo: str,
-    branch_name: str = "main",
+    branch: str = "main",
 ):
     """Generate README.md documentation for the entire program."""
 
-    setup_repository(repo, branch_name)
+    setup_repository(repo, branch)
     python_files = enumerate_python_files(repo)
 
     # Initialize readme_content as empty string to handle the case when file doesn't exist
