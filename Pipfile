@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 openai = "*"
 pytest = "*"
+pytest-cov = "*"
 
 [dev-packages]
 
