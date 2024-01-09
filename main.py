@@ -30,7 +30,10 @@ def parse_arguments(args=None):
 
 
 if __name__ == "__main__":
-    args = parse_arguments()
+    try:
+        args = parse_arguments()
+    except SystemExit as e:
+        sys.exit(e.code)
 
     # Parse repository
     try:
