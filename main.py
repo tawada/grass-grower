@@ -19,15 +19,18 @@ logging.basicConfig(
 )
 
 
-if __name__ == "__main__":
+def parse_arguments(args=None):
     parser = ArgumentParser(description="Tool to automate issue handling on GitHub")
     parser.add_argument("action", help="Action to perform", choices=[
         "add_issue", "generate_code_from_issue", "generate_readme", "update_issue"
     ])
     parser.add_argument("--issue-id", type=int, help="ID of the GitHub issue")
     parser.add_argument("--repo", help="Target GitHub repository in the format 'owner/repo'", default="tawada/grass-grower")
+    return parser.parse_args(args)
 
-    args = parser.parse_args()
+
+if __name__ == "__main__":
+    args = parse_arguments()
 
     # Parse repository
     try:
