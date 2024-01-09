@@ -4,10 +4,8 @@ import subprocess
 from typing import List
 
 from schemas import IssueComment, Issue
+from utils.logging_utils import log, exception_handler
 
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 DEFAULT_PATH = "downloads"
 
@@ -16,7 +14,7 @@ def exec_command_with_repo(
         repo: str,
         command: List[str],
         description: str,
-):
+) -> bool:
     """
     Execute a shell command within the specified git repository path.
     
@@ -30,9 +28,9 @@ def exec_command_with_repo(
     """
     repo_path = os.path.join(DEFAULT_PATH, repo)
     try:
-        logger.info(f"Starting: {description}: {repo}")
+        log(f"Starting: {description}: {repo}", level="info")
         shorted_commands = " ".join(command)[:50]
-        logger.info(f"Executing command: {shorted_commands} in {repo_path}")
+        log(f"Executing command: {shorted_commands} in {repo_path}", level="info")
         res = subprocess.run(
             command,
             stdout=subprocess.PIPE,
@@ -40,15 +38,16 @@ def exec_command_with_repo(
             cwd=repo_path,
         )
         if res.returncode != 0:
-            logger.error(f"Failed: {description}: {res.stderr.decode().strip()}")
+            log(f"Failed: {description}: {res.stderr.decode().strip()}", level="error")
             return False
-        logger.info(f"Successfully: {description}: {res.stdout.decode().strip()}")
+        log(f"Successfully: {description}: {res.stdout.decode().strip()}", level="info")
         return True
     except Exception as e:
-        logger.error(f"Exception during {description}: {e}")
+        log(f"Exception during {description}: {e}", level="error")
         return False
 
 
+@exception_handler
 def setup_repository(repo: str) -> bool:
     """リポジトリをセットアップする"""
     path = DEFAULT_PATH + "/" + repo
@@ -80,7 +79,7 @@ def pull_repository(repo: str) -> bool:
         ["git", "pull"],
         "Pulling repository",
     )
- 
+
 
 def create_issue(repo: str, title: str, body: str) -> None:
     """Create a new issue on GitHub."""
@@ -91,33 +90,42 @@ def create_issue(repo: str, title: str, body: str) -> None:
     )
 
 
+@exception_handler
 def list_issues(repo: str) -> List[Issue]:
     """issueを取得する"""
 
-    res = exec_command_with_repo(
-        repo,
-        ["gh", "issue", "list"],
-        "Listing issues",
-    )
+    try:
+        log("Listing issues", level="info")
+        res = subprocess.run(
+            ["gh", "issue", "list"],
+            stdout=subprocess.PIPE,
+            cwd=DEFAULT_PATH + "/" + repo,
+        )
+        log("Issues listed successfully", level="info")
+    except Exception as e:
+        log(f"Failed to list issues: {e}", level="error")
+        return False
+
     issue_row = res.stdout.decode().split("\t")
     # 先頭の1個目のissue_idを取得
     issue_id = int(issue_row[0])
     return get_issue_by_id(issue_id)
 
 
+@exception_handler
 def get_issue_by_id(repo: str, issue_id: int) -> Issue:
     """idからissueを取得する"""
 
     try:
-        logger.info(f"Getting issue with id: {issue_id}")
+        log(f"Getting issue with id: {issue_id}", level="info")
         res = subprocess.run(
             ["gh", "issue", "view", str(issue_id)],
             stdout=subprocess.PIPE,
             cwd=DEFAULT_PATH + "/" + repo,
         )
-        logger.info("Issue had successfully")
+        log("Issue had successfully", level="info")
     except Exception as e:
-        logger.error(f"Failed to get issue: {e}")
+        log(f"Failed to get issue: {e}", level="error")
         return None
 
     is_body = False
@@ -137,15 +145,15 @@ def get_issue_by_id(repo: str, issue_id: int) -> Issue:
     )
 
     try:
-        logger.info(f"Getting comments with id: {issue_id}")
+        log(f"Getting comments with id: {issue_id}", level="info")
         res = subprocess.run(
             ["gh", "issue", "view", str(issue_id), "-c"],
             stdout=subprocess.PIPE,
             cwd=DEFAULT_PATH + "/" + repo,
         )
-        logger.info("Comments had successfully")
+        log("Comments had successfully", level="info")
     except Exception as e:
-        logger.error(f"Failed to get comments: {e}")
+        log(f"Failed to get comments: {e}", level="error")
         return None
 
     comment_attrs = [

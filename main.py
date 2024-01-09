@@ -8,14 +8,16 @@ from routers import (
     update_issue,
 )
 
+
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
+    format='%(asctime)s - %(levelname)s - %(process)d - %(threadName)s - %(message)s',
     handlers=[
         logging.FileHandler("debug.log"),  # Log to a file
         logging.StreamHandler()            # Log to standard output
     ]
 )
+
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Tool to automate issue handling on GitHub")
