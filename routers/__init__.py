@@ -1,3 +1,4 @@
+import os
 import logging
 from pathlib import Path
 from typing import Union, List
@@ -25,11 +26,20 @@ def enumerate_python_files(repo: str):
     """Enumerate all Python files in the directory structure."""
     python_files = []
     # downloads/リポジトリ名/以下のファイルを列挙する
-    repo_path = "./downloads/" + repo
-    for file in Path(repo_path).glob("**/*.py"):
-        with open(file, "r") as f:
-            content = f.read()
-            python_files.append({"filename": str(file)[len(repo_path) - 1:], "content": content})
+    # パスをos.path.joinで結合するときに、先頭の./をつけると、絶対パスになる
+    repo_path = os.path.join("downloads",  repo)
+    EXCLUDE_DIRS = ["__pycache__", ".git"]
+    for root, dirs, files in os.walk(repo_path):
+        # 探索するディレクトリを制限する
+        dirs[:] = [d for d in dirs if d not in EXCLUDE_DIRS]
+        for file in files:
+            if file.endswith(".py"):
+                with open(os.path.join(root, file), "r") as f:
+                    content = f.read()
+                    # リポジトリ名以下のパスを取得する
+                    filename = os.path.join(root, file)[len(repo_path) + 1:]
+                    python_files.append({"filename": filename, "content": content})
+
     return python_files
 
 
