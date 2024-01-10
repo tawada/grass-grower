@@ -22,7 +22,7 @@ jobs:
         pipenv install
     - name: Run Tests with Coverage
       run: |
-        pytest --cov=./
+        pipenv run test
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2
       with:
