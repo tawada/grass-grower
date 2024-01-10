@@ -15,10 +15,10 @@ from services.github import (
 from services.llm import (
     generate_text,
 )
-
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+from utils.logging_utils import (
+    setup_logging,
+    log,
+)
 
 
 def enumerate_python_files(repo: str):
@@ -95,7 +95,7 @@ def generate_code_from_issue(repo: str, issue_id: int) -> Union[str, None]:
     setup_repository(repo)
     issue = get_issue_by_id(repo, issue_id)
     if issue is None:
-        logger.error(f"Failed to retrieve issue with ID: {issue_id}")
+        log(f"Failed to retrieve issue with ID: {issue_id}", level="error")
         return None
 
     python_files = enumerate_python_files(repo)
@@ -116,7 +116,7 @@ def update_issue(repo: str, issue_id: int):
     issue = get_issue_by_id(repo, issue_id)
 
     if issue is None:
-        logger.error(f"Failed to retrieve issue with ID: {issue_id}")
+        log(f"Failed to retrieve issue with ID: {issue_id}", level="error")
         return
 
     python_files = enumerate_python_files(repo)
@@ -133,7 +133,7 @@ def summarize_issue(repo: str, issue_id: int):
     setup_repository(repo)
     issue = get_issue_by_id(repo, issue_id)
     if issue is None or issue.summary:
-        logger.error(f"Failed to retrieve issue or issue already summarized with ID: {issue_id}")
+        log(f"Failed to retrieve issue or issue already summarized with ID: {issue_id}", level="error")
         return None
     
     messages = prepare_messages_from_issue([], issue)
@@ -161,14 +161,15 @@ def generate_readme(repo: str):
         with open(repo_path + "/README.md", "r") as f:
             readme_content = f.read()
     except FileNotFoundError:
-        logger.error(
-            "README.md file does not exist. A new README.md will be created with generated content."
+        log(
+            "README.md file does not exist. A new README.md will be created with generated content.",
+            level="warning"
         )
         # Not returning from the function here, as we might still want to generate a new README.md
     except OSError as e:
         # Catching any other OS-related errors (like file permission issues) 
         # and displaying the error message to the user.
-        logger.error(f"Error while reading README.md: {e}")
+        log(f"Error while reading README.md: {e}", level="error")
         return  # Exit the function as we cannot proceed without the existing README.md content
 
     readme_message = f"```Current README.md\n{readme_content}```"
@@ -182,7 +183,7 @@ def generate_readme(repo: str):
     try:
         checkout_new_branch(repo, "update-readme")
     except Exception as e:
-        logger.error(f"Error to checkout a new branch: {e}")
+        log(f"Error to checkout a new branch: {e}", level="error")
         return False
 
     # Attempt to write the README.md file.
@@ -190,7 +191,7 @@ def generate_readme(repo: str):
         with open(repo_path + "/README.md", "w") as f:
             f.write(generated_text)
     except OSError as e:
-        logger.error(f"Error while writing to README.md: {e}")
+        log(f"Error while writing to README.md: {e}", level="error")
         checkout_branch(repo, "main")
         return False
     

@@ -1,6 +1,19 @@
 """ Logging utilities for the project. """
+import logging
 from logging import getLogger
 from functools import wraps
+
+
+def setup_logging():
+    """ Setup logging for the project. """
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(process)d - %(threadName)s - %(message)s',
+        handlers=[
+            logging.FileHandler("debug.log"),  # Log to a file
+            logging.StreamHandler()            # Log to standard output
+        ]
+    )
 
 
 def log(message, level="info", **kwargs):

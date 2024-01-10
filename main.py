@@ -7,16 +7,13 @@ from routers import (
     generate_readme,
     update_issue,
 )
-
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(process)d - %(threadName)s - %(message)s',
-    handlers=[
-        logging.FileHandler("debug.log"),  # Log to a file
-        logging.StreamHandler()            # Log to standard output
-    ]
+from utils.logging_utils import (
+    setup_logging,
+    log,
 )
+
+
+setup_logging()
 
 
 def parse_arguments(args=None):
@@ -33,6 +30,7 @@ if __name__ == "__main__":
     try:
         args = parse_arguments()
     except SystemExit as e:
+        log(f"Error: {e}", level="error")
         sys.exit(e.code)
 
     # Parse repository
