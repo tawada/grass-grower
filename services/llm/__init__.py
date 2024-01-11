@@ -1,12 +1,12 @@
 from openai import OpenAI
 from utils.logging_utils import log
 
-client = OpenAI()
-
 
 def generate_text(messages: str) -> str:
+    """Generates text using the OpenAI API."""
     model = "gpt-4-1106-preview"
     try:
+        client = OpenAI()
         log(f"Generating text with model: {model}", level="info")
         response = client.chat.completions.create(
             model=model,
