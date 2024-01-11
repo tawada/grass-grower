@@ -1,4 +1,5 @@
 import logging
+from typing import Dict, List
 from openai import OpenAI
 
 
@@ -8,7 +9,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-def generate_text(messages: str) -> str:
+def generate_text(messages: List[Dict[str, str]]) -> str:
     model = "gpt-4-1106-preview"
     try:
         logger.info(f"Generating text with model: {model}")
