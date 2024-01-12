@@ -23,6 +23,7 @@ jobs:
     - name: Run Tests with Coverage
       run: |
         pipenv run test
+        ls -la
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
       env:
