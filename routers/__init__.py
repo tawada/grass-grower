@@ -221,3 +221,18 @@ def generate_readme(
         return False
     checkout_branch(repo, "main")
     return True
+
+
+def grow_grass(repo: str, branch: str = "main"):
+    """Grow grass on GitHub contributions graph."""
+    # 最後のコミットの日付を取得する
+    from datetime import datetime
+    import subprocess
+    command = ["git", "log", "--date=iso", "--date=format:'%Y/%m/%d %H:%M:%S'", "--pretty=format:'%ad'", "-1"]
+    proc = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    now = datetime.now()
+    last_commit_date = datetime.strptime(proc.stdout.decode('utf-8').strip("'"), '%Y/%m/%d %H:%M:%S')
+    if last_commit_date.date() == now.date():
+        return
+    # add_issueする
+    add_issue(repo, branch)

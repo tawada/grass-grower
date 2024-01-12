@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 import logging
 import sys
+import routers
 from routers import (
     add_issue,
     generate_code_from_issue,
@@ -20,7 +21,7 @@ logging.basicConfig(
 if __name__ == "__main__":
     parser = ArgumentParser(description="Tool to automate issue handling on GitHub")
     parser.add_argument("action", help="Action to perform", choices=[
-        "add_issue", "generate_code_from_issue", "generate_readme", "update_issue"
+        "add_issue", "generate_code_from_issue", "generate_readme", "grow_grass", "update_issue"
     ])
     parser.add_argument("--issue-id", type=int, help="ID of the GitHub issue")
     parser.add_argument("--repo", help="Target GitHub repository in the format 'owner/repo'", default="tawada/grass-grower")
@@ -47,6 +48,8 @@ if __name__ == "__main__":
         add_issue(repo, branch)
     elif args.action == "generate_readme":
         generate_readme(repo, branch)
+    elif args.action == "grow_grass":
+        routers.grow_grass(repo, branch)
     else:
         logging.error("Invalid action.")
         sys.exit(1)
