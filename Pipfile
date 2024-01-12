@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 openai = "*"
+pre-commit = "*"
 
 [dev-packages]
 
