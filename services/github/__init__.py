@@ -2,7 +2,7 @@ import os
 import logging
 import subprocess
 from typing import List
-
+from datetime import datetime
 from schemas import IssueComment, Issue
 
 
@@ -218,3 +218,18 @@ def push_repository(repo: str, branch_name: str) -> bool:
         ["git", "push", "origin", branch_name],
         f"Pushing repository: {repo}",
     )
+
+
+def get_datetime_of_last_commit(repo: str, branch_name: str) -> datetime:
+    """最後のコミットの日時を取得する"""
+    setup_repository(repo, branch_name)
+    command = ["git", "log", "--date=iso", "--date=format:'%Y/%m/%d %H:%M:%S'", "--pretty=format:'%ad'", "-1"]
+    repo_path = os.path.join(DEFAULT_PATH, repo)
+    proc = subprocess.run(
+        command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        cwd=repo_path,
+    )
+    last_commit_datetime = datetime.strptime(proc.stdout.decode('utf-8').strip("'"), '%Y/%m/%d %H:%M:%S')
+    return last_commit_datetime
