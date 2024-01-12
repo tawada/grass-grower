@@ -11,6 +11,7 @@ from services.github import (
     get_issue_by_id,
     reply_issue,
     push_repository,
+    get_datetime_of_last_commit,
 )
 from services.llm import (
     generate_text,
@@ -221,3 +222,14 @@ def generate_readme(
         return False
     checkout_branch(repo, "main")
     return True
+
+
+def grow_grass(repo: str, branch: str = "main"):
+    """Grow grass on GitHub contributions graph."""
+    # 最後のコミットの日付を取得する
+    from datetime import datetime
+    last_commit_datetime = get_datetime_of_last_commit(repo, branch)
+    if last_commit_datetime.date() == datetime.now().date():
+        return
+    # add_issueする
+    add_issue(repo, branch)
