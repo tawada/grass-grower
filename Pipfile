@@ -5,9 +5,15 @@ name = "pypi"
 
 [packages]
 openai = "*"
-pre-commit = "*"
 
 [dev-packages]
+codecov = "*"
+pre-commit = "*"
+pytest = "*"
+pytest-cov = "*"
 
 [requires]
 python_version = "3.11"
+
+[scripts]
+test = "python -m pytest --cov=./ --cov-report=xml"

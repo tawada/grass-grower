@@ -4,35 +4,33 @@ import subprocess
 from typing import List
 from datetime import datetime
 from schemas import IssueComment, Issue
-
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+from utils.logging_utils import log, exception_handler
 
 DEFAULT_PATH = "downloads"
 
 
 def exec_command_with_repo(
-        repo: str,
-        command: List[str],
-        description: str,
-):
+    repo: str,
+    command: List[str],
+    description: str,
+) -> bool:
     """
     Execute a shell command within the specified git repository path.
-    
+
     Args:
         repo (str): The GitHub repository to which the command is applied.
         command (List[str]): A list of strings representing the command and its arguments.
         description (str): A brief description of the command for logging purposes.
-    
+
     Returns:
         bool: True if the command was successful, False otherwise.
     """
     repo_path = os.path.join(DEFAULT_PATH, repo)
     try:
-        logger.info(f"Starting: {description}: {repo}")
+        log(f"Starting: {description}: {repo}", level="info")
         shorted_commands = " ".join(command)[:50]
-        logger.info(f"Executing command: {shorted_commands} in {repo_path}")
+        log(f"Executing command: {shorted_commands} in {repo_path}",
+            level="info")
         res = subprocess.run(
             command,
             stdout=subprocess.PIPE,
@@ -40,24 +38,25 @@ def exec_command_with_repo(
             cwd=repo_path,
         )
         if res.returncode != 0:
-            logger.error(f"Failed: {description}: {res.stderr.decode().strip()}")
+            log(f"Failed: {description}: {res.stderr.decode().strip()}",
+                level="error")
             return False
-        logger.info(f"Successfully: {description}: {res.stdout.decode().strip()}")
+        log(f"Successfully: {description}: {res.stdout.decode().strip()}",
+            level="info")
         return True
     except Exception as e:
-        logger.error(f"Exception during {description}: {e}")
+        log(f"Exception during {description}: {e}", level="error")
         return False
 
 
+@exception_handler
 def setup_repository(repo: str, branch_name: str = "main") -> bool:
     """Set up the repository to point to a specific branch."""
     path = os.path.join(DEFAULT_PATH, repo)
     # リポジトリが存在するか確認する
     if not os.path.exists(path):
         # リポジトリが存在しない場合はcloneする
-        os.makedirs(
-            path[:-len(repo) + repo.index("/")], exist_ok=True
-        )
+        os.makedirs(path[:-len(repo) + repo.index("/")], exist_ok=True)
         ret = clone_repository(repo)
     else:
         # リポジトリが存在する場合はpullする
@@ -84,7 +83,7 @@ def pull_repository(repo: str) -> bool:
         ["git", "pull"],
         "Pulling repository",
     )
- 
+
 
 def create_issue(repo: str, title: str, body: str) -> None:
     """Create a new issue on GitHub."""
@@ -95,31 +94,40 @@ def create_issue(repo: str, title: str, body: str) -> None:
     )
 
 
+@exception_handler
 def list_issue_ids(repo: str) -> List[int]:
     """issue idを取得する"""
 
-    res = exec_command_with_repo(
-        repo,
-        ["gh", "issue", "list"],
-        "Listing issues",
-    )
+    try:
+        log("Listing issues", level="info")
+        res = subprocess.run(
+            ["gh", "issue", "list"],
+            stdout=subprocess.PIPE,
+            cwd=DEFAULT_PATH + "/" + repo,
+        )
+        log("Issues listed successfully", level="info")
+    except Exception as e:
+        log(f"Failed to list issues: {e}", level="error")
+        return False
+
     issue_row = res.stdout.decode().split("\t")
     return list(map(int, issue_row))
 
 
+@exception_handler
 def get_issue_by_id(repo: str, issue_id: int) -> Issue:
     """idからissueを取得する"""
 
     try:
-        logger.info(f"Getting issue with id: {issue_id}")
+        log(f"Getting issue with id: {issue_id}", level="info")
         res = subprocess.run(
             ["gh", "issue", "view", str(issue_id)],
             stdout=subprocess.PIPE,
             cwd=DEFAULT_PATH + "/" + repo,
         )
-        logger.info("Issue had successfully")
+        log("Issue had successfully", level="info")
     except Exception as e:
-        logger.error(f"Failed to get issue: {e}")
+        log(f"Failed to get issue: {e}", level="error")
         return None
 
     is_body = False
@@ -139,19 +147,22 @@ def get_issue_by_id(repo: str, issue_id: int) -> Issue:
     )
 
     try:
-        logger.info(f"Getting comments with id: {issue_id}")
+        log(f"Getting comments with id: {issue_id}", level="info")
         res = subprocess.run(
             ["gh", "issue", "view", str(issue_id), "-c"],
             stdout=subprocess.PIPE,
             cwd=DEFAULT_PATH + "/" + repo,
         )
-        logger.info("Comments had successfully")
+        log("Comments had successfully", level="info")
     except Exception as e:
-        logger.error(f"Failed to get comments: {e}")
+        log(f"Failed to get comments: {e}", level="error")
         return None
 
     comment_attrs = [
-        "author", "association", "edited", "status",
+        "author",
+        "association",
+        "edited",
+        "status",
     ]
 
     is_body = False
@@ -179,7 +190,8 @@ def reply_issue(repo: str, issue_id: int, body: str) -> None:
     """issueに返信する"""
     return exec_command_with_repo(
         repo,
-        ["gh", "issue", "comment", str(issue_id), "-b", body],
+        ["gh", "issue", "comment",
+         str(issue_id), "-b", body],
         f"Replying issue with id: {issue_id}",
     )
 
@@ -223,7 +235,10 @@ def push_repository(repo: str, branch_name: str) -> bool:
 def get_datetime_of_last_commit(repo: str, branch_name: str) -> datetime:
     """最後のコミットの日時を取得する"""
     setup_repository(repo, branch_name)
-    command = ["git", "log", "--date=iso", "--date=format:'%Y/%m/%d %H:%M:%S'", "--pretty=format:'%ad'", "-1"]
+    command = [
+        "git", "log", "--date=iso", "--date=format:'%Y/%m/%d %H:%M:%S'",
+        "--pretty=format:'%ad'", "-1"
+    ]
     repo_path = os.path.join(DEFAULT_PATH, repo)
     proc = subprocess.run(
         command,
@@ -231,5 +246,6 @@ def get_datetime_of_last_commit(repo: str, branch_name: str) -> datetime:
         stderr=subprocess.PIPE,
         cwd=repo_path,
     )
-    last_commit_datetime = datetime.strptime(proc.stdout.decode('utf-8').strip("'"), '%Y/%m/%d %H:%M:%S')
+    last_commit_datetime = datetime.strptime(
+        proc.stdout.decode('utf-8').strip("'"), '%Y/%m/%d %H:%M:%S')
     return last_commit_datetime

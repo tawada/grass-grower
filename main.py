@@ -8,26 +8,38 @@ from routers import (
     generate_readme,
     update_issue,
 )
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler("debug.log"),  # Log to a file
-        logging.StreamHandler()            # Log to standard output
-    ]
+from utils.logging_utils import (
+    setup_logging,
+    log,
 )
 
-if __name__ == "__main__":
-    parser = ArgumentParser(description="Tool to automate issue handling on GitHub")
-    parser.add_argument("action", help="Action to perform", choices=[
-        "add_issue", "generate_code_from_issue", "generate_readme", "grow_grass", "update_issue"
-    ])
-    parser.add_argument("--issue-id", type=int, help="ID of the GitHub issue")
-    parser.add_argument("--repo", help="Target GitHub repository in the format 'owner/repo'", default="tawada/grass-grower")
-    parser.add_argument("--branch", help="Target branch name", default="main")
+setup_logging()
 
-    args = parser.parse_args()
+
+def parse_arguments(args=None):
+    parser = ArgumentParser(
+        description="Tool to automate issue handling on GitHub")
+    parser.add_argument("action",
+                        help="Action to perform",
+                        choices=[
+                            "add_issue", "generate_code_from_issue",
+                            "generate_readme", "grow_grass", "update_issue"
+                        ])
+    parser.add_argument("--issue-id", type=int, help="ID of the GitHub issue")
+    parser.add_argument(
+        "--repo",
+        help="Target GitHub repository in the format 'owner/repo'",
+        default="tawada/grass-grower")
+    parser.add_argument("--branch", help="Target branch name", default="main")
+    return parser.parse_args(args)
+
+
+if __name__ == "__main__":
+    try:
+        args = parse_arguments()
+    except SystemExit as e:
+        log(f"Error: {e}", level="error")
+        sys.exit(e.code)
 
     # Parse repository
     try:
