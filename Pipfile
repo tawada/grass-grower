@@ -15,4 +15,4 @@ codecov = "*"
 python_version = "3.11"
 
 [scripts]
-test = "python -m pytest --cov=./"
+test = "python -m pytest --cov=./ --cov-report=xml"
