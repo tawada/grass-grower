@@ -10,6 +10,25 @@ from utils.logging_utils import exception_handler, log
 DEFAULT_PATH = "downloads"
 
 
+def exec_command(
+    repo: str,
+    command: List[str],
+) -> subprocess.CompletedProcess:
+    """
+    Execute a shell command within the specified git repository path.
+
+    Returns:
+        subprocess.CompletedProcess: The result of the subprocess run.
+    """
+    repo_path = os.path.join(DEFAULT_PATH, repo)
+    return subprocess.run(
+        command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        cwd=repo_path,
+    )
+
+
 def exec_command_with_repo(
     repo: str,
     command: List[str],
