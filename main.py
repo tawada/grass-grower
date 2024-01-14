@@ -1,22 +1,15 @@
-from argparse import ArgumentParser
-import logging
+"""Tool to automate issue handling on GitHub"""
 import sys
+from argparse import ArgumentParser
+
 import routers
-from routers import (
-    add_issue,
-    generate_code_from_issue,
-    generate_readme,
-    update_issue,
-)
-from utils.logging_utils import (
-    setup_logging,
-    log,
-)
+from utils.logging_utils import log, setup_logging
 
 setup_logging()
 
 
 def parse_arguments(args=None):
+    """Parse command line arguments"""
     parser = ArgumentParser(
         description="Tool to automate issue handling on GitHub")
     parser.add_argument("action",
@@ -46,22 +39,22 @@ if __name__ == "__main__":
         owner, repo_ = args.repo.split('/')
         repo = f"{owner}/{repo_}"
     except ValueError:
-        logging.error("Invalid repository format. Use 'owner/repo'.")
+        log("Invalid repository format. Use 'owner/repo'.", level="error")
         sys.exit(1)
 
     # Parse branch
     branch = args.branch
 
     if args.action == "generate_code_from_issue" and args.issue_id:
-        generate_code_from_issue(args.issue_id, repo, branch)
+        routers.generate_code_from_issue(args.issue_id, repo, branch)
     elif args.action == "update_issue" and args.issue_id:
-        update_issue(args.issue_id, repo, branch)
+        routers.update_issue(args.issue_id, repo, branch)
     elif args.action == "add_issue":
-        add_issue(repo, branch)
+        routers.add_issue(repo, branch)
     elif args.action == "generate_readme":
-        generate_readme(repo, branch)
+        routers.generate_readme(repo, branch)
     elif args.action == "grow_grass":
         routers.grow_grass(repo, branch)
     else:
-        logging.error("Invalid action.")
+        log("Invalid action.", level="error")
         sys.exit(1)
