@@ -31,8 +31,8 @@ if __name__ == "__main__":
     try:
         args = parse_arguments()
     except SystemExit as e:
-        log(f"Error: {e}", level="error")
-        sys.exit(e.code)
+        log(f"Argument parsing error: {e}", level="error")
+        sys.exit(1)
 
     # Parse repository
     try:
@@ -45,9 +45,21 @@ if __name__ == "__main__":
     # Parse branch
     branch = args.branch
 
-    if args.action == "generate_code_from_issue" and args.issue_id:
+    # Establish a dictionary that maps actions to whether they need an issue_id
+    actions_needing_issue_id = {
+        "generate_code_from_issue": True,
+        "update_issue": True,
+        "add_issue": False,
+        "generate_readme": False,
+        "grow_grass": False,
+    }
+
+    if actions_needing_issue_id[args.action] and not args.issue_id:
+        log("'issue_id' is required for the selected action.", level="error")
+        sys.exit(1)
+    elif args.action == "generate_code_from_issue":
         routers.generate_code_from_issue(args.issue_id, repo, branch)
-    elif args.action == "update_issue" and args.issue_id:
+    elif args.action == "update_issue":
         routers.update_issue(args.issue_id, repo, branch)
     elif args.action == "add_issue":
         routers.add_issue(repo, branch)
