@@ -1,12 +1,32 @@
+"""GitHub API service."""
 import os
-import logging
 import subprocess
-from typing import List
 from datetime import datetime
-from schemas import IssueComment, Issue
-from utils.logging_utils import log, exception_handler
+from typing import Dict, List, Union
+
+from schemas import Issue, IssueComment
+from utils.logging_utils import exception_handler, log
 
 DEFAULT_PATH = "downloads"
+
+
+def exec_command(
+    repo: str,
+    command: List[str],
+) -> subprocess.CompletedProcess:
+    """
+    Execute a shell command within the specified git repository path.
+
+    Returns:
+        subprocess.CompletedProcess: The result of the subprocess run.
+    """
+    repo_path = os.path.join(DEFAULT_PATH, repo)
+    return subprocess.run(
+        command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        cwd=repo_path,
+    )
 
 
 def exec_command_with_repo(
@@ -36,6 +56,7 @@ def exec_command_with_repo(
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             cwd=repo_path,
+            check=True,
         )
         if res.returncode != 0:
             log(f"Failed: {description}: {res.stderr.decode().strip()}",
@@ -44,8 +65,11 @@ def exec_command_with_repo(
         log(f"Successfully: {description}: {res.stdout.decode().strip()}",
             level="info")
         return True
-    except Exception as e:
-        log(f"Exception during {description}: {e}", level="error")
+    except subprocess.CalledProcessError as err:
+        log(f"Exception during {description}: {err}", level="error")
+        return False
+    except Exception as ex:
+        log(f"Exception during {description}: {ex}", level="error")
         return False
 
 
@@ -85,7 +109,7 @@ def pull_repository(repo: str) -> bool:
     )
 
 
-def create_issue(repo: str, title: str, body: str) -> None:
+def create_issue(repo: str, title: str, body: str) -> bool:
     """Create a new issue on GitHub."""
     return exec_command_with_repo(
         repo,
@@ -104,18 +128,19 @@ def list_issue_ids(repo: str) -> List[int]:
             ["gh", "issue", "list"],
             stdout=subprocess.PIPE,
             cwd=DEFAULT_PATH + "/" + repo,
+            check=True,
         )
         log("Issues listed successfully", level="info")
-    except Exception as e:
-        log(f"Failed to list issues: {e}", level="error")
-        return False
+    except Exception as ex:
+        log(f"Failed to list issues: {ex}", level="error")
+        return []
 
     issue_row = res.stdout.decode().split("\t")
     return list(map(int, issue_row))
 
 
 @exception_handler
-def get_issue_by_id(repo: str, issue_id: int) -> Issue:
+def get_issue_by_id(repo: str, issue_id: int) -> Union[Issue, None]:
     """idからissueを取得する"""
 
     try:
@@ -124,10 +149,11 @@ def get_issue_by_id(repo: str, issue_id: int) -> Issue:
             ["gh", "issue", "view", str(issue_id)],
             stdout=subprocess.PIPE,
             cwd=DEFAULT_PATH + "/" + repo,
+            check=True,
         )
         log("Issue had successfully", level="info")
-    except Exception as e:
-        log(f"Failed to get issue: {e}", level="error")
+    except Exception as ex:
+        log(f"Failed to get issue: {ex}", level="error")
         return None
 
     is_body = False
@@ -152,10 +178,11 @@ def get_issue_by_id(repo: str, issue_id: int) -> Issue:
             ["gh", "issue", "view", str(issue_id), "-c"],
             stdout=subprocess.PIPE,
             cwd=DEFAULT_PATH + "/" + repo,
+            check=True,
         )
         log("Comments had successfully", level="info")
-    except Exception as e:
-        log(f"Failed to get comments: {e}", level="error")
+    except Exception as ex:
+        log(f"Failed to get comments: {ex}", level="error")
         return None
 
     comment_attrs = [
@@ -167,7 +194,7 @@ def get_issue_by_id(repo: str, issue_id: int) -> Issue:
 
     is_body = False
     body = ""
-    comment = {}
+    comment: Dict[str, str] = {}
     for line in res.stdout.decode().splitlines():
         if is_body and line.startswith("--"):
             issue.comments.append(IssueComment(**comment, body=body))
@@ -186,7 +213,7 @@ def get_issue_by_id(repo: str, issue_id: int) -> Issue:
     return issue
 
 
-def reply_issue(repo: str, issue_id: int, body: str) -> None:
+def reply_issue(repo: str, issue_id: int, body: str) -> bool:
     """issueに返信する"""
     return exec_command_with_repo(
         repo,
@@ -245,6 +272,7 @@ def get_datetime_of_last_commit(repo: str, branch_name: str) -> datetime:
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         cwd=repo_path,
+        check=True,
     )
     last_commit_datetime = datetime.strptime(
         proc.stdout.decode('utf-8').strip("'"), '%Y/%m/%d %H:%M:%S')
