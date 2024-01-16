@@ -11,66 +11,40 @@ DEFAULT_PATH = "downloads"
 
 
 def exec_command(
-    repo: str,
-    command: List[str],
-) -> subprocess.CompletedProcess:
+        repo: str,
+        command: List[str],
+        capture_output: bool = False
+) -> Union[None, subprocess.CompletedProcess]:
     """
     Execute a shell command within the specified git repository path.
+    If capture_output is True, the function returns a subprocess.CompletedProcess object.
+    Otherwise, it returns a boolean indicating success.
 
     Returns:
-        subprocess.CompletedProcess: The result of the subprocess run.
-    """
-    repo_path = os.path.join(DEFAULT_PATH, repo)
-    return subprocess.run(
-        command,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        cwd=repo_path,
-    )
-
-
-def exec_command_with_repo(
-    repo: str,
-    command: List[str],
-    description: str,
-) -> bool:
-    """
-    Execute a shell command within the specified git repository path.
-
-    Args:
-        repo (str): The GitHub repository to which the command is applied.
-        command (List[str]): A list of strings representing the command and its arguments.
-        description (str): A brief description of the command for logging purposes.
-
-    Returns:
-        bool: True if the command was successful, False otherwise.
+        Union[bool, subprocess.CompletedProcess]: The result of the subprocess run or success flag.
     """
     repo_path = os.path.join(DEFAULT_PATH, repo)
     try:
-        log(f"Starting: {description}: {repo}", level="info")
-        shorted_commands = " ".join(command)[:50]
-        log(f"Executing command: {shorted_commands} in {repo_path}",
-            level="info")
-        res = subprocess.run(
+        complete_process = subprocess.run(
             command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE if capture_output else None,
+            stderr=subprocess.PIPE if capture_output else None,
             cwd=repo_path,
             check=True,
         )
-        if res.returncode != 0:
-            log(f"Failed: {description}: {res.stderr.decode().strip()}",
-                level="error")
-            return False
-        log(f"Successfully: {description}: {res.stdout.decode().strip()}",
-            level="info")
-        return True
+        return complete_process
     except subprocess.CalledProcessError as err:
-        log(f"Exception during {description}: {err}", level="error")
-        return False
-    except Exception as ex:
-        log(f"Exception during {description}: {ex}", level="error")
-        return False
+        shorted_commands = " ".join(command)[:50]
+        log(f"Command {shorted_commands} failed with error: {err}",
+            level="error")
+        return None
+
+
+def exec_command_and_response_bool(repo: str,
+                                   command: List[str],
+                                   capture_output: bool = False) -> bool:
+    """This function executes a shell command within the specified git repository path."""
+    return bool(exec_command(repo, command, capture_output))
 
 
 @exception_handler
@@ -93,28 +67,25 @@ def setup_repository(repo: str, branch_name: str = "main") -> bool:
 
 def clone_repository(repo: str) -> bool:
     """Clone the repository."""
-    return exec_command_with_repo(
+    return exec_command_and_response_bool(
         repo[:repo.index("/")],
         ["git", "clone", "git@github.com:" + repo],
-        "Cloning repository",
     )
 
 
 def pull_repository(repo: str) -> bool:
     """リポジトリをpullする"""
-    return exec_command_with_repo(
+    return exec_command_and_response_bool(
         repo,
         ["git", "pull"],
-        "Pulling repository",
     )
 
 
 def create_issue(repo: str, title: str, body: str) -> bool:
     """Create a new issue on GitHub."""
-    return exec_command_with_repo(
+    return exec_command_and_response_bool(
         repo,
         ["gh", "issue", "create", "-t", title, "-b", body],
-        f"Creating issue with title: {title}",
     )
 
 
@@ -122,17 +93,12 @@ def create_issue(repo: str, title: str, body: str) -> bool:
 def list_issue_ids(repo: str) -> List[int]:
     """issue idを取得する"""
 
-    try:
-        log("Listing issues", level="info")
-        res = subprocess.run(
-            ["gh", "issue", "list"],
-            stdout=subprocess.PIPE,
-            cwd=DEFAULT_PATH + "/" + repo,
-            check=True,
-        )
-        log("Issues listed successfully", level="info")
-    except Exception as ex:
-        log(f"Failed to list issues: {ex}", level="error")
+    res = exec_command(
+        repo,
+        ["gh", "issue", "list"],
+        capture_output=True,
+    )
+    if not res:
         return []
 
     issue_row = res.stdout.decode().split("\t")
@@ -143,17 +109,12 @@ def list_issue_ids(repo: str) -> List[int]:
 def get_issue_by_id(repo: str, issue_id: int) -> Union[Issue, None]:
     """idからissueを取得する"""
 
-    try:
-        log(f"Getting issue with id: {issue_id}", level="info")
-        res = subprocess.run(
-            ["gh", "issue", "view", str(issue_id)],
-            stdout=subprocess.PIPE,
-            cwd=DEFAULT_PATH + "/" + repo,
-            check=True,
-        )
-        log("Issue had successfully", level="info")
-    except Exception as ex:
-        log(f"Failed to get issue: {ex}", level="error")
+    res = exec_command(
+        repo,
+        ["gh", "issue", "view", str(issue_id)],
+        capture_output=True,
+    )
+    if not res:
         return None
 
     is_body = False
@@ -172,18 +133,13 @@ def get_issue_by_id(repo: str, issue_id: int) -> Union[Issue, None]:
         body=body,
     )
 
-    try:
-        log(f"Getting comments with id: {issue_id}", level="info")
-        res = subprocess.run(
-            ["gh", "issue", "view", str(issue_id), "-c"],
-            stdout=subprocess.PIPE,
-            cwd=DEFAULT_PATH + "/" + repo,
-            check=True,
-        )
-        log("Comments had successfully", level="info")
-    except Exception as ex:
-        log(f"Failed to get comments: {ex}", level="error")
-        return None
+    res = exec_command(
+        repo,
+        ["gh", "issue", "view", str(issue_id), "-c"],
+        capture_output=True,
+    )
+    if not res:
+        return issue
 
     comment_attrs = [
         "author",
@@ -215,47 +171,42 @@ def get_issue_by_id(repo: str, issue_id: int) -> Union[Issue, None]:
 
 def reply_issue(repo: str, issue_id: int, body: str) -> bool:
     """issueに返信する"""
-    return exec_command_with_repo(
+    return exec_command_and_response_bool(
         repo,
         ["gh", "issue", "comment",
          str(issue_id), "-b", body],
-        f"Replying issue with id: {issue_id}",
     )
 
 
 def checkout_branch(repo: str, branch_name: str) -> bool:
     """ブランチをチェックアウトする"""
-    return exec_command_with_repo(
+    return exec_command_and_response_bool(
         repo,
         ["git", "checkout", branch_name],
-        f"Checking out to branch: {branch_name}",
     )
 
 
 def checkout_new_branch(repo: str, branch_name: str) -> bool:
     """新しいブランチを作成する"""
-    return exec_command_with_repo(
+    return exec_command_and_response_bool(
         repo,
         ["git", "checkout", "-b", branch_name],
-        f"Creating new branch: {branch_name}",
     )
 
 
 def commit(repo: str, message: str) -> bool:
     """コミットする"""
-    return exec_command_with_repo(
+    return exec_command_and_response_bool(
         repo,
         ["git", "commit", "-a", "-m", message],
-        f"Committing changes: {message}",
     )
 
 
 def push_repository(repo: str, branch_name: str) -> bool:
     """リポジトリをpushする"""
-    return exec_command_with_repo(
+    return exec_command_and_response_bool(
         repo,
         ["git", "push", "origin", branch_name],
-        f"Pushing repository: {repo}",
     )
 
 
