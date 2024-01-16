@@ -1,10 +1,12 @@
-import logging
-from typing import Dict, List
+"""Module for the LLM service."""
+from typing import Dict, List, Union
+
 from openai import OpenAI
+
 from utils.logging_utils import log
 
 
-def generate_text(messages: List[Dict[str, str]]) -> str:
+def generate_text(messages: List[Dict[str, str]]) -> Union[str, None]:
     """Generates text using the OpenAI API."""
     model = "gpt-4-1106-preview"
     try:
@@ -16,7 +18,7 @@ def generate_text(messages: List[Dict[str, str]]) -> str:
         )
         log(f"Text generated successfully: {response.choices[0].message.content[:50]}...",
             level="info")
-    except Exception as e:
-        log(f"Failed to generate text: {e}", level="error")
-        return ""
+    except ConnectionError as err:
+        log(f"Failed to generate text: {err}", level="error")
+        return None
     return response.choices[0].message.content
