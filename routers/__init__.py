@@ -4,8 +4,8 @@ from datetime import datetime
 from typing import List, Union
 
 import services.github
+import services.llm
 from schemas import Issue
-from services.llm import generate_text
 from utils.logging_utils import log
 
 
@@ -61,7 +61,7 @@ def prepare_messages_from_issue(messages: List, issue: Issue):
 def send_messages_to_system(messages, system_instruction):
     """Send messages to AI system for code generation."""
     messages.append({"role": "system", "content": system_instruction})
-    generated_text = generate_text(messages)
+    generated_text = services.llm.generate_text(messages)
     return generated_text
 
 
