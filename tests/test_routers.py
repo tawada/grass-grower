@@ -13,9 +13,12 @@ def test_add_issue(
     mock_enumerate_python_files,
 ):
     """Test add_issue() function."""
-    mock_enumerate_python_files.return_value = [
-        {"filename": "test.py", "content": "print('Hello, world!')"}
-    ]
+    mock_enumerate_python_files.return_value = [{
+        "filename":
+        "test.py",
+        "content":
+        "print('Hello, world!')"
+    }]
     mock_generate_text.return_value = "Hello, world!"
     mock_setup_repository.return_value = True
     mock_create_issue.return_value = True

@@ -1,6 +1,7 @@
 from unittest.mock import patch
 from services.github import add_issue
 
+
 @patch('services.github.create_issue')
 def test_add_issue(mock_create_issue):
     mock_create_issue.return_value = True  # Mock successful issue creation

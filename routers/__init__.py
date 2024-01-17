@@ -1,14 +1,14 @@
+"""Router for the API."""
 import os
-import logging
-from pathlib import Path
-from typing import Union, List
+from typing import List, Union
+
+import services.github
 from schemas import Issue
 from services.github import (
     setup_repository,
     checkout_branch,
     checkout_new_branch,
     commit,
-    create_issue,
     get_issue_by_id,
     reply_issue,
     push_repository,
@@ -17,9 +17,7 @@ from services.github import (
 from services.llm import (
     generate_text, )
 from utils.logging_utils import (
-    setup_logging,
-    log,
-)
+    log, )
 
 
 def enumerate_python_files(repo: str):
@@ -99,7 +97,7 @@ def add_issue(
     ], "You are a programmer of the highest caliber. Please summarize the above GitHub issue text to one sentense as an issue title."
                                           )
     issue_title = issue_title.strip().strip('"`').strip("'")
-    create_issue(repo, issue_title, issue_body)
+    services.github.create_issue(repo, issue_title, issue_body)
 
 
 def generate_code_from_issue(
