@@ -11,6 +11,9 @@ codecov = "*"
 pre-commit = "*"
 pytest = "*"
 pytest-cov = "*"
+isort = "*"
+black = "*"
+pytest-mock = "*"
 
 [requires]
 python_version = "3.11"

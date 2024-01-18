@@ -1,25 +1,12 @@
+"""Router for the API."""
 import os
-import logging
-from pathlib import Path
-from typing import Union, List
+from datetime import datetime
+from typing import List, Union
+
+import services.github
+import services.llm
 from schemas import Issue
-from services.github import (
-    setup_repository,
-    checkout_branch,
-    checkout_new_branch,
-    commit,
-    create_issue,
-    get_issue_by_id,
-    reply_issue,
-    push_repository,
-    get_datetime_of_last_commit,
-)
-from services.llm import (
-    generate_text, )
-from utils.logging_utils import (
-    setup_logging,
-    log,
-)
+from utils.logging_utils import log
 
 
 def enumerate_python_files(repo: str):
@@ -74,7 +61,7 @@ def prepare_messages_from_issue(messages: List, issue: Issue):
 def send_messages_to_system(messages, system_instruction):
     """Send messages to AI system for code generation."""
     messages.append({"role": "system", "content": system_instruction})
-    generated_text = generate_text(messages)
+    generated_text = services.llm.generate_text(messages)
     return generated_text
 
 
@@ -84,22 +71,22 @@ def add_issue(
 ):
     """Add an issue to the repository."""
 
-    setup_repository(repo, branch)
+    services.github.setup_repository(repo, branch)
     python_files = enumerate_python_files(repo)
     messages = prepare_messages_from_files(python_files, "")
     issue_body = send_messages_to_system(
         messages,
-        "You are a programmer of the highest caliber. Please read the code of the existing program and point out only one issue of whole code. Never refer to yourself as an AI assistant when doing so."
+        "You are a programmer of the highest caliber. Please read the code of the existing program and point out only one issue of whole code. Never refer to yourself as an AI assistant when doing so.",
     )
-    issue_title = send_messages_to_system([
-        {
+    issue_title = send_messages_to_system(
+        [{
             "role": "assistant",
             "content": issue_body
-        }
-    ], "You are a programmer of the highest caliber. Please summarize the above GitHub issue text to one sentense as an issue title."
-                                          )
+        }],
+        "You are a programmer of the highest caliber. Please summarize the above GitHub issue text to one sentense as an issue title.",
+    )
     issue_title = issue_title.strip().strip('"`').strip("'")
-    create_issue(repo, issue_title, issue_body)
+    services.github.create_issue(repo, issue_title, issue_body)
 
 
 def generate_code_from_issue(
@@ -115,8 +102,8 @@ def generate_code_from_issue(
     Returns:
     - str: The generated code based on the issue, or none if the issue cannot be retrieved.
     """
-    setup_repository(repo, branch)
-    issue = get_issue_by_id(repo, issue_id)
+    services.github.setup_repository(repo, branch)
+    issue = services.github.get_issue_by_id(repo, issue_id)
     if issue is None:
         log(f"Failed to retrieve issue with ID: {issue_id}", level="error")
         return None
@@ -126,7 +113,7 @@ def generate_code_from_issue(
     messages = prepare_messages_from_issue(messages, issue)
     generated_text = send_messages_to_system(
         messages,
-        "You are a programmer of the highest caliber.Please read the code of the existing program and rewrite any one based on the issue."
+        "You are a programmer of the highest caliber.Please read the code of the existing program and rewrite any one based on the issue.",
     )
     print(generated_text)
     return generated_text
@@ -139,8 +126,8 @@ def update_issue(
 ):
     """Update an issue with a comment."""
 
-    setup_repository(repo, branch)
-    issue = get_issue_by_id(repo, issue_id)
+    services.github.setup_repository(repo, branch)
+    issue = services.github.get_issue_by_id(repo, issue_id)
 
     if issue is None:
         log(f"Failed to retrieve issue with ID: {issue_id}", level="error")
@@ -151,9 +138,9 @@ def update_issue(
     messages = prepare_messages_from_issue(messages, issue)
     generated_text = send_messages_to_system(
         messages,
-        "You are a programmer of the highest caliber.Please read the code of the existing program and make additional comments on the issue."
+        "You are a programmer of the highest caliber.Please read the code of the existing program and make additional comments on the issue.",
     )
-    reply_issue(repo, issue.id, generated_text)
+    services.github.reply_issue(repo, issue.id, generated_text)
 
 
 def summarize_issue(
@@ -161,22 +148,25 @@ def summarize_issue(
     repo: str,
     branch: str = "main",
 ):
-    setup_repository(repo, branch)
-    issue = get_issue_by_id(repo, issue_id)
+    services.github.setup_repository(repo, branch)
+    issue = services.github.get_issue_by_id(repo, issue_id)
     if issue is None or issue.summary:
-        log(f"Failed to retrieve issue or issue already summarized with ID: {issue_id}",
-            level="error")
+        log(
+            f"Failed to retrieve issue or issue already summarized with ID: {issue_id}",
+            level="error",
+        )
         return None
 
     messages = prepare_messages_from_issue([], issue)
 
     # Message to the system for summarization instruction
-    system_instruction = "Please summarize the following issue and its discussion succinctly."
+    system_instruction = (
+        "Please summarize the following issue and its discussion succinctly.")
 
     issue.summary = send_messages_to_system(messages, system_instruction)
 
     # Persist the summary back to the issue as a comment
-    reply_issue(repo, issue.id, f"Summary:\n{issue.summary}")
+    services.github.reply_issue(repo, issue.id, f"Summary:\n{issue.summary}")
 
 
 def generate_readme(
@@ -185,7 +175,7 @@ def generate_readme(
 ):
     """Generate README.md documentation for the entire program."""
 
-    setup_repository(repo, branch)
+    services.github.setup_repository(repo, branch)
     python_files = enumerate_python_files(repo)
 
     # Initialize readme_content as empty string to handle the case when file doesn't exist
@@ -196,8 +186,10 @@ def generate_readme(
         with open(repo_path + "/README.md", "r") as f:
             readme_content = f.read()
     except FileNotFoundError:
-        log("README.md file does not exist. A new README.md will be created with generated content.",
-            level="warning")
+        log(
+            "README.md file does not exist. A new README.md will be created with generated content.",
+            level="warning",
+        )
         # Not returning from the function here, as we might still want to generate a new README.md
     except OSError as e:
         # Catching any other OS-related errors (like file permission issues)
@@ -209,12 +201,12 @@ def generate_readme(
     messages = prepare_messages_from_files(python_files, readme_message)
     generated_text = send_messages_to_system(
         messages,
-        "You are a programmer of the highest caliber.Please read the code of the existing program and generate README.md."
+        "You are a programmer of the highest caliber.Please read the code of the existing program and generate README.md.",
     )
 
     # Checkout to the a new branch
     try:
-        checkout_new_branch(repo, "update-readme")
+        services.github.checkout_new_branch(repo, "update-readme")
     except Exception as e:
         log(f"Error to checkout a new branch: {e}", level="error")
         return False
@@ -225,25 +217,25 @@ def generate_readme(
             f.write(generated_text)
     except OSError as e:
         log(f"Error while writing to README.md: {e}", level="error")
-        checkout_branch(repo, "main")
+        services.github.checkout_branch(repo, "main")
         return False
 
     # Commit the changes
-    res = commit(repo, "Update README.md")
+    res = services.github.commit(repo, "Update README.md")
     if not res:
         return False
-    res = push_repository(repo, "update-readme")
+    res = services.github.push_repository(repo, "update-readme")
     if not res:
         return False
-    checkout_branch(repo, "main")
+    services.github.checkout_branch(repo, "main")
     return True
 
 
 def grow_grass(repo: str, branch: str = "main"):
     """Grow grass on GitHub contributions graph."""
     # 最後のコミットの日付を取得する
-    from datetime import datetime
-    last_commit_datetime = get_datetime_of_last_commit(repo, branch)
+    last_commit_datetime = services.github.get_datetime_of_last_commit(
+        repo, branch)
     if last_commit_datetime.date() == datetime.now().date():
         return
     # add_issueする

@@ -8,12 +8,12 @@ def setup_logging():
     """ Setup logging for the project. """
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(process)d - %(threadName)s - %(message)s',
+        format=
+        '%(asctime)s - %(levelname)s - %(process)d - %(threadName)s - %(message)s',
         handlers=[
             logging.FileHandler("debug.log"),  # Log to a file
-            logging.StreamHandler()            # Log to standard output
-        ]
-    )
+            logging.StreamHandler()  # Log to standard output
+        ])
 
 
 def log(message, level="info", **kwargs):
@@ -29,6 +29,7 @@ def log(message, level="info", **kwargs):
 
 def exception_handler(func):
     """ Decorator to handle exceptions in a function. """
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:
@@ -36,4 +37,5 @@ def exception_handler(func):
         except Exception as e:
             log(f"An error occurred in {func.__name__}: {e}", level="error")
             # More sophisticated error handling can be added here
+
     return wrapper
