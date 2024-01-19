@@ -40,16 +40,10 @@ if __name__ == "__main__":
         log(f"Argument parsing error: {e}", level="error")
         sys.exit(1)
 
-    # Parse repository
-    try:
-        owner, repo_ = args.repo.split("/")
-        repo = f"{owner}/{repo_}"
-    except ValueError:
+    # Check to parse repository
+    if len(args.repo.split("/")) != 2:
         log("Invalid repository format. Use 'owner/repo'.", level="error")
         sys.exit(1)
-
-    # Parse branch
-    branch = args.branch
 
     # Establish a dictionary that maps actions to whether they need an issue_id
     actions_needing_issue_id = {
@@ -64,15 +58,15 @@ if __name__ == "__main__":
         log("'issue_id' is required for the selected action.", level="error")
         sys.exit(1)
     elif args.action == "generate_code_from_issue":
-        routers.generate_code_from_issue(args.issue_id, repo, branch)
+        routers.generate_code_from_issue(args.issue_id, args.repo, args.branch)
     elif args.action == "update_issue":
-        routers.update_issue(args.issue_id, repo, branch)
+        routers.update_issue(args.issue_id, args.repo, args.branch)
     elif args.action == "add_issue":
-        routers.add_issue(repo, branch)
+        routers.add_issue(args.repo, args.branch)
     elif args.action == "generate_readme":
-        routers.generate_readme(repo, branch)
+        routers.generate_readme(args.repo, args.branch)
     elif args.action == "grow_grass":
-        routers.grow_grass(repo, branch)
+        routers.grow_grass(args.repo, args.branch)
     else:
         log("Invalid action.", level="error")
         sys.exit(1)

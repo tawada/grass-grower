@@ -102,6 +102,7 @@ def generate_code_from_issue(
     Returns:
     - str: The generated code based on the issue, or none if the issue cannot be retrieved.
     """
+
     services.github.setup_repository(repo, branch)
     issue = services.github.get_issue_by_id(repo, issue_id)
     if issue is None:
