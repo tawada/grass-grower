@@ -1,26 +1,26 @@
 """ Logging utilities for the project. """
 import logging
-from logging import getLogger
 from functools import wraps
+from logging import getLogger
 
 
 def setup_logging():
-    """ Setup logging for the project. """
+    """Setup logging for the project."""
     logging.basicConfig(
         level=logging.INFO,
-        format=
-        '%(asctime)s - %(levelname)s - %(process)d - %(threadName)s - %(message)s',
+        format="%(asctime)s - %(levelname)s - %(process)d - %(threadName)s - %(message)s",
         handlers=[
             logging.FileHandler("debug.log"),  # Log to a file
-            logging.StreamHandler()  # Log to standard output
-        ])
+            logging.StreamHandler(),  # Log to standard output
+        ],
+    )
 
 
 def log(message, level="info", **kwargs):
-    """ Log a message to the logger."""
+    """Log a message to the logger."""
     logger = getLogger(__name__)
 
-    extra_info = ' '.join(f'{key}={value}' for key, value in kwargs.items())
+    extra_info = " ".join(f"{key}={value}" for key, value in kwargs.items())
     full_message = f"{message} {extra_info}".strip()
 
     log_func = getattr(logger, level.lower(), logger.info)
@@ -28,7 +28,7 @@ def log(message, level="info", **kwargs):
 
 
 def exception_handler(func):
-    """ Decorator to handle exceptions in a function. """
+    """Decorator to handle exceptions in a function."""
 
     @wraps(func)
     def wrapper(*args, **kwargs):

@@ -214,8 +214,12 @@ def get_datetime_of_last_commit(repo: str, branch_name: str) -> datetime:
     """最後のコミットの日時を取得する"""
     setup_repository(repo, branch_name)
     command = [
-        "git", "log", "--date=iso", "--date=format:'%Y/%m/%d %H:%M:%S'",
-        "--pretty=format:'%ad'", "-1"
+        "git",
+        "log",
+        "--date=iso",
+        "--date=format:'%Y/%m/%d %H:%M:%S'",
+        "--pretty=format:'%ad'",
+        "-1",
     ]
     repo_path = os.path.join(DEFAULT_PATH, repo)
     proc = subprocess.run(
@@ -226,5 +230,5 @@ def get_datetime_of_last_commit(repo: str, branch_name: str) -> datetime:
         check=True,
     )
     last_commit_datetime = datetime.strptime(
-        proc.stdout.decode('utf-8').strip("'"), '%Y/%m/%d %H:%M:%S')
+        proc.stdout.decode("utf-8").strip("'"), "%Y/%m/%d %H:%M:%S")
     return last_commit_datetime

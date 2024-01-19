@@ -7,6 +7,7 @@ from typing import List
 @dataclass
 class IssueComment:
     """IssueCommentのデータ構造"""
+
     author: str
     association: str
     edited: str
@@ -17,6 +18,7 @@ class IssueComment:
 @dataclass
 class Issue:
     """Issueのデータ構造"""
+
     id: int
     title: str
     body: str

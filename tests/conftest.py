@@ -15,8 +15,8 @@ def setup():
 def setup_github():
 
     def inner(mocker):
-        mocker.patch('services.github.setup_repository', return_value=True)
-        mocker.patch('services.github.create_issue', return_value=True)
+        mocker.patch("services.github.setup_repository", return_value=True)
+        mocker.patch("services.github.create_issue", return_value=True)
 
     return inner
 
@@ -33,10 +33,12 @@ def setup_llm():
 def setup_routers():
 
     def inner(mocker):
-        mocker.patch("routers.enumerate_python_files",
-                     return_value=[{
-                         "filename": "test.py",
-                         "content": "print('Hello, world!')"
-                     }])
+        mocker.patch(
+            "routers.enumerate_python_files",
+            return_value=[{
+                "filename": "test.py",
+                "content": "print('Hello, world!')"
+            }],
+        )
 
     return inner
