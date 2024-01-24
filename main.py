@@ -5,8 +5,6 @@ from argparse import ArgumentParser
 import routers
 from utils.logging_utils import log, setup_logging
 
-setup_logging()
-
 
 def parse_arguments(args=None):
     """Parse command line arguments"""
@@ -30,20 +28,12 @@ def parse_arguments(args=None):
         default="tawada/grass-grower",
     )
     parser.add_argument("--branch", help="Target branch name", default="main")
-    return parser.parse_args(args)
-
-
-if __name__ == "__main__":
-    try:
-        args = parse_arguments()
-    except SystemExit as e:
-        log(f"Argument parsing error: {e}", level="error")
-        sys.exit(1)
+    parsed_args = parser.parse_args(args)
 
     # Check to parse repository
-    if len(args.repo.split("/")) != 2:
-        log("Invalid repository format. Use 'owner/repo'.", level="error")
-        sys.exit(1)
+    if len(parsed_args.repo.split("/")) != 2:
+        print("Invalid repository format. Use 'owner/repo'.")
+        sys.exit(2)
 
     # Establish a dictionary that maps actions to whether they need an issue_id
     actions_needing_issue_id = {
@@ -54,10 +44,22 @@ if __name__ == "__main__":
         "grow_grass": False,
     }
 
-    if actions_needing_issue_id[args.action] and not args.issue_id:
-        log("'issue_id' is required for the selected action.", level="error")
+    if actions_needing_issue_id[
+            parsed_args.action] and not parsed_args.issue_id:
+        print("'issue_id' is required for the selected action.")
+        sys.exit(2)
+    return parsed_args
+
+
+def main():
+    """Main function"""
+    try:
+        args = parse_arguments()
+    except SystemExit as err:
+        log(f"Argument parsing error: {err}", level="error")
         sys.exit(1)
-    elif args.action == "generate_code_from_issue":
+
+    if args.action == "generate_code_from_issue":
         routers.generate_code_from_issue(args.issue_id, args.repo, args.branch)
     elif args.action == "update_issue":
         routers.update_issue(args.issue_id, args.repo, args.branch)
@@ -70,3 +72,8 @@ if __name__ == "__main__":
     else:
         log("Invalid action.", level="error")
         sys.exit(1)
+
+
+if __name__ == "__main__":
+    setup_logging()
+    main()
