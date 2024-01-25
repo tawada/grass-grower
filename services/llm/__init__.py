@@ -1,7 +1,7 @@
 """Module for the LLM service."""
 from typing import Dict, List, Union
 
-from openai import OpenAI
+import openai
 
 from utils.logging_utils import log
 
@@ -17,7 +17,7 @@ def generate_text(messages: List[Dict[str, str]]) -> Union[str, None]:
     """
     model = "gpt-4-1106-preview"
     try:
-        client = OpenAI()
+        client = openai.OpenAI()
         log(f"Generating text with model: {model}", level="info")
         response = client.chat.completions.create(
             model=model,

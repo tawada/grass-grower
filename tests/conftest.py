@@ -1,8 +1,10 @@
+"""Pytest configuration file."""
 import pytest
 
 
 @pytest.fixture()
 def setup():
+    """Setup mock functions."""
 
     def inner(mocker):
         setup_github()(mocker)
@@ -13,6 +15,7 @@ def setup():
 
 
 def setup_github():
+    """Setup mock functions."""
 
     def inner(mocker):
         mocker.patch("services.github.setup_repository", return_value=True)
@@ -22,6 +25,7 @@ def setup_github():
 
 
 def setup_llm():
+    """Setup mock functions."""
 
     def inner(mocker):
         mocker.patch("services.llm.generate_text",
@@ -30,7 +34,43 @@ def setup_llm():
     return inner
 
 
+@pytest.fixture()
+def setup_llm_detail():
+    """Setup mock functions."""
+
+    # client = OpenAI()
+    # response = client.chat.completions.create(model, messages)
+    # response.choices[0].message.content
+    class MockOpenAIObject:
+        """Mock OpenAI class."""
+
+        def __init__(self):
+            self.chat = MockOpenAIObject()
+            self.completions = MockOpenAIObject()
+            self.choices = [MockOpenAIObject()]
+            self.message = MockOpenAIObject()
+            self.content = "Hello, world!"
+            self.model = None
+            self.messages = None
+
+        def create(self, model, messages):
+            """Mock create function."""
+            self.model = model
+            self.messages = messages
+            return MockOpenAIObject()
+
+        def __str__(self):
+            """Mock __str__ function."""
+            return self.content
+
+    def inner(mocker):
+        mocker.patch("openai.OpenAI", new=MockOpenAIObject)
+
+    return inner
+
+
 def setup_routers():
+    """Setup mock functions."""
 
     def inner(mocker):
         mocker.patch(
