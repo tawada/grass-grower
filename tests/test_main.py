@@ -28,3 +28,13 @@ def test_parse_arguments_invalid_issue_id():
         assert False
     except SystemExit:
         assert True
+
+
+def test_parse_arguments_invalid_repository():
+    """Test parse_arguments() with invalid repository"""
+    args = ["add_issue", "--repo", "unparsable_repository"]
+    try:
+        main.parse_arguments(args)
+        assert False
+    except SystemExit:
+        assert True
