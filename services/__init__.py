@@ -1,1 +1,2 @@
-__all__ = ['github', 'llm']
+"""Modlues to use external services"""
+__all__ = ["github", "llm"]
