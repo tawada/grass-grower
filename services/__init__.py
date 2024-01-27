@@ -1,2 +1,2 @@
-"""Modlues to use external services"""
+"""Modules to use external services"""
 __all__ = ["github", "llm"]
