@@ -1,3 +1,4 @@
+"""Test routers.py module."""
 import routers
 
 
@@ -35,7 +36,7 @@ def test_summarize_issue(mocker, setup):
     assert True
 
 
-def generate_readme(mocker, setup):
+def test_generate_readme(mocker, setup):
     """Test generate_readme() function."""
     setup(mocker)
     routers.generate_readme("test_owner/test_repo")

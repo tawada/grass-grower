@@ -1,6 +1,8 @@
 """Pytest configuration file."""
 import pytest
 
+import schemas
+
 
 @pytest.fixture()
 def setup():
@@ -20,6 +22,12 @@ def setup_github():
     def inner(mocker):
         mocker.patch("services.github.setup_repository", return_value=True)
         mocker.patch("services.github.create_issue", return_value=True)
+        mocker.patch("services.github.get_issue_by_id",
+                     return_value=schemas.Issue(id=1,
+                                                title="test",
+                                                body="test",
+                                                comments=[]))
+        mocker.patch("services.github.reply_issue", return_value=True)
 
     return inner
 
