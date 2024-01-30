@@ -1,4 +1,6 @@
 """Test routers.py module."""
+from datetime import datetime, timedelta
+
 import routers
 
 
@@ -40,4 +42,22 @@ def test_generate_readme(mocker, setup):
     """Test generate_readme() function."""
     setup(mocker)
     routers.generate_readme("test_owner/test_repo")
+    assert True
+
+
+def test_grow_grass_now(mocker, setup):
+    """Test grow_grass() function."""
+    setup(mocker)
+    mocker.patch("services.github.get_datetime_of_last_commit",
+                 return_value=datetime.now())
+    routers.grow_grass("test_owner/test_repo")
+    assert True
+
+
+def test_grow_grass_yesterday(mocker, setup):
+    """Test grow_grass() function."""
+    setup(mocker)
+    mocker.patch("services.github.get_datetime_of_last_commit",
+                 return_value=datetime.now() - timedelta(days=1))
+    routers.grow_grass("test_owner/test_repo")
     assert True
