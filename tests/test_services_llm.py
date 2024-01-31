@@ -8,5 +8,6 @@ def test_services_llm_generate_text(
 ):
     """Test add_issue() function."""
     setup_llm_detail(mocker)
-    services.llm.generate_text([{"text": "Hello, world!"}])
+    openai_client = services.llm.get_openai_client()
+    services.llm.generate_text([{"text": "Hello, world!"}], openai_client)
     assert True

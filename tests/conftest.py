@@ -56,11 +56,12 @@ def setup_llm_detail():
     class MockOpenAIObject:
         """Mock OpenAI class."""
 
-        def __init__(self):
-            self.chat = MockOpenAIObject()
-            self.completions = MockOpenAIObject()
-            self.choices = [MockOpenAIObject()]
-            self.message = MockOpenAIObject()
+        def __init__(self, api_key=None):
+            self.api_key = api_key
+            self.chat = self
+            self.completions = self
+            self.choices = [self]
+            self.message = self
             self.content = "Hello, world!"
             self.model = None
             self.messages = None
@@ -69,7 +70,7 @@ def setup_llm_detail():
             """Mock create function."""
             self.model = model
             self.messages = messages
-            return MockOpenAIObject()
+            return self
 
         def __str__(self):
             """Mock __str__ function."""

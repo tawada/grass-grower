@@ -1,4 +1,5 @@
 """Module for the LLM service."""
+import os
 from typing import Dict, List, Union
 
 import openai
@@ -6,20 +7,28 @@ import openai
 from utils.logging_utils import log
 
 
-def generate_text(messages: List[Dict[str, str]]) -> Union[str, None]:
+def get_openai_client(api_key: str = None) -> openai.OpenAI:
+    """Factory function to create and configure an OpenAI client."""
+    return openai.OpenAI(api_key=api_key or os.environ["OPENAI_API_KEY"])
+
+
+def generate_text(
+    messages: List[Dict[str, str]],
+    openai_client: openai.OpenAI,
+) -> Union[str, None]:
     """Generates text using the OpenAI API.
 
     Args:
         messages (List[Dict[str, str]]): A list of message dictionaries to send to the API.
+        openai_client (openai.OpenAI): An OpenAI client.
 
     Returns:
         Union[str, None]: The generated text, or None if an error occurs.
     """
     model = "gpt-4-1106-preview"
     try:
-        client = openai.OpenAI()
         log(f"Generating text with model: {model}", level="info")
-        response = client.chat.completions.create(
+        response = openai_client.chat.completions.create(
             model=model,
             messages=messages,
         )
