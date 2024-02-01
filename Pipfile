@@ -19,4 +19,5 @@ pytest-mock = "*"
 python_version = "3.11"
 
 [scripts]
+start = "python main.py grow_grass"
 test = "python -m pytest --cov=./ --cov-report=xml"
