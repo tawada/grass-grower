@@ -40,6 +40,7 @@ def setup_llm():
     """Setup mock functions."""
 
     def inner(mocker):
+        mocker.patch.dict("os.environ", {"OPENAI_API_KEY": "test"})
         mocker.patch("services.llm.generate_text",
                      return_value="Hello, world!")
 
@@ -77,7 +78,7 @@ def setup_llm_detail():
             return self.content
 
     def inner(mocker):
-        mocker.patch("os.environ", return_value={"OPEN_API_KEY": "test"})
+        mocker.patch.dict("os.environ", {"OPENAI_API_KEY": "test"})
         mocker.patch("openai.OpenAI", new=MockOpenAIObject)
 
     return inner
