@@ -45,6 +45,27 @@ def test_generate_readme(mocker, setup):
     assert True
 
 
+def test_generate_readme_failed(mocker, setup):
+    """Test generate_readme() function."""
+    setup(mocker)
+
+    class DummyFileController:
+        """Dummy file controller class."""
+
+        def __enter__(self):
+            return type("FileController", (object, ), {
+                "read": lambda: "test",
+                "write": lambda *args: True
+            })
+
+        def __exit__(self, *args):
+            pass
+
+    mocker.patch("routers.open", return_value=DummyFileController())
+    routers.generate_readme("test_owner/test_repo")
+    assert True
+
+
 def test_grow_grass_now(mocker, setup):
     """Test grow_grass() function."""
     setup(mocker)
