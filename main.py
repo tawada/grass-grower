@@ -5,6 +5,15 @@ from argparse import ArgumentParser
 import routers
 from utils.logging_utils import log, setup_logging
 
+# Establish a dictionary that maps actions to whether they need an issue_id
+actions_needing_issue_id = {
+    "generate_code_from_issue": True,
+    "update_issue": True,
+    "add_issue": False,
+    "generate_readme": False,
+    "grow_grass": False,
+}
+
 
 def parse_arguments(args=None):
     """Parse command line arguments"""
@@ -35,15 +44,6 @@ def parse_arguments(args=None):
         print("Invalid repository format. Use 'owner/repo'.")
         sys.exit(2)
 
-    # Establish a dictionary that maps actions to whether they need an issue_id
-    actions_needing_issue_id = {
-        "generate_code_from_issue": True,
-        "update_issue": True,
-        "add_issue": False,
-        "generate_readme": False,
-        "grow_grass": False,
-    }
-
     if actions_needing_issue_id[
             parsed_args.action] and not parsed_args.issue_id:
         print("'issue_id' is required for the selected action.")
@@ -51,29 +51,24 @@ def parse_arguments(args=None):
     return parsed_args
 
 
-def main():
+def main(args=None):
     """Main function"""
     try:
-        args = parse_arguments()
+        args = parse_arguments(args)
     except SystemExit as err:
         log(f"Argument parsing error: {err}", level="error")
         sys.exit(1)
 
-    if args.action == "generate_code_from_issue":
-        routers.generate_code_from_issue(args.issue_id, args.repo, args.branch)
-    elif args.action == "update_issue":
-        routers.update_issue(args.issue_id, args.repo, args.branch)
-    elif args.action == "add_issue":
-        routers.add_issue(args.repo, args.branch)
-    elif args.action == "generate_readme":
-        routers.generate_readme(args.repo, args.branch)
-    elif args.action == "grow_grass":
-        routers.grow_grass(args.repo, args.branch)
-    else:
-        log("Invalid action.", level="error")
+    try:
+        _args = [args.repo, args.branch]
+        if actions_needing_issue_id[args.action]:
+            _args.insert(0, args.issue_id)
+        getattr(routers, args.action)(*_args)
+    except AttributeError as err:
+        log(f"Action not implemented: {err}", level="error")
         sys.exit(1)
 
 
 if __name__ == "__main__":
     setup_logging()
-    main()
+    main(None)

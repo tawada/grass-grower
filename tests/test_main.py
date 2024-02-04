@@ -38,3 +38,10 @@ def test_parse_arguments_invalid_repository():
         assert False
     except SystemExit:
         assert True
+
+
+def test_main_add_issue(mocker, setup):
+    """Test main() with action 'add_issue'"""
+    setup(mocker)
+    args = ["add_issue", "--issue-id", "123"]
+    main.main(args)
