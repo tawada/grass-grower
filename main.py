@@ -1,7 +1,7 @@
 """Tool to automate issue handling on GitHub"""
 import os
 import sys
-from argparse import ArgumentParser
+from argparse import ArgumentParser, ArgumentTypeError
 
 import routers
 from utils.logging_utils import log, setup_logging
@@ -24,6 +24,13 @@ class MissingIssueIDError(Exception):
     """Raised when the issue_id is missing"""
 
 
+def parse_git_repo(value: str) -> str:
+    """Parse the repository argument"""
+    if len(value.split("/")) != 2:
+        raise ArgumentTypeError("Invalid repository format. Use 'owner/repo'.")
+    return value
+
+
 def parse_arguments(args=None):
     """Parse command line arguments"""
     parser = ArgumentParser(
@@ -44,6 +51,7 @@ def parse_arguments(args=None):
         "--repo",
         help="Target GitHub repository in the format 'owner/repo'",
         default=os.getenv("DEFAULT_REPO", "tawada/grass-grower"),
+        type=parse_git_repo,
     )
     parser.add_argument("--branch", help="Target branch name", default="main")
     parsed_args = parser.parse_args(args)
