@@ -1,6 +1,7 @@
 """Tool to automate issue handling on GitHub"""
+import os
 import sys
-from argparse import ArgumentParser
+from argparse import ArgumentParser, ArgumentTypeError
 
 import routers
 from utils.logging_utils import log, setup_logging
@@ -13,6 +14,21 @@ actions_needing_issue_id = {
     "generate_readme": False,
     "grow_grass": False,
 }
+
+
+class InvalidRepositoryFormatError(Exception):
+    """Raised when the repository format is invalid"""
+
+
+class MissingIssueIDError(Exception):
+    """Raised when the issue_id is missing"""
+
+
+def parse_git_repo(value: str) -> str:
+    """Parse the repository argument"""
+    if len(value.split("/")) != 2:
+        raise ArgumentTypeError("Invalid repository format. Use 'owner/repo'.")
+    return value
 
 
 def parse_arguments(args=None):
@@ -34,20 +50,22 @@ def parse_arguments(args=None):
     parser.add_argument(
         "--repo",
         help="Target GitHub repository in the format 'owner/repo'",
-        default="tawada/grass-grower",
+        default=os.getenv("DEFAULT_REPO", "tawada/grass-grower"),
+        type=parse_git_repo,
     )
     parser.add_argument("--branch", help="Target branch name", default="main")
     parsed_args = parser.parse_args(args)
 
     # Check to parse repository
     if len(parsed_args.repo.split("/")) != 2:
-        print("Invalid repository format. Use 'owner/repo'.")
-        sys.exit(2)
+        raise InvalidRepositoryFormatError(
+            "Invalid repository format. Use 'owner/repo'.")
 
     if actions_needing_issue_id[
             parsed_args.action] and not parsed_args.issue_id:
-        print("'issue_id' is required for the selected action.")
-        sys.exit(2)
+        raise MissingIssueIDError(
+            "'issue_id' is required for the selected action.")
+
     return parsed_args
 
 
@@ -55,6 +73,12 @@ def main(args=None):
     """Main function"""
     try:
         args = parse_arguments(args)
+    except InvalidRepositoryFormatError as err:
+        log(f"Argument validation error: {str(err)}", level="error")
+        sys.exit(1)
+    except MissingIssueIDError as err:
+        log(f"Argument validation error: {str(err)}", level="error")
+        sys.exit(1)
     except SystemExit as err:
         log(f"Argument parsing error: {err}", level="error")
         sys.exit(1)

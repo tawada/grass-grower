@@ -1,5 +1,6 @@
 """Test main.py"""
 import main
+from main import InvalidRepositoryFormatError, MissingIssueIDError
 
 
 def test_parse_arguments_valid():
@@ -26,7 +27,7 @@ def test_parse_arguments_invalid_issue_id():
     try:
         main.parse_arguments(args)
         assert False
-    except SystemExit:
+    except MissingIssueIDError:
         assert True
 
 
@@ -36,7 +37,7 @@ def test_parse_arguments_invalid_repository():
     try:
         main.parse_arguments(args)
         assert False
-    except SystemExit:
+    except InvalidRepositoryFormatError:
         assert True
 
 
