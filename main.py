@@ -1,4 +1,5 @@
 """Tool to automate issue handling on GitHub"""
+import os
 import sys
 from argparse import ArgumentParser
 
@@ -42,7 +43,7 @@ def parse_arguments(args=None):
     parser.add_argument(
         "--repo",
         help="Target GitHub repository in the format 'owner/repo'",
-        default="tawada/grass-grower",
+        default=os.getenv("DEFAULT_REPO", "tawada/grass-grower"),
     )
     parser.add_argument("--branch", help="Target branch name", default="main")
     parsed_args = parser.parse_args(args)
