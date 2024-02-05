@@ -15,6 +15,14 @@ actions_needing_issue_id = {
 }
 
 
+class InvalidRepositoryFormatError(Exception):
+    """Raised when the repository format is invalid"""
+
+
+class MissingIssueIDError(Exception):
+    """Raised when the issue_id is missing"""
+
+
 def parse_arguments(args=None):
     """Parse command line arguments"""
     parser = ArgumentParser(
@@ -41,13 +49,14 @@ def parse_arguments(args=None):
 
     # Check to parse repository
     if len(parsed_args.repo.split("/")) != 2:
-        print("Invalid repository format. Use 'owner/repo'.")
-        sys.exit(2)
+        raise InvalidRepositoryFormatError(
+            "Invalid repository format. Use 'owner/repo'.")
 
     if actions_needing_issue_id[
             parsed_args.action] and not parsed_args.issue_id:
-        print("'issue_id' is required for the selected action.")
-        sys.exit(2)
+        raise MissingIssueIDError(
+            "'issue_id' is required for the selected action.")
+
     return parsed_args
 
 
@@ -55,6 +64,12 @@ def main(args=None):
     """Main function"""
     try:
         args = parse_arguments(args)
+    except InvalidRepositoryFormatError as err:
+        log(f"Argument validation error: {str(err)}", level="error")
+        sys.exit(1)
+    except MissingIssueIDError as err:
+        log(f"Argument validation error: {str(err)}", level="error")
+        sys.exit(1)
     except SystemExit as err:
         log(f"Argument parsing error: {err}", level="error")
         sys.exit(1)
