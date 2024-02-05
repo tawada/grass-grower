@@ -16,10 +16,6 @@ actions_needing_issue_id = {
 }
 
 
-class InvalidRepositoryFormatError(Exception):
-    """Raised when the repository format is invalid"""
-
-
 class MissingIssueIDError(Exception):
     """Raised when the issue_id is missing"""
 
@@ -56,11 +52,6 @@ def parse_arguments(args=None):
     parser.add_argument("--branch", help="Target branch name", default="main")
     parsed_args = parser.parse_args(args)
 
-    # Check to parse repository
-    if len(parsed_args.repo.split("/")) != 2:
-        raise InvalidRepositoryFormatError(
-            "Invalid repository format. Use 'owner/repo'.")
-
     if actions_needing_issue_id[
             parsed_args.action] and not parsed_args.issue_id:
         raise MissingIssueIDError(
@@ -73,9 +64,6 @@ def main(args=None):
     """Main function"""
     try:
         args = parse_arguments(args)
-    except InvalidRepositoryFormatError as err:
-        log(f"Argument validation error: {str(err)}", level="error")
-        sys.exit(1)
     except MissingIssueIDError as err:
         log(f"Argument validation error: {str(err)}", level="error")
         sys.exit(1)
