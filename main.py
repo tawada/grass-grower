@@ -62,10 +62,17 @@ def parse_arguments(args=None):
 
 def main(args=None):
     """Main function"""
+    # Set up logging
+    setup_logging()
+
     try:
         args = parse_arguments(args)
     except MissingIssueIDError as err:
-        log(f"Argument validation error: {str(err)}", level="error")
+        log(f"'issue_id' is required for the selected action: {str(err)}",
+            level="error")
+        sys.exit(1)
+    except ArgumentTypeError as err:
+        log(f"Argument error: {str(err)}", level="error")
         sys.exit(1)
     except SystemExit as err:
         log(f"Argument parsing error: {err}", level="error")
@@ -82,5 +89,4 @@ def main(args=None):
 
 
 if __name__ == "__main__":
-    setup_logging()
     main(None)
