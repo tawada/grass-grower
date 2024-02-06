@@ -1,5 +1,6 @@
 """Tool to automate issue handling on GitHub"""
 import os
+import re
 import sys
 from argparse import ArgumentParser, ArgumentTypeError
 
@@ -22,7 +23,9 @@ class MissingIssueIDError(Exception):
 
 def parse_git_repo(value: str) -> str:
     """Parse the repository argument"""
-    if len(value.split("/")) != 2:
+    # Username and repository regex (simplified)
+    valid_pattern = r'^[a-zA-Z0-9-]+/[a-zA-Z0-9-_]+$'
+    if not re.match(valid_pattern, value):
         raise ArgumentTypeError("Invalid repository format. Use 'owner/repo'.")
     return value
 
