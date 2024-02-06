@@ -11,7 +11,6 @@ def test_add_issue(
     """Test add_issue() function."""
     setup(mocker)
     routers.add_issue("test_owner/test_repo")
-    assert True
 
 
 def test_update_issue(
@@ -21,28 +20,24 @@ def test_update_issue(
     """Test update_issue() function."""
     setup(mocker)
     routers.update_issue("test_owner/test_repo", 1)
-    assert True
 
 
 def test_generate_code_from_issue(mocker, setup):
     """Test generate_code_from_issue() function."""
     setup(mocker)
     routers.generate_code_from_issue("test_owner/test_repo", 1)
-    assert True
 
 
 def test_summarize_issue(mocker, setup):
     """Test summarize_issue() function."""
     setup(mocker)
     routers.summarize_issue("test_owner/test_repo", 1)
-    assert True
 
 
 def test_generate_readme(mocker, setup):
     """Test generate_readme() function."""
     setup(mocker)
     routers.generate_readme("test_owner/test_repo")
-    assert True
 
 
 def test_generate_readme_failed(mocker, setup):
@@ -63,7 +58,6 @@ def test_generate_readme_failed(mocker, setup):
 
     mocker.patch("routers.open", return_value=DummyFileController())
     routers.generate_readme("test_owner/test_repo")
-    assert True
 
 
 def test_grow_grass_now(mocker, setup):
@@ -72,7 +66,6 @@ def test_grow_grass_now(mocker, setup):
     mocker.patch("services.github.get_datetime_of_last_commit",
                  return_value=datetime.now())
     routers.grow_grass("test_owner/test_repo")
-    assert True
 
 
 def test_grow_grass_yesterday(mocker, setup):
@@ -81,4 +74,3 @@ def test_grow_grass_yesterday(mocker, setup):
     mocker.patch("services.github.get_datetime_of_last_commit",
                  return_value=datetime.now() - timedelta(days=1))
     routers.grow_grass("test_owner/test_repo")
-    assert True

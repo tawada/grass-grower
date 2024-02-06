@@ -8,6 +8,8 @@ import services.llm
 from schemas import Issue
 from utils.logging_utils import log
 
+EXCLUDE_DIRS = os.environ.get('EXCLUDE_DIRS', '__pycache__,.git').split(',')
+
 
 def enumerate_python_files(repo: str):
     """Enumerate all Python files in the directory structure."""
@@ -15,14 +17,13 @@ def enumerate_python_files(repo: str):
     # downloads/リポジトリ名/以下のファイルを列挙する
     # パスをos.path.joinで結合するときに、先頭の./をつけると、絶対パスになる
     repo_path = os.path.join("downloads", repo)
-    EXCLUDE_DIRS = ["__pycache__", ".git"]
     for root, dirs, files in os.walk(repo_path):
         # 探索するディレクトリを制限する
         dirs[:] = [d for d in dirs if d not in EXCLUDE_DIRS]
         for file in files:
             if file.endswith(".py"):
-                with open(os.path.join(root, file), "r") as f:
-                    content = f.read()
+                with open(os.path.join(root, file), "r") as file_object:
+                    content = file_object.read()
                     # リポジトリ名以下のパスを取得する
                     filename = os.path.join(root, file)[len(repo_path) + 1:]
                     python_files.append({
@@ -149,7 +150,8 @@ def summarize_issue(
     issue_id: int,
     repo: str,
     branch: str = "main",
-):
+) -> bool:
+    """Summarize an issue and add the summary as a comment to the issue."""
     services.github.setup_repository(repo, branch)
     issue = services.github.get_issue_by_id(repo, issue_id)
     if issue is None or issue.summary:
@@ -157,7 +159,7 @@ def summarize_issue(
             f"Failed to retrieve issue or issue already summarized with ID: {issue_id}",
             level="error",
         )
-        return None
+        return False
 
     messages = prepare_messages_from_issue([], issue)
 
@@ -168,13 +170,14 @@ def summarize_issue(
     issue.summary = send_messages_to_system(messages, system_instruction)
 
     # Persist the summary back to the issue as a comment
-    services.github.reply_issue(repo, issue.id, f"Summary:\n{issue.summary}")
+    return services.github.reply_issue(repo, issue.id,
+                                       f"Summary:\n{issue.summary}")
 
 
 def generate_readme(
     repo: str,
     branch: str = "main",
-):
+) -> bool:
     """Generate README.md documentation for the entire program."""
 
     services.github.setup_repository(repo, branch)
@@ -185,19 +188,19 @@ def generate_readme(
 
     try:
         repo_path = "./downloads/" + repo
-        with open(repo_path + "/README.md", "r") as f:
-            readme_content = f.read()
+        with open(repo_path + "/README.md", "r") as file_object:
+            readme_content = file_object.read()
     except FileNotFoundError:
         log(
             "README.md file does not exist. A new README.md will be created with generated content.",
             level="warning",
         )
-        # Not returning from the function here, as we might still want to generate a new README.md
-    except OSError as e:
+        return False
+    except OSError as err:
         # Catching any other OS-related errors (like file permission issues)
         # and displaying the error message to the user.
-        log(f"Error while reading README.md: {e}", level="error")
-        return  # Exit the function as we cannot proceed without the existing README.md content
+        log(f"Error while reading README.md: {err}", level="error")
+        return False
 
     readme_message = f"```Current README.md\n{readme_content}```"
     messages = prepare_messages_from_files(python_files, readme_message)
@@ -209,16 +212,19 @@ def generate_readme(
     # Checkout to the a new branch
     try:
         services.github.checkout_new_branch(repo, "update-readme")
-    except Exception as e:
-        log(f"Error to checkout a new branch: {e}", level="error")
+    except FileNotFoundError as err:
+        log(f"Error while checking out a new branch: {err}", level="error")
+        return False
+    except Exception as err:
+        log(f"Error to checkout a new branch: {err}", level="error")
         return False
 
     # Attempt to write the README.md file.
     try:
-        with open(repo_path + "/README.md", "w") as f:
-            f.write(generated_text)
-    except OSError as e:
-        log(f"Error while writing to README.md: {e}", level="error")
+        with open(repo_path + "/README.md", "w") as file_object:
+            file_object.write(generated_text)
+    except OSError as err:
+        log(f"Error while writing to README.md: {err}", level="error")
         services.github.checkout_branch(repo, "main")
         return False
 

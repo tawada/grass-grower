@@ -1,5 +1,6 @@
 """Tool to automate issue handling on GitHub"""
 import os
+import re
 import sys
 from argparse import ArgumentParser, ArgumentTypeError
 
@@ -22,7 +23,9 @@ class MissingIssueIDError(Exception):
 
 def parse_git_repo(value: str) -> str:
     """Parse the repository argument"""
-    if len(value.split("/")) != 2:
+    # Username and repository regex (simplified)
+    valid_pattern = r'^[a-zA-Z0-9-]+/[a-zA-Z0-9-_]+$'
+    if not re.match(valid_pattern, value):
         raise ArgumentTypeError("Invalid repository format. Use 'owner/repo'.")
     return value
 
@@ -62,10 +65,17 @@ def parse_arguments(args=None):
 
 def main(args=None):
     """Main function"""
+    # Set up logging
+    setup_logging()
+
     try:
         args = parse_arguments(args)
     except MissingIssueIDError as err:
-        log(f"Argument validation error: {str(err)}", level="error")
+        log(f"'issue_id' is required for the selected action: {str(err)}",
+            level="error")
+        sys.exit(1)
+    except ArgumentTypeError as err:
+        log(f"Argument error: {str(err)}", level="error")
         sys.exit(1)
     except SystemExit as err:
         log(f"Argument parsing error: {err}", level="error")
@@ -82,5 +92,4 @@ def main(args=None):
 
 
 if __name__ == "__main__":
-    setup_logging()
     main(None)
