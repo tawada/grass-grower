@@ -6,6 +6,8 @@ import openai
 
 from utils.logging_utils import log
 
+MODEL_NAME = os.environ.get('OPENAI_MODEL_NAME', 'gpt-4-1106-preview')
+
 
 def get_openai_client(api_key: str = None) -> openai.OpenAI:
     """Factory function to create and configure an OpenAI client."""
@@ -25,11 +27,10 @@ def generate_text(
     Returns:
         Union[str, None]: The generated text, or None if an error occurs.
     """
-    model = "gpt-4-1106-preview"
     try:
-        log(f"Generating text with model: {model}", level="info")
+        log(f"Generating text with model: {MODEL_NAME}", level="info")
         response = openai_client.chat.completions.create(
-            model=model,
+            model=MODEL_NAME,
             messages=messages,
         )
         generated_content = response.choices[0].message.content
