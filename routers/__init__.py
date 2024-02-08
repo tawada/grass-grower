@@ -70,6 +70,7 @@ def send_messages_to_system(messages, system_instruction):
 def add_issue(
     repo: str,
     branch: str = "main",
+    code_lang: str = "python",
 ):
     """Add an issue to the repository."""
 
@@ -95,6 +96,7 @@ def generate_code_from_issue(
     issue_id: int,
     repo: str,
     branch: str = "main",
+    code_lang: str = "python",
 ) -> Union[str, None]:
     """Generate code from an issue and return the generated code.
 
@@ -126,6 +128,7 @@ def update_issue(
     issue_id: int,
     repo: str,
     branch: str = "main",
+    code_lang: str = "python",
 ):
     """Update an issue with a comment."""
 
@@ -177,6 +180,7 @@ def summarize_issue(
 def generate_readme(
     repo: str,
     branch: str = "main",
+    code_lang: str = "python",
 ) -> bool:
     """Generate README.md documentation for the entire program."""
 
@@ -239,7 +243,7 @@ def generate_readme(
     return True
 
 
-def grow_grass(repo: str, branch: str = "main"):
+def grow_grass(repo: str, branch: str = "main", code_lang: str = "python"):
     """Grow grass on GitHub contributions graph."""
     # 最後のコミットの日付を取得する
     last_commit_datetime = services.github.get_datetime_of_last_commit(

@@ -53,6 +53,9 @@ def parse_arguments(args=None):
         type=parse_git_repo,
     )
     parser.add_argument("--branch", help="Target branch name", default="main")
+    parser.add_argument("--code-lang",
+                        help="Target code language",
+                        default="python")
     parsed_args = parser.parse_args(args)
 
     if actions_needing_issue_id[
@@ -82,7 +85,7 @@ def main(args=None):
         sys.exit(1)
 
     try:
-        _args = [args.repo, args.branch]
+        _args = [args.repo, args.branch, args.code_lang]
         if actions_needing_issue_id[args.action]:
             _args.insert(0, args.issue_id)
         getattr(routers, args.action)(*_args)
