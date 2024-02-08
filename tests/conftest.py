@@ -89,7 +89,7 @@ def setup_routers():
 
     def inner(mocker):
         mocker.patch(
-            "routers.enumerate_python_files",
+            "routers.enumerate_target_files",
             return_value=[{
                 "filename": "test.py",
                 "content": "print('Hello, world!')"
