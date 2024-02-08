@@ -40,7 +40,7 @@ def test_services_github_setup_repository_clone_fail(mocker):
     )
     mocker.patch(
         "services.github.subprocess.run",
-        return_value=subprocess.CalledProcessError,
+        new=subprocess.CalledProcessError,
     )
     services.github.setup_repository("test/test")
     assert True
