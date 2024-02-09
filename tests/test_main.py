@@ -47,3 +47,25 @@ def test_main_add_issue(mocker, setup):
     setup(mocker)
     args = ["add_issue", "--issue-id", "123"]
     main.main(args)
+
+
+def test_main_update_issue_fail_without_issue_id(mocker, setup):
+    """Test main() with action 'update_issue'"""
+    setup(mocker)
+    args = ["update_issue"]
+    try:
+        main.main(args)
+        assert False
+    except SystemExit:
+        assert True
+
+
+def test_main_update_issue_fail_invalid_issue_id(mocker, setup):
+    """Test main() with action 'update_issue'"""
+    setup(mocker)
+    args = ["update_issue", "--issue-id", "invalid_issue_id"]
+    try:
+        main.main(args)
+        assert False
+    except SystemExit:
+        assert True
