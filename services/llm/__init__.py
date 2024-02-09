@@ -6,7 +6,7 @@ import openai
 
 from utils.logging_utils import log
 
-MODEL_NAME = os.environ.get('OPENAI_MODEL_NAME', 'gpt-4-1106-preview')
+MODEL_NAME = os.environ.get('OPENAI_MODEL_NAME', 'gpt-4-0125-preview')
 
 
 def get_openai_client(api_key: str = None) -> openai.OpenAI:
