@@ -2,6 +2,7 @@
 
 [![unit-test](https://github.com/tawada/grass-grower/actions/workflows/ci.yml/badge.svg)](https://github.com/tawada/grass-grower/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/tawada/grass-grower/graph/badge.svg?token=SK4NPV09X0)](https://codecov.io/gh/tawada/grass-grower)
+[![Maintainability](https://api.codeclimate.com/v1/badges/bfe3e9c7ac7bc6671ff1/maintainability)](https://codeclimate.com/github/tawada/grass-grower/maintainability)
 
 Welcome to Grass Grower, a cutting-edge Python application designed to streamline issue management and documentation creation for software projects on GitHub. By harnessing the capabilities of advanced Large Language Models (LLMs), our tool can autonomously generate meaningful responses to issues and produce comprehensive and accurate `README.md` documentation.
 
