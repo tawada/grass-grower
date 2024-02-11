@@ -77,6 +77,9 @@ def generate_json(
                 level="info")
             return generated_content
         except RuntimeError as err:
-            log(f"Failed to generate json: trial {i}: {err}", level="error")
+            err_msg = str(err)
+            if response:
+                err_msg = response.choices[0].message.content
+            log(f"Failed to generate json: trial {i}: {err_msg}: ", level="error")
             continue
     raise RuntimeError("Failed to generate json after multiple retries")

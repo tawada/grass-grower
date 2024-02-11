@@ -318,5 +318,6 @@ def generate_code_from_issue_and_reply(
         issue_message = logic.generate_issue_reply_message(repo, issue, modification, msg)
         services.github.reply_issue(repo, issue.id, issue_message)
     finally:
-        services.github.checkout_branch(repo, branch)
-        services.github.delete_branch(repo, new_branch)
+        if branch != new_branch:
+            services.github.checkout_branch(repo, branch)
+            services.github.delete_branch(repo, new_branch)
