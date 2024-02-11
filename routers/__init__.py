@@ -305,14 +305,18 @@ def generate_code_from_issue_and_reply(
     modification = logic.generate_modification_from_issue(
         repo, issue, code_lang)
     is_valid = logic.velify_modification(repo, modification)
-    if not is_valid:
-        raise ValueError(f"Invalid modification {modification}")
+    try:
+        if not is_valid:
+            raise ValueError(f"Invalid modification {modification}")
 
-    msg = logic.generate_commit_message(repo, issue, modification)
-    logic.apply_modification(repo, modification)
-    success = services.github.commit(repo, msg)
-    if not success:
-        raise ValueError(f"Failed to commit {msg}")
-    services.github.push_repository(repo, new_branch)
+        msg = logic.generate_commit_message(repo, issue, modification)
+        logic.apply_modification(repo, modification)
+        success = services.github.commit(repo, msg)
+        if not success:
+            raise ValueError(f"Failed to commit {msg}")
+        services.github.push_repository(repo, new_branch)
 
-    services.github.reply_issue(repo, issue.id, modification)
+        services.github.reply_issue(repo, issue.id, modification)
+    finally:
+        services.github.checkout_branch(repo, branch)
+        services.github.delete_branch(repo, new_branch)

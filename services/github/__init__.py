@@ -226,6 +226,14 @@ def push_repository(repo: str, branch_name: str) -> bool:
     )
 
 
+def delete_branch(repo: str, branch_name: str) -> bool:
+    """ブランチを削除する"""
+    return exec_command_and_response_bool(
+        repo,
+        ["git", "branch", "-D", branch_name],
+    )
+
+
 def get_datetime_of_last_commit(repo: str, branch_name: str) -> datetime:
     """最後のコミットの日時を取得する"""
     setup_repository(repo, branch_name)
