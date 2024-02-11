@@ -12,11 +12,11 @@ def apply_modification(repo, modification):
     """Apply modification"""
     repo_path = get_repo_path(repo)
     file_path = os.path.join(repo_path, modification['filepath'])
-    with open(file_path, "r") as file_object:
+    with open(file_path, "r", newline="") as file_object:
         before_code = file_object.read()
     after_code = before_code.replace(modification['before_code'],
                                      modification['after_code'])
-    with open(file_path, "w") as file_object:
+    with open(file_path, "w", newline="") as file_object:
         file_object.write(after_code)
     return True
 
