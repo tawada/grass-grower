@@ -68,7 +68,7 @@ def generate_commit_message(repo, issue, modification):
     openai_client = services.llm.get_openai_client()
     commit_message = services.llm.generate_text(messages, openai_client)
     if "\n" in commit_message:
-        commit_message = commit_message.split("\n")[0]
+        commit_message = commit_message.split("\n")[0].strip("\"")
     commit_message += f" (#{issue.id})"
     return commit_message
 
