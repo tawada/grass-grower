@@ -8,6 +8,20 @@ import services.llm
 EXCLUDE_DIRS = os.environ.get('EXCLUDE_DIRS', '__pycache__,.git').split(',')
 
 
+def apply_modification(repo, modification):
+    """Apply modification"""
+    repo_path = get_repo_path(repo)
+    file_path = os.path.join(repo_path, modification['filepath'])
+    with open(file_path, "r") as file_object:
+        before_code = file_object.read()
+    after_code = before_code.replace(
+        modification['before_code'],
+        modification['after_code'])
+    with open(file_path, "w") as file_object:
+        file_object.write(after_code)
+    return True
+
+
 def generate_modification_from_issue(
     repo: str,
     issue: schemas.Issue,
