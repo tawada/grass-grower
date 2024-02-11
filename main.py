@@ -41,6 +41,7 @@ def parse_arguments(args=None):
         choices=[
             "add_issue",
             "generate_code_from_issue",
+            "generate_code_from_issue_and_reply",
             "generate_readme",
             "grow_grass",
             "update_issue",
