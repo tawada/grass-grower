@@ -285,8 +285,8 @@ def grow_grass(repo: str, branch: str = "main", code_lang: str = "python"):
 
 
 def generate_code_from_issue_and_reply(
-    repo: str,
     issue_id: int,
+    repo: str,
     branch: str = "main",
     code_lang: str = "python",
 ):
