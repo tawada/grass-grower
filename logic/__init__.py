@@ -30,7 +30,8 @@ def generate_modification_from_issue(
 def velify_modification(repo: str, modification):
     """Velify modification"""
     repo_path = get_repo_path(repo)
-    with open(repo_path + modification['filepath'], "r") as file_object:
+    file_path = os.path.join(repo_path, modification['filepath'])
+    with open(file_path, "r") as file_object:
         before_code = file_object.read()
     return modification['before_code'] in before_code
 
