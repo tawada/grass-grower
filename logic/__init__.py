@@ -115,6 +115,13 @@ def generate_messages_from_files(repo: str, code_lang: str):
     return messages
 
 
+def generate_issue_reply_message(repo, issue, modification, commit_message):
+    """Generate a reply message."""
+    message = commit_message + "\n"
+    message += f"`{modification['filepath']}`\nBefore:\n```{modification['before_code']}```\nAfter:\n```{modification['after_code']}```"
+    return message
+
+
 def get_repo_path(repo: str):
     """Get repo path"""
     return os.path.join("downloads", repo)
