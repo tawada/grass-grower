@@ -51,7 +51,7 @@ def parse_arguments(args=None):
     parser.add_argument(
         "--repo",
         help="Target GitHub repository in the format 'owner/repo'",
-        default=os.getenv("DEFAULT_REPO", "tawada/grass-grower"),
+        default=os.getenv("DEFAULT_REPO"),
         type=parse_git_repo,
     )
     parser.add_argument("--branch", help="Target branch name", default="main")
