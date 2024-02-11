@@ -14,9 +14,8 @@ def apply_modification(repo, modification):
     file_path = os.path.join(repo_path, modification['filepath'])
     with open(file_path, "r") as file_object:
         before_code = file_object.read()
-    after_code = before_code.replace(
-        modification['before_code'],
-        modification['after_code'])
+    after_code = before_code.replace(modification['before_code'],
+                                     modification['after_code'])
     with open(file_path, "w") as file_object:
         file_object.write(after_code)
     return True
@@ -41,8 +40,8 @@ def generate_modification_from_issue(
     return generated_json
 
 
-def velify_modification(repo: str, modification):
-    """Velify modification"""
+def verify_modification(repo: str, modification):
+    """Verify modification"""
     repo_path = get_repo_path(repo)
     file_path = os.path.join(repo_path, modification['filepath'])
     with open(file_path, "r") as file_object:
