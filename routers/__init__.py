@@ -8,7 +8,7 @@ import services.github
 import services.llm
 from utils.logging_utils import log
 
-EXCLUDE_DIRS = os.environ.get('EXCLUDE_DIRS', '__pycache__,.git').split(',')
+EXCLUDE_DIRS = os.environ.get('EXCLUDE_DIRS', '__pycache__,.git,downloads').split(',')
 
 
 def enumerate_target_files(repo: str, code_lang: str):
@@ -26,7 +26,7 @@ def enumerate_target_files(repo: str, code_lang: str):
     repo_path = os.path.join("downloads", repo)
     for root, dirs, files in os.walk(repo_path):
         # 探索するディレクトリを制限する
-        dirs[:] = [d for d in dirs if d not in EXCLUDE_DIRS]
+        dirs[:] = [d for d in dirs if d not in EXCLUDE_DIRS and not d.startswith('.')]
         for file in files:
             if file.endswith(tuple(target_extension)):
                 with open(os.path.join(root, file), "r") as file_object:

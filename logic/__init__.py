@@ -5,7 +5,7 @@ import schemas
 import services
 import services.llm
 
-EXCLUDE_DIRS = os.environ.get('EXCLUDE_DIRS', '__pycache__,.git').split(',')
+EXCLUDE_DIRS = os.environ.get('EXCLUDE_DIRS', '__pycache__,.git,downloads').split(',')
 
 
 def apply_modification(repo, modification):
@@ -100,7 +100,7 @@ def generate_messages_from_files(repo: str, code_lang: str):
     repo_path = get_repo_path(repo)
     for root, dirs, files in os.walk(repo_path):
         # 探索するディレクトリを制限する
-        dirs[:] = [d for d in dirs if d not in EXCLUDE_DIRS]
+        dirs[:] = [d for d in dirs if d not in EXCLUDE_DIRS and not d.startswith('.')]
         for file in files:
             if not file.endswith(tuple(target_extension)):
                 continue
