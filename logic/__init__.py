@@ -15,7 +15,7 @@ def generate_modification_from_issue(
 ):
     """Generate a modification from an issue"""
     messages = generate_messages_from_files(repo, code_lang)
-    messages.extends(generate_messages_from_issue(issue))
+    messages.extend(generate_messages_from_issue(issue))
     messages.append({
         "role":
         "system",
