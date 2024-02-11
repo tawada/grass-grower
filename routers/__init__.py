@@ -8,7 +8,8 @@ import services.github
 import services.llm
 from utils.logging_utils import log
 
-EXCLUDE_DIRS = os.environ.get('EXCLUDE_DIRS', '__pycache__,.git,downloads').split(',')
+config = load_config()
+EXCLUDE_DIRS = config.get('exclude_dirs', ['__pycache__', '.git', 'downloads'])
 
 
 def enumerate_target_files(repo: str, code_lang: str):
