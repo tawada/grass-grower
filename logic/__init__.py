@@ -117,7 +117,7 @@ def generate_messages_from_files(repo: str, code_lang: str):
 
 def generate_issue_reply_message(repo, issue, modification, commit_message):
     """Generate a reply message."""
-    message = commit_message + "\n"
+    message = "The following changes have been completed.\n\n" + commit_message + "\n"
     message += f"`{modification['filepath']}`\nBefore:\n```{modification['before_code']}```\nAfter:\n```{modification['after_code']}```"
     return message
 
