@@ -10,6 +10,7 @@ from utils.logging_utils import log, setup_logging
 # Establish a dictionary that maps actions to whether they need an issue_id
 actions_needing_issue_id = {
     "generate_code_from_issue": True,
+    "generate_code_from_issue_and_reply": True,
     "update_issue": True,
     "add_issue": False,
     "generate_readme": False,
@@ -40,6 +41,7 @@ def parse_arguments(args=None):
         choices=[
             "add_issue",
             "generate_code_from_issue",
+            "generate_code_from_issue_and_reply",
             "generate_readme",
             "grow_grass",
             "update_issue",

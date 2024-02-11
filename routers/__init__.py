@@ -1,11 +1,11 @@
 """Router for the API."""
 import os
 from datetime import datetime
-from typing import List, Union
+from typing import Union
 
+import logic
 import services.github
 import services.llm
-from schemas import Issue
 from utils.logging_utils import log
 
 EXCLUDE_DIRS = os.environ.get('EXCLUDE_DIRS', '__pycache__,.git').split(',')
@@ -49,20 +49,6 @@ def prepare_messages_from_files(target_files, additional_message):
         messages.append({"role": "user", "content": message})
     if additional_message:
         messages.append({"role": "user", "content": additional_message})
-    return messages
-
-
-def prepare_messages_from_issue(messages: List, issue: Issue):
-    """Prepare messages from file contents with an additional context message."""
-    messages.append({
-        "role": "user",
-        "content": f"```{issue.title}\n{issue.body}```\n"
-    })
-    for comment in issue.comments:
-        messages.append({
-            "role": "user",
-            "content": f"```issue comment\n{comment.body}```\n"
-        })
     return messages
 
 
@@ -159,7 +145,7 @@ def generate_code_from_issue(
 
     target_files = enumerate_target_files(repo, code_lang)
     messages = prepare_messages_from_files(target_files, "")
-    messages = prepare_messages_from_issue(messages, issue)
+    messages.extend(logic.generate_messages_from_issue(issue))
     generated_text = send_messages_to_system(
         messages,
         "You are a programmer of the highest caliber.Please read the code of the existing program and rewrite any one based on the issue.",
@@ -185,7 +171,7 @@ def update_issue(
 
     target_files = enumerate_target_files(repo, code_lang)
     messages = prepare_messages_from_files(target_files, "")
-    messages = prepare_messages_from_issue(messages, issue)
+    messages.extend(logic.generate_messages_from_issue(issue))
     generated_text = send_messages_to_system(
         messages,
         "You are a programmer of the highest caliber.Please read the code of the existing program and make additional comments on the issue.",
@@ -208,7 +194,7 @@ def summarize_issue(
         )
         return False
 
-    messages = prepare_messages_from_issue([], issue)
+    messages = logic.generate_messages_from_issue(issue)
 
     # Message to the system for summarization instruction
     system_instruction = (
@@ -296,3 +282,41 @@ def grow_grass(repo: str, branch: str = "main", code_lang: str = "python"):
         return
     # add_issueする
     add_issue(repo, branch, code_lang)
+
+
+def generate_code_from_issue_and_reply(
+    issue_id: int,
+    repo: str,
+    branch: str = "main",
+    code_lang: str = "python",
+):
+    """Generate code from an issue and reply the generated code to the repository."""
+
+    # Checkout to the branch
+    services.github.setup_repository(repo, branch)
+
+    new_branch = f"update-issue-#{issue_id}"
+    if new_branch != branch:
+        # Checkout to the a new branch
+        services.github.checkout_new_branch(repo, new_branch)
+
+    issue = services.github.get_issue_by_id(repo, issue_id)
+
+    modification = logic.generate_modification_from_issue(
+        repo, issue, code_lang)
+    is_valid = logic.velify_modification(repo, modification)
+    try:
+        if not is_valid:
+            raise ValueError(f"Invalid modification {modification}")
+
+        msg = logic.generate_commit_message(repo, issue, modification)
+        logic.apply_modification(repo, modification)
+        success = services.github.commit(repo, msg)
+        if not success:
+            raise ValueError(f"Failed to commit {msg}")
+        services.github.push_repository(repo, new_branch)
+
+        services.github.reply_issue(repo, issue.id, modification)
+    finally:
+        services.github.checkout_branch(repo, branch)
+        services.github.delete_branch(repo, new_branch)
