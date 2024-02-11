@@ -76,6 +76,12 @@ def generate_json(
             log(f"Text generated successfully: {json.dumps(generated_content)[:50]}...",
                 level="info")
             return generated_content
+        except json.JSONDecodeError as err:
+            err_msg = str(err)
+            if response:
+                err_msg = response.choices[0].message.content
+            log(f"Failed to generate json: trial {i}: {err_msg}", level="error")
+            continue
         except RuntimeError as err:
             err_msg = str(err)
             if response:
