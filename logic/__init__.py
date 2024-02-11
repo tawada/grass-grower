@@ -27,7 +27,7 @@ def generate_modification_from_issue(
     return generated_json
 
 
-def velify_modification(repo: str, modification):
+def verify_modification(repo: str, modification):
     """Velify modification"""
     repo_path = get_repo_path(repo)
     with open(repo_path + modification['filepath'], "r") as file_object:
