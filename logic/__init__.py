@@ -34,7 +34,7 @@ def generate_modification_from_issue(
         "role":
         "system",
         "content":
-        "Output code modification as JSON format from the whole code and issues. Do not duplicate output if the code has already been changed. The JSON modification includes keys such as 'filepath', 'before_code', 'after_code'. 'before_code' is a part of file.\ne.g.\n```{filepath: 'path/to/file', before_code: 'def func1(aaa: int):\n\"\"\"Output an argment\"\"\"\nprint(aaa)\n', after_code: 'def func1(aaa: int, bbb: int):\n\"\"\"Output two argments\"\"\"\nprint(aaa)\nprint(bbb)\n'}```\n"
+        "Propose a new code modification as JSON format from the whole code and issues. Do not duplicate output if the code has already been changed. The JSON modification includes keys such as 'filepath', 'before_code', 'after_code'. 'before_code' is a part of file.\ne.g.\n```{filepath: 'path/to/file', before_code: 'def func1(aaa: int):\n\"\"\"Output an argment\"\"\"\nprint(aaa)\n', after_code: 'def func1(aaa: int, bbb: int):\n\"\"\"Output two argments\"\"\"\nprint(aaa)\nprint(bbb)\n'}```\n"
     })
     openai_client = services.llm.get_openai_client()
     generated_json = services.llm.generate_json(messages, openai_client)
