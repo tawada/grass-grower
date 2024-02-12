@@ -5,7 +5,8 @@ import schemas
 import services
 import services.llm
 
-EXCLUDE_DIRS = os.environ.get('EXCLUDE_DIRS', '__pycache__,.git,downloads').split(',')
+EXCLUDE_DIRS = os.environ.get('EXCLUDE_DIRS',
+                              '__pycache__,.git,downloads').split(',')
 
 
 def apply_modification(repo, modification):
@@ -33,7 +34,7 @@ def generate_modification_from_issue(
         "role":
         "system",
         "content":
-        "Output code modification as JSON format from the whole code and issues. The JSON modification includes keys such as 'filepath', 'before_code', 'after_code'. 'before_code' is a part of file.\ne.g.\n```{filepath: 'path/to/file', before_code: 'def func1(aaa: int):\n\"\"\"Output an argment\"\"\"\nprint(aaa)\n', after_code: 'def func1(aaa: int, bbb: int):\n\"\"\"Output two argments\"\"\"\nprint(aaa)\nprint(bbb)\n'}```\n"
+        "Output code modification as JSON format from the whole code and issues. Do not duplicate output if the code has already been changed. The JSON modification includes keys such as 'filepath', 'before_code', 'after_code'. 'before_code' is a part of file.\ne.g.\n```{filepath: 'path/to/file', before_code: 'def func1(aaa: int):\n\"\"\"Output an argment\"\"\"\nprint(aaa)\n', after_code: 'def func1(aaa: int, bbb: int):\n\"\"\"Output two argments\"\"\"\nprint(aaa)\nprint(bbb)\n'}```\n"
     })
     openai_client = services.llm.get_openai_client()
     generated_json = services.llm.generate_json(messages, openai_client)
@@ -100,7 +101,9 @@ def generate_messages_from_files(repo: str, code_lang: str):
     repo_path = get_repo_path(repo)
     for root, dirs, files in os.walk(repo_path):
         # 探索するディレクトリを制限する
-        dirs[:] = [d for d in dirs if d not in EXCLUDE_DIRS and not d.startswith('.')]
+        dirs[:] = [
+            d for d in dirs if d not in EXCLUDE_DIRS and not d.startswith('.')
+        ]
         for file in files:
             if not file.endswith(tuple(target_extension)):
                 continue
@@ -117,7 +120,7 @@ def generate_messages_from_files(repo: str, code_lang: str):
 def generate_issue_reply_message(repo, issue, modification, commit_message):
     """Generate a reply message."""
     message = "The following changes have been completed.\n\n" + commit_message + "\n"
-    message += f"`{modification['filepath']}`\nBefore:\n```{modification['before_code']}```\nAfter:\n```{modification['after_code']}```"
+    message += f"`{modification['filepath']}`\nBefore:\n```\n{modification['before_code']}\n```\nAfter:\n```\n{modification['after_code']}\n```"
     return message
 
 
