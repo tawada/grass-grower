@@ -25,6 +25,7 @@ def load_config(file_path='config.json'):
         return get_default_config()
 
 
+
 def get_default_config():
     '''Provide a default configuration as a fallback.'''
     return {
