@@ -69,6 +69,10 @@ def generate_commit_message(repo, issue, modification):
     commit_message = services.llm.generate_text(messages, openai_client)
     if "\n" in commit_message:
         commit_message = commit_message.split("\n")[0].strip("\"")
+    elif ". " in commit_message:
+        commit_message = commit_message.split(". ")[0].strip("\"")
+    elif len(commit_message) > 72:
+        commit_message = commit_message[:72]
     commit_message += f" (#{issue.id})"
     return commit_message
 
