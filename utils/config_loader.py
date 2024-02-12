@@ -1,5 +1,7 @@
 import json
 
+from utils.logging_utils import log
+
 
 def load_config(file_path='config.json'):
     """Load configuration from a JSON file.
