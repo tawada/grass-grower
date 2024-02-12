@@ -5,9 +5,11 @@ from typing import Dict, List, Union
 
 import openai
 
+from utils.config_loader import load_config
 from utils.logging_utils import log
 
-MODEL_NAME = os.environ.get('OPENAI_MODEL_NAME', 'gpt-4-0125-preview')
+config = load_config()
+MODEL_NAME = config['OPENAI_MODEL_NAME']
 
 
 def get_openai_client(api_key: str = None) -> openai.OpenAI:
@@ -80,12 +82,14 @@ def generate_json(
             err_msg = str(err)
             if response:
                 err_msg = response.choices[0].message.content
-            log(f"Failed to generate json: trial {i}: {err_msg}", level="error")
+            log(f"Failed to generate json: trial {i}: {err_msg}",
+                level="error")
             continue
         except RuntimeError as err:
             err_msg = str(err)
             if response:
                 err_msg = response.choices[0].message.content
-            log(f"Failed to generate json: trial {i}: {err_msg}: ", level="error")
+            log(f"Failed to generate json: trial {i}: {err_msg}: ",
+                level="error")
             continue
     raise RuntimeError("Failed to generate json after multiple retries")
