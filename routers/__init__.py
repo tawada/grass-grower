@@ -313,6 +313,7 @@ def generate_code_from_issue_and_reply(
         logic.apply_modification(repo, modification)
         success = services.github.commit(repo, msg)
         if not success:
+            log(str(modification), level="info")
             raise ValueError(f"Failed to commit {msg}")
         services.github.push_repository(repo, new_branch)
         issue_message = logic.generate_issue_reply_message(

@@ -17,6 +17,8 @@ def apply_modification(repo, modification):
         before_code = file_object.read()
     after_code = before_code.replace(modification['before_code'],
                                      modification['after_code'])
+    if before_code == after_code:
+        raise RuntimeError("Code has no changes")
     with open(file_path, "w", newline="") as file_object:
         file_object.write(after_code)
     return True
