@@ -12,7 +12,7 @@ from utils.config_loader import load_config
 
 from utils.config_loader import load_config
 
-config = load_config()
+config = load_config('path/to/config.json')
 EXCLUDE_DIRS = config.get('exclude_dirs', ['__pycache__', '.git', 'downloads'])
 
 
