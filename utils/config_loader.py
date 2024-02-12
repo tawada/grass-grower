@@ -23,6 +23,9 @@ def load_config(file_path='config.json'):
     except json.JSONDecodeError as e:
         log(f'Error decoding JSON from {file_path}. Details: {e.msg} at line {e.lineno}, column {e.colno}', level='error')
         return get_default_config()
+    except json.JSONDecodeError as e:
+        log(f'Error decoding JSON from {file_path}. Details: {e.msg} at line {e.lineno}, column {e.colno}', level='error')
+        return get_default_config()
 
 
 def get_default_config():
