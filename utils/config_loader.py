@@ -14,6 +14,10 @@ def load_config(file_path='config.json'):
         with open(file_path) as config_file:
             return json.load(config_file)
     except FileNotFoundError:
+        try:
+        with open(file_path) as config_file:
+            return json.load(config_file)
+    except FileNotFoundError:
         if not os.path.exists(file_path):
             log(f'Configuration file {file_path} not found. Loading default configuration.', level='warning')
             return get_default_config()
