@@ -14,8 +14,8 @@ def load_config(file_path='config.json'):
         with open(file_path) as config_file:
             return json.load(config_file)
     except FileNotFoundError:
-        print(f'Configuration file {file_path} not found.')
+        log(f'Configuration file {file_path} not found.', level='warning')
         return {}
     except json.JSONDecodeError as e:
-        print(f'Error decoding JSON from {file_path}: {e}')
+        log(f'Error decoding JSON from {file_path}: {e}', level='error')
         return {}
