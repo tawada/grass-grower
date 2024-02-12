@@ -9,7 +9,7 @@ from utils.config_loader import load_config
 from utils.logging_utils import log
 
 config = load_config()
-MODEL_NAME = config['OPENAI_MODEL_NAME']
+MODEL_NAME = config['openai_model_name']
 
 
 def get_openai_client(api_key: str = None) -> openai.OpenAI:
