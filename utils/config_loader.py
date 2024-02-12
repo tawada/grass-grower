@@ -14,10 +14,11 @@ def load_config(file_path='config.json'):
         with open(file_path) as config_file:
             return json.load(config_file)
     except FileNotFoundError:
-        try:
-        with open(file_path) as config_file:
-            return json.load(config_file)
-    except FileNotFoundError:
+        log(f'Configuration file {file_path} not found. Loading default configuration.', level='warning')
+        return get_default_config()
+    except json.JSONDecodeError as e:
+        log(f'Error decoding JSON from {file_path}. Details: {e.msg} at line {e.lineno}, column {e.colno}', level='error')
+        return get_default_config()
         log(f'Configuration file {file_path} not found. Loading default configuration.', level='warning')
         return get_default_config()
     except json.JSONDecodeError as e:
