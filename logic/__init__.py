@@ -108,7 +108,10 @@ def generate_messages_from_files(repo: str, code_lang: str):
     repo_path = get_repo_path(repo)
     for root, dirs, files in os.walk(repo_path):
         # 探索するディレクトリを制限する
-        dirs[:] = [d for d in dirs if d not in config["exclude_dirs"] and not d.startswith('.')]
+        dirs[:] = [
+            d for d in dirs
+            if d not in config["exclude_dirs"] and not d.startswith('.')
+        ]
         for file in files:
             if not file.endswith(tuple(target_extension)):
                 continue

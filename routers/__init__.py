@@ -27,7 +27,10 @@ def enumerate_target_files(repo: str, code_lang: str):
     repo_path = os.path.join("downloads", repo)
     for root, dirs, files in os.walk(repo_path):
         # 探索するディレクトリを制限する
-        dirs[:] = [d for d in dirs if d not in config["exclude_dirs"] and not d.startswith('.')]
+        dirs[:] = [
+            d for d in dirs
+            if d not in config["exclude_dirs"] and not d.startswith('.')
+        ]
         for file in files:
             if file.endswith(tuple(target_extension)):
                 with open(os.path.join(root, file), "r") as file_object:
