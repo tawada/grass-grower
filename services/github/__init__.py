@@ -256,3 +256,16 @@ def get_datetime_of_last_commit(repo: str, branch_name: str) -> datetime:
     last_commit_datetime = datetime.strptime(
         proc.stdout.decode("utf-8").strip("'"), "%Y/%m/%d %H:%M:%S")
     return last_commit_datetime
+
+
+def pull_request(
+    repo: str,
+    to_branch: str,
+    title: str,
+    body: str,
+) -> bool:
+    """プルリクエストを作成する"""
+    return exec_command_and_response_bool(
+        repo,
+        ["gh", "pr", "-B", to_branch, "-b", body, "-t", title],
+    )
