@@ -50,10 +50,6 @@ def exec_command(
                 level="error")
             # Generic error handling or re-try logic
         return None
-    except Exception as err:
-        log(f"An unexpected error occurred: {err}", level="error")
-        # Handle unexpected errors gracefully
-        return None
 
 
 def exec_command_and_response_bool(repo: str,
