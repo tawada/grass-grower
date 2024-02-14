@@ -32,6 +32,7 @@ def setup_github():
         mocker.patch("services.github.reply_issue", return_value=True)
         mocker.patch("services.github.checkout_new_branch", return_value=True)
         mocker.patch("services.github.checkout_branch", return_value=True)
+        mocker.patch("services.github.delete_branch", return_value=True)
 
     return inner
 
@@ -41,6 +42,8 @@ def setup_llm():
 
     def inner(mocker):
         mocker.patch.dict("os.environ", {"OPENAI_API_KEY": "test"})
+        mocker.patch("services.llm.generate_text",
+                     return_value="Hello, world!")
         mocker.patch("services.llm.generate_text",
                      return_value="Hello, world!")
 

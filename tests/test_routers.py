@@ -75,3 +75,31 @@ def test_grow_grass_yesterday(mocker, setup):
     mocker.patch("services.github.get_datetime_of_last_commit",
                  return_value=datetime.now() - timedelta(days=1))
     routers.grow_grass("test_owner/test_repo", "main", "python")
+
+
+def test_generate_code_from_issue_and_reply(mocker, setup):
+    """Test generate_code_from_issue_and_reply() function."""
+    setup(mocker)
+
+    class DummyFileController:
+        """Dummy file controller class."""
+
+        def __enter__(self):
+            return type("FileController", (object, ), {
+                "read": lambda: "test",
+                "write": lambda *args: True
+            })
+
+        def __exit__(self, *args):
+            pass
+
+    mocker.patch("logic.open", return_value=DummyFileController())
+    mocker.patch("services.llm.generate_json",
+                 return_value={
+                     "filepath": "test_filepath",
+                     "before_code": "test",
+                     "after_code": "test_after_code",
+                 })
+
+    routers.generate_code_from_issue_and_reply(1, "test_owner/test_repo",
+                                               "main", "python")
