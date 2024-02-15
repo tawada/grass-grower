@@ -70,10 +70,17 @@ def setup_llm_detail():
             self.model = None
             self.messages = None
 
-        def create(self, model, messages):
+        def create(
+            self,
+            model,
+            messages,
+            response_format={"type": "text"},
+        ):
             """Mock create function."""
             self.model = model
             self.messages = messages
+            if response_format["type"] == "json_object":
+                self.content = "{\"type\": [{\"content\": \"test\"}]}"
             return self
 
         def __str__(self):
