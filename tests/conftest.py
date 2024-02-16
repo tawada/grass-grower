@@ -44,8 +44,6 @@ def setup_llm():
         mocker.patch.dict("os.environ", {"OPENAI_API_KEY": "test"})
         mocker.patch("services.llm.generate_text",
                      return_value="Hello, world!")
-        mocker.patch("services.llm.generate_text",
-                     return_value="Hello, world!")
 
     return inner
 
