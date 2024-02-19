@@ -121,13 +121,21 @@ def list_issue_ids(repo: str) -> List[int]:
 def get_issue_by_id(repo: str, issue_id: int) -> Union[Issue, None]:
     """idからissueを取得する"""
 
+    issue = get_issue_body(repo, issue_id)
+    comments = get_issue_comments(repo, issue_id)
+    issue.comments = comments
+    return issue
+
+
+def get_issue_body(repo: str, issue_id: int) -> Issue:
+    """issueの本文を取得する"""
     res = exec_command(
         repo,
         ["gh", "issue", "view", str(issue_id)],
         capture_output=True,
     )
     if not res:
-        return None
+        raise Exception("Failed to get issue body")
 
     is_body = False
     body = ""
@@ -144,14 +152,18 @@ def get_issue_by_id(repo: str, issue_id: int) -> Union[Issue, None]:
         title=title,
         body=body,
     )
+    return issue
 
+
+def get_issue_comments(repo: str, issue_id: int) -> List[IssueComment]:
+    """issueのコメントを取得する"""
     res = exec_command(
         repo,
         ["gh", "issue", "view", str(issue_id), "-c"],
         capture_output=True,
     )
     if not res:
-        return issue
+        return []
 
     comment_attrs = [
         "author",
@@ -162,10 +174,11 @@ def get_issue_by_id(repo: str, issue_id: int) -> Union[Issue, None]:
 
     is_body = False
     body = ""
+    comments: List[IssueComment] = []
     comment: Dict[str, str] = {}
     for line in res.stdout.decode().splitlines():
         if is_body and line.startswith("--"):
-            issue.comments.append(IssueComment(**comment, body=body))
+            comments.append(IssueComment(**comment, body=body))
             comment = {}
             body = ""
             is_body = False
@@ -177,8 +190,7 @@ def get_issue_by_id(repo: str, issue_id: int) -> Union[Issue, None]:
             for attr in comment_attrs:
                 if line.startswith(attr + ":\t"):
                     comment[attr] = line[len(attr + ":\t"):].strip()
-
-    return issue
+    return comments
 
 
 def reply_issue(repo: str, issue_id: int, body: str) -> bool:
