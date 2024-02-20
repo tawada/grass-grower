@@ -25,6 +25,20 @@ def test_update_issue(
 def test_generate_code_from_issue(mocker, setup):
     """Test generate_code_from_issue() function."""
     setup(mocker)
+
+    class DummyFileController:
+        """Dummy file controller class."""
+
+        def __enter__(self):
+            return type("FileController", (object, ), {
+                "read": lambda: "test",
+                "write": lambda *args: True
+            })
+
+        def __exit__(self, *args):
+            pass
+
+    mocker.patch("logic.open", return_value=DummyFileController())
     routers.generate_code_from_issue(1, "test_owner/test_repo", "main",
                                      "python")
 
