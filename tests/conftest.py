@@ -11,7 +11,6 @@ def setup():
     def inner(mocker):
         setup_github()(mocker)
         setup_llm()(mocker)
-        setup_routers()(mocker)
 
     return inner
 
@@ -88,35 +87,5 @@ def setup_llm_detail():
     def inner(mocker):
         mocker.patch.dict("os.environ", {"OPENAI_API_KEY": "test"})
         mocker.patch("openai.OpenAI", new=MockOpenAIObject)
-
-    return inner
-
-
-def setup_routers():
-    """Setup mock functions."""
-
-    def inner(mocker):
-        # mocker.patch(
-        #     "routers.enumerate_target_files",
-        #     return_value=[{
-        #         "filename": "test.py",
-        #         "content": "print('Hello, world!')"
-        #     }],
-        # )
-        mocker.patch(
-            "routers.os.walk",
-            return_value=[["root", ["dir"], ["test.py"]]],
-        )
-        dummy_file = type(
-            "dummy_file", (object, ), {
-                "read": lambda self: "print('Hello, world!')",
-                "write": lambda self, content: True,
-                "__enter__": lambda self: self,
-                "__exit__": lambda self, *args: None
-            })
-        mocker.patch(
-            "routers.open",
-            return_value=dummy_file(),
-        )
 
     return inner

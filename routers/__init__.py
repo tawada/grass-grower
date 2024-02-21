@@ -16,50 +16,6 @@ from .code_generator import (
 config = load_config()
 
 
-def enumerate_target_files(repo: str, code_lang: str):
-    """Enumerate all target files in the directory structure."""
-    target_files = []
-    # downloads/リポジトリ名/以下のファイルを列挙する
-    # パスをos.path.joinで結合するときに、先頭の./をつけると、絶対パスになる
-
-    extension_dict = {
-        "python": [".py"],
-        "tex": [".tex"],
-    }
-    target_extension = extension_dict.get(code_lang, [])
-
-    repo_path = os.path.join("downloads", repo)
-    for root, dirs, files in os.walk(repo_path):
-        # 探索するディレクトリを制限する
-        dirs[:] = [
-            d for d in dirs
-            if d not in config["exclude_dirs"] and not d.startswith('.')
-        ]
-        for file in files:
-            if file.endswith(tuple(target_extension)):
-                with open(os.path.join(root, file), "r") as file_object:
-                    content = file_object.read()
-                    # リポジトリ名以下のパスを取得する
-                    filename = os.path.join(root, file)[len(repo_path) + 1:]
-                    target_files.append({
-                        "filename": filename,
-                        "content": content
-                    })
-
-    return target_files
-
-
-def prepare_messages_from_files(target_files, additional_message):
-    """Prepare messages from enumerated target files with an additional context message."""
-    messages = []
-    for file_info in target_files:
-        message = f"```{file_info['filename']}\n{file_info['content']}```"
-        messages.append({"role": "user", "content": message})
-    if additional_message:
-        messages.append({"role": "user", "content": additional_message})
-    return messages
-
-
 def send_messages_to_system(messages, system_instruction):
     """Send messages to AI system for code generation."""
     messages.append({"role": "system", "content": system_instruction})
@@ -113,8 +69,7 @@ def add_issue(
         code_lang]
 
     services.github.setup_repository(repo, branch)
-    target_files = enumerate_target_files(repo, code_lang)
-    messages = prepare_messages_from_files(target_files, "")
+    messages = logic.generate_messages_from_files(repo, code_lang)
     issue_body = send_messages_to_system(
         messages,
         prompt_generating_issue,
@@ -145,8 +100,7 @@ def update_issue(
         log(f"Failed to retrieve issue with ID: {issue_id}", level="error")
         return
 
-    target_files = enumerate_target_files(repo, code_lang)
-    messages = prepare_messages_from_files(target_files, "")
+    messages = logic.generate_messages_from_files(repo, code_lang)
     messages.extend(logic.generate_messages_from_issue(issue))
     generated_text = send_messages_to_system(
         messages,
