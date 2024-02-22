@@ -2,7 +2,7 @@
 import os
 import subprocess
 from datetime import datetime
-from typing import Dict, List, Union
+from typing import List, Union
 
 from schemas import Issue, IssueComment
 from utils.logging_utils import exception_handler, log
@@ -142,8 +142,8 @@ def exec_get_issue_body(repo: str, issue_id: int) -> str:
 def parse_issue_body(issue_id: int, issue_body: str) -> Issue:
     """issueの本文をパースする"""
     body_attrs = ["title"]
-    parsed_body = parse_github_text(issue_body, body_attrs)
-    issue = Issue(id=issue_id, **parsed_body[0])
+    parsed_body = parse_github_text(issue_body, body_attrs)[0]
+    issue = Issue(id=issue_id, comments=[], **parsed_body)
     return issue
 
 
@@ -180,7 +180,8 @@ def parse_issue_comments(issue_comments: str) -> List[IssueComment]:
     return comments
 
 
-def parse_github_text(target_text: str, attrs: list[str]) -> list[dict[str, str]]:
+def parse_github_text(target_text: str,
+                      attrs: list[str]) -> list[dict[str, str]]:
     """Parse the text of a GitHub issue or pull request."""
     items = []
     item = {"body": ""}
@@ -200,14 +201,17 @@ def parse_github_text(target_text: str, attrs: list[str]) -> list[dict[str, str]
                         item[key] = value
         else:
             # body field
-            is_attribute_field = True
             if line.startswith("--"):
                 # body field is finished
                 # attribute field is started
+                is_attribute_field = True
                 items.append(item)
                 item = {"body": ""}
             else:
                 item["body"] += line + "\n"
+    if item["body"]:
+        # add the last item
+        items.append(item)
     return items
 
 
