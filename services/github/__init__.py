@@ -127,7 +127,7 @@ def get_issue_by_id(repo: str, issue_id: int) -> Union[Issue, None]:
     return issue
 
 
-def get_issue_body(repo: str, issue_id: int) -> Issue:
+def exec_get_issue_body(repo: str, issue_id: int) -> str:
     """issueの本文を取得する"""
     res = exec_command(
         repo,
@@ -136,14 +136,18 @@ def get_issue_body(repo: str, issue_id: int) -> Issue:
     )
     if not res:
         raise Exception("Failed to get issue body")
+    return res.stdout.decode()
 
+
+def parse_issue_body(issue_id: int, issue_body: str) -> Issue:
+    """issueの本文をパースする"""
     is_body = False
     body = ""
-    for line in res.stdout.decode().splitlines():
+    for line in issue_body.splitlines():
         if is_body:
             body += line + "\n"
         elif line.startswith("title:\t"):
-            title = line[len("title:\t"):]
+            title = line[len("title:\t"):].strip()
         elif line.startswith("--"):
             is_body = True
 
@@ -155,7 +159,13 @@ def get_issue_body(repo: str, issue_id: int) -> Issue:
     return issue
 
 
-def get_issue_comments(repo: str, issue_id: int) -> List[IssueComment]:
+def get_issue_body(repo: str, issue_id: int) -> Issue:
+    """issueの本文を取得する"""
+    issue_body = exec_get_issue_body(repo, issue_id)
+    return parse_issue_body(issue_id, issue_body)
+
+
+def excec_get_issue_comments(repo: str, issue_id: int) -> str:
     """issueのコメントを取得する"""
     res = exec_command(
         repo,
@@ -163,8 +173,12 @@ def get_issue_comments(repo: str, issue_id: int) -> List[IssueComment]:
         capture_output=True,
     )
     if not res:
-        return []
+        raise Exception("Failed to get issue body")
+    return res.stdout.decode()
 
+
+def parse_issue_comments(issue_comments: str) -> List[IssueComment]:
+    """issueのコメントをパースする"""
     comment_attrs = [
         "author",
         "association",
@@ -176,7 +190,7 @@ def get_issue_comments(repo: str, issue_id: int) -> List[IssueComment]:
     body = ""
     comments: List[IssueComment] = []
     comment: Dict[str, str] = {}
-    for line in res.stdout.decode().splitlines():
+    for line in issue_comments.splitlines():
         if is_body and line.startswith("--"):
             comments.append(IssueComment(**comment, body=body))
             comment = {}
@@ -191,6 +205,12 @@ def get_issue_comments(repo: str, issue_id: int) -> List[IssueComment]:
                 if line.startswith(attr + ":\t"):
                     comment[attr] = line[len(attr + ":\t"):].strip()
     return comments
+
+
+def get_issue_comments(repo: str, issue_id: int) -> List[IssueComment]:
+    """issueのコメントを取得する"""
+    issue_comments = excec_get_issue_comments(repo, issue_id)
+    return parse_issue_comments(issue_comments)
 
 
 def reply_issue(repo: str, issue_id: int, body: str) -> bool:
