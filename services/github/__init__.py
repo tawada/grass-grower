@@ -141,21 +141,9 @@ def exec_get_issue_body(repo: str, issue_id: int) -> str:
 
 def parse_issue_body(issue_id: int, issue_body: str) -> Issue:
     """issueの本文をパースする"""
-    is_body = False
-    body = ""
-    for line in issue_body.splitlines():
-        if is_body:
-            body += line + "\n"
-        elif line.startswith("title:\t"):
-            title = line[len("title:\t"):].strip()
-        elif line.startswith("--"):
-            is_body = True
-
-    issue = Issue(
-        id=issue_id,
-        title=title,
-        body=body,
-    )
+    body_attrs = ["title"]
+    parsed_body = parse_github_text(issue_body, body_attrs)
+    issue = Issue(id=issue_id, **parsed_body[0])
     return issue
 
 
@@ -185,26 +173,42 @@ def parse_issue_comments(issue_comments: str) -> List[IssueComment]:
         "edited",
         "status",
     ]
-
-    is_body = False
-    body = ""
-    comments: List[IssueComment] = []
-    comment: Dict[str, str] = {}
-    for line in issue_comments.splitlines():
-        if is_body and line.startswith("--"):
-            comments.append(IssueComment(**comment, body=body))
-            comment = {}
-            body = ""
-            is_body = False
-        elif is_body:
-            body += line + "\n"
-        elif line.startswith("--"):
-            is_body = True
-        else:
-            for attr in comment_attrs:
-                if line.startswith(attr + ":\t"):
-                    comment[attr] = line[len(attr + ":\t"):].strip()
+    parsed_comments = parse_github_text(issue_comments, comment_attrs)
+    comments: List[IssueComment] = [
+        IssueComment(**comment) for comment in parsed_comments
+    ]
     return comments
+
+
+def parse_github_text(target_text: str, attrs: list[str]) -> list[dict[str, str]]:
+    """Parse the text of a GitHub issue or pull request."""
+    items = []
+    item = {"body": ""}
+    is_attribute_field = True
+    for line in target_text.splitlines():
+        if is_attribute_field:
+            if line.startswith("--"):
+                # attribute field is finished
+                # body field is started
+                is_attribute_field = False
+            else:
+                idx = line.find(":\t")
+                if idx != -1:
+                    key = line[:idx]
+                    value = line[idx + 2:].strip()
+                    if key in attrs:
+                        item[key] = value
+        else:
+            # body field
+            is_attribute_field = True
+            if line.startswith("--"):
+                # body field is finished
+                # attribute field is started
+                items.append(item)
+                item = {"body": ""}
+            else:
+                item["body"] += line + "\n"
+    return items
 
 
 def get_issue_comments(repo: str, issue_id: int) -> List[IssueComment]:
