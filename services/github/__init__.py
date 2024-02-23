@@ -187,28 +187,23 @@ def parse_github_text(target_text: str,
     item = {"body": ""}
     is_attribute_field = True
     for line in target_text.splitlines():
-        if is_attribute_field:
-            if line.startswith("--"):
-                # attribute field is finished
-                # body field is started
-                is_attribute_field = False
-            else:
-                idx = line.find(":\t")
-                if idx != -1:
-                    key = line[:idx]
-                    value = line[idx + 2:].strip()
-                    if key in attrs:
-                        item[key] = value
-        else:
-            # body field
-            if line.startswith("--"):
+        if line.startswith("--"):
+            if not is_attribute_field:
                 # body field is finished
-                # attribute field is started
-                is_attribute_field = True
                 items.append(item)
                 item = {"body": ""}
-            else:
-                item["body"] += line + "\n"
+            # switch between attribute field and body field
+            is_attribute_field ^= True
+        elif is_attribute_field:
+            # attribute field
+            idx = line.find(":\t")
+            key = line[:idx]
+            if idx != -1 and key in attrs:
+                value = line[idx + 2:].strip()
+                item[key] = value
+        else:
+            # body field
+            item["body"] += line + "\n"
     if item["body"]:
         # add the last item
         items.append(item)
