@@ -35,21 +35,9 @@ def exec_command(
         return complete_process
     except subprocess.CalledProcessError as err:
         shorted_commands = " ".join(command)[:50]
-        authentication_failed_e_code = 402
-        another_error_code = 500
-        if err.returncode == authentication_failed_e_code:
-            log(f"Authentication failed for git command: {shorted_commands}",
-                level="error")
-            # Potentially re-try command or notify user for re-authentication
-        elif err.returncode == another_error_code:
-            log(f"Network issues encountered when running git command: {shorted_commands}",
-                level="error")
-            # Potentially re-try command after a delay or notify user about network issues
-        else:
-            log(f"Command {shorted_commands} failed with error: {err}",
-                level="error")
-            # Generic error handling or re-try logic
-        return None
+        log(f"Command {shorted_commands} failed with error ({err.returncode}): {err}",
+            level="exception")
+        raise
 
 
 def exec_command_and_response_bool(repo: str,
