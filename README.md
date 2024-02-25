@@ -1,92 +1,88 @@
-# Grass Grower
+Based on the current README.md and the implemented functionalities within the provided Python application, here's a revised and enhanced README.md content that mirrors the advancements and integrates a bit more clarity on its usage, setup, and capabilities:
+
+# Grass Grower: Enhanced Version
 
 [![unit-test](https://github.com/tawada/grass-grower/actions/workflows/ci.yml/badge.svg)](https://github.com/tawada/grass-grower/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/tawada/grass-grower/graph/badge.svg?token=SK4NPV09X0)](https://codecov.io/gh/tawada/grass-grower)
 [![Maintainability](https://api.codeclimate.com/v1/badges/bfe3e9c7ac7bc6671ff1/maintainability)](https://codeclimate.com/github/tawada/grass-grower/maintainability)
 
-Welcome to Grass Grower, a cutting-edge Python application designed to streamline issue management and documentation creation for software projects on GitHub. By harnessing the capabilities of advanced Large Language Models (LLMs), our tool can autonomously generate meaningful responses to issues and produce comprehensive and accurate `README.md` documentation.
+Welcome to the enhanced version of Grass Grower, an AI-driven Python application formulated to automate and streamline GitHub issue management and documentation tasks. By leveraging advanced Large Language Models (LLM) capabilities, Grass Grower offers an intuitive and efficient way of handling GitHub tasks directly from the command line, providing meaningful interactions and well-structured documentation.
 
 **Table of Contents**
 - [Overview](#overview)
 - [Features](#features)
-- [How It Works](#how-it-works)
-- [Getting Started](#getting-started)
+- [Installation](#installation)
 - [Usage](#usage)
+- [Configuration](#configuration)
 - [Dependencies](#dependencies)
 - [Limitations](#limitations)
-- [Future Enhancements](#future-enhancements)
+- [Planned Features](#planned-features)
 - [Contributing](#contributing)
 - [License](#license)
 
 ## Overview
 
-Grass Grower is engineered to bridge the gap between project maintenance and AI technology. The tool efficiently facilitates developers to manage GitHub issues and autogenerate documentation by providing relevant, smart, and concise LLM-generated content.
+The enhanced Grass Grower tool combines AI technology with practical software project management applications. Designed for developers and project maintainers, it simplifies GitHub issue handling and README.md documentation generation through smart, AI-generated content.
 
 ## Features
 
-Grass Grower is packed with an array of features to elevate your software project management:
+- **Enhanced Automated Issue Response**: Crafts contextually aware comments for GitHub issues using AI.
+- **Advanced README Generation**: Builds and updates `README.md` files that accurately represent the project's current state and technology stack.
+- **Effective Codebase Analysis**: Analyzes the codebase to ensure that generated documentation and issue responses are aligned with the latest project advancements.
+- **Efficient GitHub Integration**: Employs GitHub CLI for seamless interaction with GitHub repositories, facilitating issue management without the need to leave the terminal.
 
-- **Automated Issue Response**: Utilizes AI to craft well-thought-out and context-aware comments as responses to GitHub issues.
-- **Dynamic Documentation Generation**: Analyzes the codebase and employed technologies to compose an updated and informative `README.md`.
-- **Codebase Analysis**: Scans and interprets the entire codebase, ensuring the documentation aligns with the latest developments.
-- **Direct GitHub Integration**: Directly communicates with GitHub via CLI to fetch issues and submit replies without leaving the command line.
+## Installation
 
-## How It Works
-
-Grass Grower is composed of multiple modules, each designed to perform specialized operations:
-
-- `main.py`: Serves as the command center, accepting arguments and deploying corresponding actions like generating readmes or issue updates.
-- `routers`: Contains the core logic for readme generation and issue management.
-- `services`: Interfaces with GitHub (`github`) for issue retrieval and comments while leveraging LLMs (`llm`) for content creation.
-- `schemas`: Defines essential data structures like the `Issue` class for systematic data handling.
-- `system_instruction`: Interprets user-generated system commands to guide the AI model.
-
-## Getting Started
-
-To harness the power of Grass Grower, set up your environment:
-
-1. Install and configure the GitHub CLI (`gh`).
-2. Ensure OpenAI API keys are properly set up for LLM interactions.
+Grass Grower requires Python 3.8+, OpenAI API keys, and the GitHub CLI to be installed and configured. Detailed setup and authentication steps are provided in the subsequent sections.
 
 ## Usage
 
-Activate Grass Grower with these simple commands:
+Execute key functionalities of Grass Grower using these commands:
 
 ```bash
-python main.py generate_code_from_issue [issue_id] # Generate code for a specific issue
-python main.py generate_readme                    # Generate the README.md file
-python main.py update_issue                       # Post a comment on an existing issue
+python main.py <action> [--issue-id <id>] [--repo <owner/repo>] [--branch <name>] [--code-lang <language>]
 ```
 
-Replace `[issue_id]` with the actual ID of the GitHub issue you're addressing.
+- `<action>`: The task to perform (e.g., `generate_code_from_issue`, `generate_readme`, `update_issue`).
+- `[--issue-id <id>]`: Specifies the GitHub issue ID for actions related to issues.
+- `[--repo <owner/repo>]`: Defines the GitHub repository to operate on.
+- `[--branch <name>]`: Sets the repository branch for the action.
+- `[--code-lang <language>]`: Indicates the primary programming language of the codebase for better context understanding by the AI.
+
+## Configuration
+
+Environmental variables such as OpenAI API key and default GitHub repository settings can be managed through a `config.json` file or directly within the environment settings for flexibility and security.
 
 ## Dependencies
 
-- Python 3.8 or later
-- OpenAI's Python client
-- GitHub CLI (`gh`)
+In addition to Python 3.8+, ensure the following are installed and correctly configured:
+
+- OpenAI Python client library.
+- GitHub CLI (`gh`).
+
+Refer to the `requirements.txt` file for a detailed list of Python dependencies.
 
 ## Limitations
 
-Grass Grower comes with certain constraints:
+While Grass Grower significantly improves GitHub interaction efficiency, current limitations include:
 
-- Interaction is currently limited to the first retrieved GitHub issue.
-- Reliant on OpenAI's API, potentially incurring additional costs and rate limits.
+- Single-issue interaction per command execution.
+- Dependency on external APIs, implying potential costs and rate limits.
 
-## Future Enhancements
+## Planned Features
 
-Projected enhancements include:
+Future updates aim to address existing limitations and introduce:
 
-- Multi-issue interaction capability.
-- Refined error handling for improved stability.
-- More sophisticated AI-driven content creation tailored to user input.
+- Multi-issue handling for batch processing.
+- Enhanced error handling and stability.
+- Customizable AI-driven templates for more personalized content generation.
 
 ## Contributing
 
-Contributors are welcome to join the development of Grass Grower. Feel free to fork the repository, make improvements, and open pull requests.
+We welcome contributions from the community! Please see the repository guidelines for more information on how to contribute.
 
 ## License
 
-Grass Grower is released under the MIT License. See the LICENSE file for more details.
+Grass Grower is open-sourced under the MIT License. See the LICENSE file for legal information.
 
-*Authored with AI enhancement.*
+*Authored and enhanced with the power of AI.*
