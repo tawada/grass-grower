@@ -2,6 +2,7 @@
 from datetime import datetime, timedelta
 
 import routers
+from tests import utils
 
 
 def test_add_issue(
@@ -80,6 +81,8 @@ def test_summarize_issue(mocker, setup):
 def test_generate_readme(mocker, setup):
     """Test generate_readme() function."""
     setup(mocker)
+    mocker.patch("builtins.open",
+                 return_value=utils.mock_open_with(read_data="test"))
     routers.generate_readme("test_owner/test_repo", "main", "python")
 
 
