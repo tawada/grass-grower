@@ -1,5 +1,3 @@
-Based on the current README.md and the implemented functionalities within the provided Python application, here's a revised and enhanced README.md content that mirrors the advancements and integrates a bit more clarity on its usage, setup, and capabilities:
-
 # Grass Grower: Enhanced Version
 
 [![unit-test](https://github.com/tawada/grass-grower/actions/workflows/ci.yml/badge.svg)](https://github.com/tawada/grass-grower/actions/workflows/ci.yml)
@@ -55,7 +53,7 @@ Environmental variables such as OpenAI API key and default GitHub repository set
 
 ## Dependencies
 
-In addition to Python 3.8+, ensure the following are installed and correctly configured:
+In addition to Python 3.11, ensure the following are installed and correctly configured:
 
 - OpenAI Python client library.
 - GitHub CLI (`gh`).
@@ -84,5 +82,3 @@ We welcome contributions from the community! Please see the repository guideline
 ## License
 
 Grass Grower is open-sourced under the MIT License. See the LICENSE file for legal information.
-
-*Authored and enhanced with the power of AI.*
