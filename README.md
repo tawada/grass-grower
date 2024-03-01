@@ -1,4 +1,4 @@
-# Grass Grower: Enhanced Version
+# Grass Grower
 
 [![unit-test](https://github.com/tawada/grass-grower/actions/workflows/ci.yml/badge.svg)](https://github.com/tawada/grass-grower/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/tawada/grass-grower/graph/badge.svg?token=SK4NPV09X0)](https://codecov.io/gh/tawada/grass-grower)
@@ -31,7 +31,7 @@ The enhanced Grass Grower tool combines AI technology with practical software pr
 
 ## Installation
 
-Grass Grower requires Python 3.8+, OpenAI API keys, and the GitHub CLI to be installed and configured. Detailed setup and authentication steps are provided in the subsequent sections.
+Grass Grower requires Python 3.11, OpenAI API keys, and the GitHub CLI to be installed and configured. Detailed setup and authentication steps are provided in the subsequent sections.
 
 ## Usage
 
