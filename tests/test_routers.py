@@ -2,7 +2,6 @@
 from datetime import datetime, timedelta
 
 import routers
-from tests import utils
 
 
 def test_add_issue(
@@ -11,8 +10,7 @@ def test_add_issue(
 ):
     """Test add_issue() function."""
     setup(mocker)
-    mocker.patch("builtins.open",
-                 return_value=utils.mock_open_with(read_data="test"))
+    mocker.patch("builtins.open", mocker.mock_open(read_data="test"))
     routers.add_issue("test_owner/test_repo", "python")
 
 
@@ -23,16 +21,14 @@ def test_update_issue(
     """Test update_issue() function."""
     setup(mocker)
 
-    mocker.patch("builtins.open",
-                 return_value=utils.mock_open_with(read_data="test"))
+    mocker.patch("builtins.open", mocker.mock_open(read_data="test"))
     routers.update_issue(1, "test_owner/test_repo", "main", "python")
 
 
 def test_generate_code_from_issue(mocker, setup):
     """Test generate_code_from_issue() function."""
     setup(mocker)
-    mocker.patch("builtins.open",
-                 return_value=utils.mock_open_with(read_data="test"))
+    mocker.patch("builtins.open", mocker.mock_open(read_data="test"))
     routers.generate_code_from_issue(1, "test_owner/test_repo", "main",
                                      "python")
 
@@ -46,16 +42,14 @@ def test_summarize_issue(mocker, setup):
 def test_generate_readme(mocker, setup):
     """Test generate_readme() function."""
     setup(mocker)
-    mocker.patch("builtins.open",
-                 return_value=utils.mock_open_with(read_data="test"))
+    mocker.patch("builtins.open", mocker.mock_open(read_data="test"))
     routers.generate_readme("test_owner/test_repo", "main", "python")
 
 
 def test_generate_readme_failed(mocker, setup):
     """Test generate_readme() function."""
     setup(mocker)
-    mocker.patch("builtins.open",
-                 return_value=utils.mock_open_with(read_data="test"))
+    mocker.patch("builtins.open", mocker.mock_open(read_data="test"))
     routers.generate_readme("test_owner/test_repo", "main", "python")
 
 
@@ -78,8 +72,7 @@ def test_grow_grass_yesterday(mocker, setup):
 def test_generate_code_from_issue_and_reply(mocker, setup):
     """Test generate_code_from_issue_and_reply() function."""
     setup(mocker)
-    mocker.patch("builtins.open",
-                 return_value=utils.mock_open_with(read_data="test"))
+    mocker.patch("builtins.open", mocker.mock_open(read_data="test"))
     mocker.patch("services.llm.generate_json",
                  return_value={
                      "filepath": "test_filepath",
