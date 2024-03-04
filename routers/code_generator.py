@@ -4,8 +4,8 @@ from typing import Union
 import logic
 import services.github
 import services.llm
-from utils.logging_utils import log
 from utils.config_loader import load_config
+from utils.logging_utils import log
 
 config = load_config()
 
@@ -95,10 +95,12 @@ def generate_readme(
         log(f"Error to checkout a new branch: {err}", level="error")
         return False
 
+    validated_text = logic.validate_text(generated_text)
+
     # Attempt to write the README.md file.
     try:
         with open(repo_path + "/README.md", "w") as file_object:
-            file_object.write(generated_text)
+            file_object.write(validated_text)
     except OSError as err:
         log(f"Error while writing to README.md: {err}", level="error")
         services.github.checkout_branch(repo, "main")

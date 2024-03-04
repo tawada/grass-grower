@@ -4,7 +4,6 @@ import os
 import schemas
 import services
 import services.llm
-
 from utils.config_loader import load_config
 
 config = load_config()
@@ -135,3 +134,15 @@ def generate_issue_reply_message(repo, issue, modification, commit_message):
 def get_repo_path(repo: str):
     """Get repo path"""
     return os.path.join("downloads", repo)
+
+
+def validate_text(raw_text: str):
+    candidates = ["```markdown\n", "```\n", "```"]
+    validated_text = raw_text
+    for start_text in candidates:
+        if raw_text.startswith(start_text):
+            validated_text = raw_text[len(start_text):]
+            break
+    if validated_text.endswith("```"):
+        validated_text = raw_text[:-len("```")]
+    return validated_text
