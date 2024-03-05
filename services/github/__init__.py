@@ -10,11 +10,9 @@ from utils.logging_utils import exception_handler, log
 DEFAULT_PATH = "downloads"
 
 
-def exec_command(
-        repo: str,
-        command: List[str],
-        capture_output: bool = False
-) -> Union[None, subprocess.CompletedProcess]:
+def exec_command(repo: str,
+                 command: List[str],
+                 capture_output: bool = False) -> subprocess.CompletedProcess:
     """
     Execute a shell command within the specified git repository path.
     If capture_output is True, the function returns a subprocess.CompletedProcess object.
@@ -117,13 +115,18 @@ def get_issue_by_id(repo: str, issue_id: int) -> Union[Issue, None]:
 
 def exec_get_issue_body(repo: str, issue_id: int) -> str:
     """issueの本文を取得する"""
-    res = exec_command(
-        repo,
-        ["gh", "issue", "view", str(issue_id)],
-        capture_output=True,
-    )
-    if not res:
-        raise Exception("Failed to get issue body")
+    try:
+        res = exec_command(
+            repo,
+            ["gh", "issue", "view", str(issue_id)],
+            capture_output=True,
+        )
+    except subprocess.CalledProcessError as err:
+        err_msg = "Could not resolve to an issue or pull request with the number of"
+        if err.stderr and err_msg in err.stderr.decode():
+            log(f"{err_msg} {issue_id}", level="error")
+            raise ValueError(f"{err_msg} {issue_id}") from err
+        raise Exception("Failed to get issue body") from err
     return res.stdout.decode()
 
 
