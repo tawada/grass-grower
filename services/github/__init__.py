@@ -45,7 +45,6 @@ def exec_command_and_response_bool(repo: str,
     return bool(exec_command(repo, command, capture_output))
 
 
-@exception_handler
 def setup_repository(repo: str, branch_name: str = "main") -> bool:
     """Set up the repository to point to a specific branch."""
     path = os.path.join(DEFAULT_PATH, repo)
@@ -65,10 +64,13 @@ def setup_repository(repo: str, branch_name: str = "main") -> bool:
 
 def clone_repository(repo: str) -> bool:
     """Clone the repository."""
-    return exec_command_and_response_bool(
-        repo[:repo.index("/")],
-        ["git", "clone", "git@github.com:" + repo],
-    )
+    try:
+        return exec_command_and_response_bool(
+            repo[:repo.index("/")],
+            ["git", "clone", "git@github.com:" + repo],
+        )
+    except subprocess.CalledProcessError as err:
+        raise ValueError(f"Invalid repository: {repo}") from err
 
 
 def pull_repository(repo: str) -> bool:
