@@ -42,8 +42,11 @@ def test_services_github_setup_repository_clone_fail(mocker):
         "services.github.subprocess.run",
         side_effect=subprocess.CalledProcessError(402, "test"),
     )
-    services.github.setup_repository("test/test")
-    assert True
+    try:
+        services.github.setup_repository("test/test")
+        assert False
+    except ValueError:
+        assert True
 
 
 def test_services_github_create_issue(mocker):
