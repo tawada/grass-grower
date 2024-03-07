@@ -45,7 +45,7 @@ def test_services_github_setup_repository_clone_fail(mocker):
     try:
         services.github.setup_repository("test/test")
         assert False
-    except ValueError:
+    except RuntimeError:
         assert True
 
 

@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import List, Union
 
 from schemas import Issue, IssueComment
+from services.github import exceptions
 from utils.logging_utils import exception_handler, log
 
 DEFAULT_PATH = "downloads"
@@ -68,9 +69,13 @@ def clone_repository(repo: str) -> bool:
         return exec_command_and_response_bool(
             repo[:repo.index("/")],
             ["git", "clone", "git@github.com:" + repo],
+            True,
         )
     except subprocess.CalledProcessError as err:
-        raise ValueError(f"Invalid repository: {repo}") from err
+        exception, error_message = exceptions.parse_exception(err)
+        if exception == ValueError:
+            raise ValueError(f"Invalid repository: {repo}") from err
+        raise exception(error_message) from err
 
 
 def pull_repository(repo: str) -> bool:
