@@ -80,10 +80,17 @@ def clone_repository(repo: str) -> bool:
 
 def pull_repository(repo: str) -> bool:
     """リポジトリをpullする"""
-    return exec_command_and_response_bool(
-        repo,
-        ["git", "pull"],
-    )
+    try:
+        return exec_command_and_response_bool(
+            repo,
+            ["git", "pull"],
+            True,
+        )
+    except subprocess.CalledProcessError as err:
+        exception, error_message = exceptions.parse_exception(err)
+        if exception == ValueError:
+            raise ValueError(f"Invalid repository: {repo}") from err
+        raise exception(error_message) from err
 
 
 def create_issue(repo: str, title: str, body: str) -> bool:
@@ -249,10 +256,16 @@ def commit(repo: str, message: str) -> bool:
 
 def push_repository(repo: str, branch_name: str) -> bool:
     """リポジトリをpushする"""
-    return exec_command_and_response_bool(
-        repo,
-        ["git", "push", "origin", branch_name],
-    )
+    try:
+        return exec_command_and_response_bool(
+            repo,
+            ["git", "push", "origin", branch_name],
+        )
+    except subprocess.CalledProcessError as err:
+        exception, error_message = exceptions.parse_exception(err)
+        if exception == ValueError:
+            raise ValueError(f"Invalid repository: {repo}") from err
+        raise exception(error_message) from err
 
 
 def delete_branch(repo: str, branch_name: str) -> bool:

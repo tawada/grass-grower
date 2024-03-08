@@ -2,6 +2,7 @@
 import subprocess
 
 import services.github
+import services.github.exceptions
 
 
 def test_services_github_setup_repository_exist(mocker):
@@ -45,7 +46,7 @@ def test_services_github_setup_repository_clone_fail(mocker):
     try:
         services.github.setup_repository("test/test")
         assert False
-    except RuntimeError:
+    except services.github.exceptions.CommandExecutionException:
         assert True
 
 
