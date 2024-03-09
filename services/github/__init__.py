@@ -260,6 +260,7 @@ def push_repository(repo: str, branch_name: str) -> bool:
         return exec_command_and_response_bool(
             repo,
             ["git", "push", "origin", branch_name],
+            capture_output=True,
         )
     except subprocess.CalledProcessError as err:
         exception, error_message = exceptions.parse_exception(err)
