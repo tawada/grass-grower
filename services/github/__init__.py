@@ -36,7 +36,8 @@ def exec_command(repo: str,
         shorted_commands = " ".join(command)[:50]
         log(f"Command {shorted_commands} failed with error ({err.returncode}): {err}",
             level="exception")
-        raise
+        exception, error_message = exceptions.parse_exception(err)
+        raise exception(error_message) from err
 
 
 def exec_command_and_response_bool(repo: str,
@@ -71,11 +72,9 @@ def clone_repository(repo: str) -> bool:
             ["git", "clone", "git@github.com:" + repo],
             True,
         )
-    except subprocess.CalledProcessError as err:
-        exception, error_message = exceptions.parse_exception(err)
-        if exception == ValueError:
-            raise ValueError(f"Invalid repository: {repo}") from err
-        raise exception(error_message) from err
+    except exceptions.GitHubRepoNotFoundException as err:
+        raise exceptions.GitHubRepoNotFoundException(
+            f"Invalid repository: {repo}") from err
 
 
 def pull_repository(repo: str) -> bool:
@@ -86,11 +85,9 @@ def pull_repository(repo: str) -> bool:
             ["git", "pull"],
             True,
         )
-    except subprocess.CalledProcessError as err:
-        exception, error_message = exceptions.parse_exception(err)
-        if exception == ValueError:
-            raise ValueError(f"Invalid repository: {repo}") from err
-        raise exception(error_message) from err
+    except exceptions.GitHubRepoNotFoundException as err:
+        raise exceptions.GitHubRepoNotFoundException(
+            f"Invalid repository: {repo}") from err
 
 
 def create_issue(repo: str, title: str, body: str) -> bool:
@@ -135,12 +132,9 @@ def exec_get_issue_body(repo: str, issue_id: int) -> str:
             ["gh", "issue", "view", str(issue_id)],
             capture_output=True,
         )
-    except subprocess.CalledProcessError as err:
-        err_msg = "Could not resolve to an issue or pull request with the number of"
-        if err.stderr and err_msg in err.stderr.decode():
-            log(f"{err_msg} {issue_id}", level="error")
-            raise ValueError(f"{err_msg} {issue_id}") from err
-        raise Exception("Failed to get issue body") from err
+    except exceptions.GitHubRepoNotFoundException as err:
+        raise exceptions.GitHubRepoNotFoundException(
+            f"Invalid repository: {repo}") from err
     return res.stdout.decode()
 
 
@@ -262,11 +256,9 @@ def push_repository(repo: str, branch_name: str) -> bool:
             ["git", "push", "origin", branch_name],
             capture_output=True,
         )
-    except subprocess.CalledProcessError as err:
-        exception, error_message = exceptions.parse_exception(err)
-        if exception == ValueError:
-            raise ValueError(f"Invalid repository: {repo}") from err
-        raise exception(error_message) from err
+    except exceptions.GitHubRepoNotFoundException as err:
+        raise exceptions.GitHubRepoNotFoundException(
+            f"Invalid repository: {repo}") from err
 
 
 def delete_branch(repo: str, branch_name: str) -> bool:
