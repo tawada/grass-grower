@@ -234,10 +234,15 @@ def checkout_branch(repo: str, branch_name: str) -> bool:
 
 def checkout_new_branch(repo: str, branch_name: str) -> bool:
     """新しいブランチを作成する"""
-    return exec_command_and_response_bool(
-        repo,
-        ["git", "checkout", "-b", branch_name],
-    )
+    try:
+        return exec_command_and_response_bool(
+            repo,
+            ["git", "checkout", "-b", branch_name],
+            capture_output=True,
+        )
+    except exceptions.GitBranchAlreadyExistsException as err:
+        raise exceptions.GitBranchAlreadyExistsException(
+            f"Branch already exists: {branch_name}") from err
 
 
 def commit(repo: str, message: str) -> bool:

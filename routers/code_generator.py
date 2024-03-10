@@ -93,7 +93,7 @@ def generate_readme(
         return False
     except Exception as err:
         log(f"Error to checkout a new branch: {err}", level="error")
-        return False
+        raise
 
     validated_text = logic.validate_text(generated_text)
 

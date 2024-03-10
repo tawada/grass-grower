@@ -20,6 +20,12 @@ class GitException(CommandExecutionException):
     """Base exception raised for errors in the Git API."""
 
 
+class GitBranchAlreadyExistsException(GitException):
+    """Exception raised for errors in the Git API."""
+    # fatal: a branch named '<branch_name>' already exists
+    message = "already exists"
+
+
 class GitHubException(CommandExecutionException):
     """Base exception raised for errors in the GitHub API."""
 
@@ -36,7 +42,8 @@ class GitHubRepoNotFoundException(GitHubException):
 
 exception_keywords: dict[str, type[CommandExecutionException]] = {}
 _src: list[type[CommandExecutionException]] = [
-    GitHubConnectionException, GitHubRepoNotFoundException
+    GitBranchAlreadyExistsException, GitHubConnectionException,
+    GitHubRepoNotFoundException
 ]
 for _exception in _src:
     exception_keywords[_exception.message] = _exception
