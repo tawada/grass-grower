@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import List, Union
 
 from schemas import Issue, IssueComment
-from services.github import exceptions
+from services.github import exceptions, github_utils
 from utils.logging_utils import exception_handler, log
 
 DEFAULT_PATH = "downloads"
@@ -49,11 +49,9 @@ def exec_command_and_response_bool(repo: str,
 
 def setup_repository(repo: str, branch_name: str = "main") -> bool:
     """Set up the repository to point to a specific branch."""
-    path = os.path.join(DEFAULT_PATH, repo)
     # リポジトリが存在するか確認する
-    if not os.path.exists(path):
+    if not github_utils.exists_repo(DEFAULT_PATH, repo):
         # リポジトリが存在しない場合はcloneする
-        os.makedirs(path[:-len(repo) + repo.index("/")], exist_ok=True)
         ret = clone_repository(repo)
     else:
         # リポジトリが存在する場合はpullする
@@ -66,6 +64,7 @@ def setup_repository(repo: str, branch_name: str = "main") -> bool:
 
 def clone_repository(repo: str) -> bool:
     """Clone the repository."""
+    github_utils.make_owner_dir(DEFAULT_PATH, repo)
     try:
         return exec_command_and_response_bool(
             repo[:repo.index("/")],
