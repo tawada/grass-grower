@@ -47,19 +47,17 @@ def exec_command_and_response_bool(repo: str,
     return bool(exec_command(repo, command, capture_output))
 
 
-def setup_repository(repo: str, branch_name: str = "main") -> bool:
+def setup_repository(repo: str, branch_name: str = "main"):
     """Set up the repository to point to a specific branch."""
     # リポジトリが存在するか確認する
     if not github_utils.exists_repo(DEFAULT_PATH, repo):
         # リポジトリが存在しない場合はcloneする
-        ret = clone_repository(repo)
+        clone_repository(repo)
     else:
         # リポジトリが存在する場合はpullする
-        ret = pull_repository(repo)
-    if ret:
-        # リポジトリのブランチを指定する
-        return checkout_branch(repo, branch_name)
-    return False
+        pull_repository(repo)
+    # リポジトリのブランチを指定する
+    checkout_branch(repo, branch_name)
 
 
 def clone_repository(repo: str) -> bool:
