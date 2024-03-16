@@ -5,10 +5,9 @@ from typing import Dict, List, Union
 
 import openai
 
-from utils.config_loader import load_config
+from config import config
 from utils.logging_utils import log
 
-config = load_config()
 MODEL_NAME = config['openai_model_name']
 
 

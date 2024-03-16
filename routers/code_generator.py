@@ -4,10 +4,7 @@ from typing import Union
 import logic
 import services.github
 import services.llm
-from utils.config_loader import load_config
 from utils.logging_utils import log
-
-config = load_config()
 
 
 def send_messages_to_system(messages, system_instruction):

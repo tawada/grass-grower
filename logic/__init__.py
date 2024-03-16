@@ -4,9 +4,7 @@ import os
 import schemas
 import services
 import services.llm
-from utils.config_loader import load_config
-
-config = load_config()
+from config import config
 
 
 def apply_modification(repo, modification):
@@ -137,6 +135,7 @@ def get_repo_path(repo: str):
 
 
 def validate_text(raw_text: str):
+    """Validate text"""
     candidates = ["```markdown\n", "```\n", "```"]
     validated_text = raw_text
     for start_text in candidates:

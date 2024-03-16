@@ -1,19 +1,14 @@
 """Router for the API."""
-import os
 from datetime import datetime
 
 import logic
 import services.github
 import services.llm
 from utils.logging_utils import log
-from utils.config_loader import load_config
-from .code_generator import (
-    generate_code_from_issue,
-    generate_code_from_issue_and_reply,
-    generate_readme,
-)
 
-config = load_config()
+from .code_generator import (generate_code_from_issue,
+                             generate_code_from_issue_and_reply,
+                             generate_readme)
 
 
 def send_messages_to_system(messages, system_instruction):
