@@ -13,7 +13,16 @@ MODEL_NAME = config['openai_model_name']
 
 def get_openai_client(api_key: str = None) -> openai.OpenAI:
     """Factory function to create and configure an OpenAI client."""
-    return openai.OpenAI(api_key=api_key or os.environ["OPENAI_API_KEY"])
+    try:
+        if api_key is None:
+            api_key = os.environ["OPENAI_API_KEY"]
+        return openai.OpenAI(api_key=api_key)
+    except KeyError as err:
+        log("OPENAI_API_KEY is not set in environment variables. Please set it to use LLM functionalities.",
+            level="error")
+        raise ValueError(
+            "API key must be provided as an argument or in the environment"
+        ) from err
 
 
 def generate_text(
