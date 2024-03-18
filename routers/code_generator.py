@@ -30,11 +30,10 @@ def generate_code_from_issue(
     - str: The generated code based on the issue, or none if the issue cannot be retrieved.
     """
 
+    # Setup the repository and get the issue
     services.github.setup_repository(repo, branch)
+    # Get the issue
     issue = services.github.get_issue_by_id(repo, issue_id)
-    if issue is None:
-        log(f"Failed to retrieve issue with ID: {issue_id}", level="error")
-        return None
 
     messages = logic.generate_messages_from_files(repo, code_lang)
     messages.extend(logic.generate_messages_from_issue(issue))

@@ -2,7 +2,7 @@
 import os
 import subprocess
 from datetime import datetime
-from typing import List, Union
+from typing import List
 
 from schemas import Issue, IssueComment
 from services.github import exceptions, github_utils
@@ -111,8 +111,7 @@ def list_issue_ids(repo: str) -> List[int]:
     return list(map(int, issue_row))
 
 
-@exception_handler
-def get_issue_by_id(repo: str, issue_id: int) -> Union[Issue, None]:
+def get_issue_by_id(repo: str, issue_id: int) -> Issue:
     """idからissueを取得する"""
 
     issue = get_issue_body(repo, issue_id)
