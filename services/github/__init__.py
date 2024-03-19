@@ -180,29 +180,29 @@ def parse_github_text(target_text: str,
     """Parse the text of a GitHub issue or pull request."""
     items = []
     item = {"body": ""}
-    is_attribute_field = True
-    for line in target_text.splitlines():
-        if line.startswith("--"):
-            if not is_attribute_field:
-                # body field is finished
-                items.append(item)
-                item = {"body": ""}
-            # switch between attribute field and body field
-            is_attribute_field ^= True
-        elif is_attribute_field:
+    fields = split_text_by_borderlines(target_text)
+    for idx, field_body in enumerate(fields):
+        if idx % 2 == 0:
             # attribute field
-            idx = line.find(":\t")
-            key = line[:idx]
-            if idx != -1 and key in attrs:
-                value = line[idx + 2:].strip()
-                item[key] = value
+            for line in field_body.splitlines():
+                key_value = line.split(":\t")
+                if len(key_value) == 2 and key_value[0] in attrs:
+                    item[key_value[0]] = key_value[1].strip()
         else:
             # body field
-            item["body"] += line + "\n"
+            item["body"] = field_body
+            items.append(item)
+            item = {"body": ""}
     if item["body"]:
         # add the last item
         items.append(item)
     return items
+
+
+def split_text_by_borderlines(text: str) -> List[str]:
+    """Split the text by borderlines."""
+    # A borderline starts with "--".
+    return text.split("\n--\n")
 
 
 def get_issue_comments(repo: str, issue_id: int) -> List[IssueComment]:
