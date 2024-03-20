@@ -179,24 +179,29 @@ def parse_github_text(target_text: str,
                       attrs: list[str]) -> list[dict[str, str]]:
     """Parse the text of a GitHub issue or pull request."""
     items = []
-    item = {"body": ""}
     fields = split_text_by_borderlines(target_text)
     for idx, field_body in enumerate(fields):
         if idx % 2 == 0:
             # attribute field
-            for line in field_body.splitlines():
-                key_value = line.split(":\t")
-                if len(key_value) == 2 and key_value[0] in attrs:
-                    item[key_value[0]] = key_value[1].strip()
+            item = make_dict_from_field_body(field_body, attrs)
+            items.append(item)
         else:
             # body field
-            item["body"] = field_body
-            items.append(item)
-            item = {"body": ""}
-    if item["body"]:
-        # add the last item
-        items.append(item)
+            items[-1]["body"] = field_body
     return items
+
+
+def make_dict_from_field_body(
+    field_body: str,
+    attrs: list[str],
+) -> dict[str, str]:
+    """Make a dictionary from the field body."""
+    item = {}
+    for line in field_body.splitlines():
+        key_value = line.split(":\t")
+        if len(key_value) == 2 and key_value[0] in attrs:
+            item[key_value[0]] = key_value[1].strip()
+    return item
 
 
 def split_text_by_borderlines(text: str) -> List[str]:
