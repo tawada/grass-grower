@@ -18,7 +18,8 @@ def get_openai_client(api_key: str = None) -> openai.OpenAI:
             api_key = os.environ["OPENAI_API_KEY"]
         return openai.OpenAI(api_key=api_key)
     except KeyError as err:
-        log("OPENAI_API_KEY is not set in environment variables. Please set it to use LLM functionalities.",
+        log(("OPENAI_API_KEY is not set in environment variables. "
+             "Please set it to use LLM functionalities."),
             level="error")
         raise ValueError(
             "API key must be provided as an argument or in the environment"
@@ -38,19 +39,9 @@ def generate_text(
     Returns:
         Union[str, None]: The generated text, or None if an error occurs.
     """
-    try:
-        log(f"Generating text with model: {MODEL_NAME}", level="info")
-        response = openai_client.chat.completions.create(
-            model=MODEL_NAME,
-            messages=messages,
-        )
-        generated_content = response.choices[0].message.content
-        log(f"Text generated successfully: {generated_content[:50]}...",
-            level="info")
-        return generated_content
-    except RuntimeError as err:
-        log(f"Failed to generate text: {err}", level="error")
-        return None
+    return generate_response(messages,
+                             openai_client,
+                             response_format={"type": "text"})
 
 
 def generate_json(
@@ -75,29 +66,61 @@ def generate_json(
     log(f"Generating json with model: {MODEL_NAME}", level="info")
     if retry < 0:
         raise ValueError("Retry must be a non-negative integer")
-    for i in range(retry + 1):
+    for trial_idx in range(retry + 1):
         try:
-            response = openai_client.chat.completions.create(
-                model=MODEL_NAME,
-                messages=messages,
-                response_format={"type": "json_object"},
-            )
-            generated_content = json.loads(response.choices[0].message.content)
+            generated_content = generate_response(
+                messages,
+                openai_client,
+                response_format={"type": "json_object"})
+        except RuntimeError as err:
+            err_msg = str(err)
+            log(f"Failed to generate json: trial {trial_idx}: {err_msg}: ",
+                level="error")
+            continue
+        try:
+            generated_content = json.loads(generated_content)
             log(f"Text generated successfully: {json.dumps(generated_content)[:50]}...",
                 level="info")
             return generated_content
         except json.JSONDecodeError as err:
             err_msg = str(err)
-            if response:
-                err_msg = response.choices[0].message.content
-            log(f"Failed to generate json: trial {i}: {err_msg}",
-                level="error")
-            continue
-        except RuntimeError as err:
-            err_msg = str(err)
-            if response:
-                err_msg = response.choices[0].message.content
-            log(f"Failed to generate json: trial {i}: {err_msg}: ",
+            log(f"Failed to generate json: trial {trial_idx}: {err_msg}",
                 level="error")
             continue
     raise RuntimeError("Failed to generate json after multiple retries")
+
+
+def generate_response(
+    messages: List[Dict[str, str]],
+    openai_client: openai.OpenAI,
+    response_format: Dict[str, str] = {"type": "text"},
+) -> str:
+    """Generates a response using the OpenAI API.
+
+    Args:
+        messages (List[Dict[str, str]]): A list of message dictionaries to send to the API.
+        openai_client (openai.OpenAI): An OpenAI client.
+        response_format (Dict[str, str], optional): The format of the response.
+        Can be {"type": "text"} or {"type": "json_object"}. Defaults to {"type": "text"}.
+
+    Returns:
+        str: The generated response
+
+    Raises:
+        ValueError: If the retry argument is negative.
+        RuntimeError: If the request fails after multiple retries.
+    """
+    log(f"Generating response with model: {MODEL_NAME}", level="info")
+    try:
+        response = openai_client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=messages,
+            response_format=response_format,
+        )
+        generated_content = response.choices[0].message.content
+        log(f"Response generated successfully: {generated_content[:50]}...",
+            level="info")
+        return generated_content
+    except RuntimeError as err:
+        log(f"Failed to generate response: {err}", level="error")
+        raise
