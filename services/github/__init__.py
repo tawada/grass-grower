@@ -155,8 +155,6 @@ def excec_get_issue_comments(repo: str, issue_id: int) -> str:
         ["gh", "issue", "view", str(issue_id), "-c"],
         capture_output=True,
     )
-    if not res:
-        raise Exception("Failed to get issue body")
     return res.stdout.decode()
 
 
@@ -168,6 +166,8 @@ def parse_issue_comments(issue_comments: str) -> List[IssueComment]:
         "edited",
         "status",
     ]
+    if not issue_comments:
+        return []
     parsed_comments = parse_github_text(issue_comments, comment_attrs)
     comments: List[IssueComment] = [
         IssueComment(**comment) for comment in parsed_comments
