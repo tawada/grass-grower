@@ -4,7 +4,8 @@ import os
 import schemas
 import services
 import services.llm
-from config import config
+
+from . import logic_utils
 
 
 def apply_modification(repo, modification):
@@ -103,22 +104,16 @@ def generate_messages_from_files(repo: str, code_lang: str):
 
     messages = []
     repo_path = get_repo_path(repo)
-    for root, dirs, files in os.walk(repo_path):
-        # 探索するディレクトリを制限する
-        dirs[:] = [
-            d for d in dirs
-            if d not in config["exclude_dirs"] and not d.startswith('.')
-        ]
-        for file in files:
-            if not file.endswith(tuple(target_extension)):
-                continue
-            with open(os.path.join(root, file), "r") as file_object:
-                content = file_object.read()
-            filename = os.path.join(root, file)[len(repo_path) + 1:]
-            messages.append({
-                "role": "user",
-                "content": f"```{filename}\n{content}```\n"
-            })
+
+    for file_path in logic_utils.enumarate_file_paths(repo_path,
+                                                      target_extension):
+        with open(file_path, "r") as file_object:
+            content = file_object.read()
+        filename = file_path[len(repo_path) + 1:]
+        messages.append({
+            "role": "user",
+            "content": f"```{filename}\n{content}```\n"
+        })
     return messages
 
 
