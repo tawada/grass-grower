@@ -4,6 +4,7 @@ from typing import Union
 import logic
 import services.github
 import services.llm
+from logic import logic_utils
 from utils.logging_utils import log
 
 
@@ -54,24 +55,15 @@ def generate_readme(
 
     services.github.setup_repository(repo, branch)
 
-    # Initialize readme_content as empty string to handle the case when file doesn't exist
-    readme_content = ""
-
     try:
         repo_path = "./downloads/" + repo
-        with open(repo_path + "/README.md", "r") as file_object:
-            readme_content = file_object.read()
+        readme_content = logic_utils.get_file_content(repo_path + "/README.md")
     except FileNotFoundError:
         log(
             "README.md file does not exist. A new README.md will be created with generated content.",
             level="warning",
         )
-        return False
-    except OSError as err:
-        # Catching any other OS-related errors (like file permission issues)
-        # and displaying the error message to the user.
-        log(f"Error while reading README.md: {err}", level="error")
-        return False
+        raise
 
     readme_message = f"```Current README.md\n{readme_content}```"
     messages = logic.generate_messages_from_files(repo, code_lang)
@@ -86,7 +78,7 @@ def generate_readme(
         services.github.checkout_new_branch(repo, "update-readme")
     except FileNotFoundError as err:
         log(f"Error while checking out a new branch: {err}", level="error")
-        return False
+        raise
     except Exception as err:
         log(f"Error to checkout a new branch: {err}", level="error")
         raise

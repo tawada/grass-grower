@@ -24,3 +24,9 @@ def is_target_dir(dir_name: str):
 def is_target_file(file_name: str, target_extension: list[str]):
     """Check if the file is a target file."""
     return file_name.endswith(tuple(target_extension))
+
+
+def get_file_content(file_path: str):
+    """Get the content of a file."""
+    with open(file_path, "r") as file_object:
+        return file_object.read()
