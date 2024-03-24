@@ -105,8 +105,8 @@ def generate_messages_from_files(repo: str, code_lang: str):
     messages = []
     repo_path = get_repo_path(repo)
 
-    for file_path in logic_utils.enumarate_file_paths(repo_path,
-                                                      target_extension):
+    for file_path in logic_utils.enumarate_target_file_paths(
+            repo_path, target_extension):
         with open(file_path, "r") as file_object:
             content = file_object.read()
         filename = file_path[len(repo_path) + 1:]
