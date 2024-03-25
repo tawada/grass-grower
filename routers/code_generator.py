@@ -56,7 +56,7 @@ def generate_readme(
     services.github.setup_repository(repo, branch)
 
     try:
-        repo_path = "./downloads/" + repo
+        repo_path = logic_utils.get_repo_path(repo)
         readme_content = logic_utils.get_file_content(repo_path + "/README.md")
     except FileNotFoundError:
         log(

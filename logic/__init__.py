@@ -10,7 +10,7 @@ from . import logic_utils
 
 def apply_modification(repo, modification):
     """Apply modification"""
-    repo_path = get_repo_path(repo)
+    repo_path = logic_utils.get_repo_path(repo)
     file_path = os.path.join(repo_path, modification['filepath'])
     with open(file_path, "r", newline="") as file_object:
         before_code = file_object.read()
@@ -44,7 +44,7 @@ def generate_modification_from_issue(
 
 def verify_modification(repo: str, modification):
     """Verify modification"""
-    repo_path = get_repo_path(repo)
+    repo_path = logic_utils.get_repo_path(repo)
     file_path = os.path.join(repo_path, modification['filepath'])
     with open(file_path, "r") as file_object:
         before_code = file_object.read()
@@ -103,7 +103,7 @@ def generate_messages_from_files(repo: str, code_lang: str):
     target_extension = extension_dict[code_lang]
 
     messages = []
-    repo_path = get_repo_path(repo)
+    repo_path = logic_utils.get_repo_path(repo)
 
     for file_path in logic_utils.enumarate_target_file_paths(
             repo_path, target_extension):
@@ -122,11 +122,6 @@ def generate_issue_reply_message(repo, issue, modification, commit_message):
     message = "The following changes have been completed.\n\n" + commit_message + "\n"
     message += f"`{modification['filepath']}`\nBefore:\n```\n{modification['before_code']}\n```\nAfter:\n```\n{modification['after_code']}\n```"
     return message
-
-
-def get_repo_path(repo: str):
-    """Get repo path"""
-    return os.path.join("downloads", repo)
 
 
 def validate_text(raw_text: str):

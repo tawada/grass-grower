@@ -35,3 +35,8 @@ def get_file_content(file_path: str):
     """Get the content of a file."""
     with open(file_path, "r") as file_object:
         return file_object.read()
+
+
+def get_repo_path(repo: str):
+    """Get repo path"""
+    return os.path.join("downloads", repo)
