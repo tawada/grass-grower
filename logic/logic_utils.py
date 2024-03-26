@@ -39,4 +39,4 @@ def get_file_content(file_path: str):
 
 def get_repo_path(repo: str):
     """Get repo path"""
-    return os.path.join("downloads", repo)
+    return os.path.join(config["repository_path"], repo)

@@ -4,11 +4,12 @@ import subprocess
 from datetime import datetime
 from typing import List
 
+from config import config
 from schemas import Issue, IssueComment
 from services.github import exceptions, github_utils
 from utils.logging_utils import exception_handler, log
 
-DEFAULT_PATH = "downloads"
+DEFAULT_PATH = config["repository_path"]
 
 
 def exec_command(repo: str,
