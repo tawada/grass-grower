@@ -37,6 +37,17 @@ def get_file_content(file_path: str):
         return file_object.read()
 
 
+def get_file_path(repo: str, file_name: str):
+    """Get the file path in the repository."""
+    return os.path.join(get_repo_path(repo), file_name)
+
+
 def get_repo_path(repo: str):
     """Get repo path"""
     return os.path.join(config["repository_path"], repo)
+
+
+def write_to_file(file_path: str, content: str):
+    """Write content to a file."""
+    with open(file_path, "w") as file_object:
+        file_object.write(content)

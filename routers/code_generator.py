@@ -54,10 +54,10 @@ def generate_readme(
     """Generate README.md documentation for the entire program."""
 
     services.github.setup_repository(repo, branch)
+    file_path = logic_utils.get_file_path(repo, "README.md")
 
     try:
-        repo_path = logic_utils.get_repo_path(repo)
-        readme_content = logic_utils.get_file_content(repo_path + "/README.md")
+        readme_content = logic_utils.get_file_content(file_path)
     except FileNotFoundError:
         log(
             "README.md file does not exist. A new README.md will be created with generated content.",
@@ -84,23 +84,15 @@ def generate_readme(
         raise
 
     validated_text = logic.validate_text(generated_text)
-
-    # Attempt to write the README.md file.
     try:
-        with open(repo_path + "/README.md", "w") as file_object:
-            file_object.write(validated_text)
+        logic_utils.write_to_file(file_path, validated_text)
     except OSError as err:
         log(f"Error while writing to README.md: {err}", level="error")
         services.github.checkout_branch(repo, "main")
-        return False
 
     # Commit the changes
-    res = services.github.commit(repo, "Update README.md")
-    if not res:
-        return False
-    res = services.github.push_repository(repo, "update-readme")
-    if not res:
-        return False
+    services.github.commit(repo, "Update README.md")
+    services.github.push_repository(repo, "update-readme")
     services.github.checkout_branch(repo, "main")
     return True
 
