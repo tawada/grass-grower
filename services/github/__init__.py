@@ -149,7 +149,7 @@ def get_issue_body(repo: str, issue_id: int) -> Issue:
     return parse_issue_body(issue_id, issue_body)
 
 
-def excec_get_issue_comments(repo: str, issue_id: int) -> str:
+def exec_get_issue_comments(repo: str, issue_id: int) -> str:
     """issueのコメントを取得する"""
     res = exec_command(
         repo,
@@ -185,6 +185,8 @@ def parse_github_text(target_text: str,
         if idx % 2 == 0:
             # attribute field
             item = make_dict_from_field_body(field_body, attrs)
+            if not item:
+                break
             items.append(item)
         else:
             # body field
@@ -213,7 +215,7 @@ def split_text_by_borderlines(text: str) -> List[str]:
 
 def get_issue_comments(repo: str, issue_id: int) -> List[IssueComment]:
     """issueのコメントを取得する"""
-    issue_comments = excec_get_issue_comments(repo, issue_id)
+    issue_comments = exec_get_issue_comments(repo, issue_id)
     return parse_issue_comments(issue_comments)
 
 
