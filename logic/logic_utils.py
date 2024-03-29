@@ -1,6 +1,7 @@
 """Utility functions for logic operations."""
 import os
 
+import schemas
 from config import config
 
 
@@ -51,3 +52,54 @@ def write_to_file(file_path: str, content: str):
     """Write content to a file."""
     with open(file_path, "w") as file_object:
         file_object.write(content)
+
+
+def generate_messages_from_issue(issue: schemas.Issue):
+    """Generate LLM messages from issue"""
+    messages = []
+    messages.append({
+        "role": "user",
+        "content": f"```{issue.title}\n{issue.body}```\n"
+    })
+    for comment in issue.comments:
+        messages.append({
+            "role": "user",
+            "content": f"```issue comment\n{comment.body}```\n"
+        })
+    return messages
+
+
+def generate_messages_from_files(repo: str, code_lang: str):
+    """Generate LLM messages from files"""
+
+    extension_dict = {
+        "python": [".py"],
+        "tex": [".tex"],
+    }
+    target_extension = extension_dict[code_lang]
+
+    messages = []
+    repo_path = get_repo_path(repo)
+
+    for file_path in enumarate_target_file_paths(repo_path, target_extension):
+        with open(file_path, "r") as file_object:
+            content = file_object.read()
+        filename = file_path[len(repo_path) + 1:]
+        messages.append({
+            "role": "user",
+            "content": f"```{filename}\n{content}```\n"
+        })
+    return messages
+
+
+def validate_text(raw_text: str):
+    """Validate text"""
+    candidates = ["```markdown\n", "```\n", "```"]
+    validated_text = raw_text
+    for start_text in candidates:
+        if raw_text.startswith(start_text):
+            validated_text = raw_text[len(start_text):]
+            break
+    if validated_text.endswith("```"):
+        validated_text = raw_text[:-len("```")]
+    return validated_text

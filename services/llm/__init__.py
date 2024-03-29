@@ -1,7 +1,7 @@
 """Module for the LLM service."""
 import json
 import os
-from typing import Dict, List, Union
+from typing import Dict, List
 
 import openai
 
@@ -29,7 +29,7 @@ def get_openai_client(api_key: str = None) -> openai.OpenAI:
 def generate_text(
     messages: List[Dict[str, str]],
     openai_client: openai.OpenAI,
-) -> Union[str, None]:
+) -> str:
     """Generates text using the OpenAI API.
 
     Args:
@@ -48,7 +48,7 @@ def generate_json(
     messages: List[Dict[str, str]],
     openai_client: openai.OpenAI,
     retry: int = 0,
-) -> Union[str, None]:
+) -> dict[str, str]:
     """Generates json using the OpenAI API.
 
     Args:
@@ -78,10 +78,10 @@ def generate_json(
                 level="error")
             continue
         try:
-            generated_content = json.loads(generated_content)
-            log(f"Text generated successfully: {json.dumps(generated_content)[:50]}...",
+            generated_json = json.loads(generated_content)
+            log(f"Text generated successfully: {json.dumps(generated_json)[:50]}...",
                 level="info")
-            return generated_content
+            return generated_json
         except json.JSONDecodeError as err:
             err_msg = str(err)
             log(f"Failed to generate json: trial {trial_idx}: {err_msg}",

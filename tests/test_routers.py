@@ -75,7 +75,7 @@ def test_generate_code_from_issue_and_reply(mocker, setup):
     mocker.patch("builtins.open", mocker.mock_open(read_data="test"))
     mocker.patch("services.llm.generate_json",
                  return_value={
-                     "filepath": "test_filepath",
+                     "file_path": "test_file_path",
                      "before_code": "test",
                      "after_code": "test_after_code",
                  })
