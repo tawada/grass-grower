@@ -8,7 +8,7 @@ import openai
 from config import config
 from utils.logging_utils import log
 
-MODEL_NAME = config['openai_model_name']
+MODEL_NAME = config["openai_model_name"]
 
 
 def get_openai_client(api_key: str = None) -> openai.OpenAI:
@@ -18,9 +18,11 @@ def get_openai_client(api_key: str = None) -> openai.OpenAI:
             api_key = os.environ["OPENAI_API_KEY"]
         return openai.OpenAI(api_key=api_key)
     except KeyError as err:
-        log(("OPENAI_API_KEY is not set in environment variables. "
+        log(
+            ("OPENAI_API_KEY is not set in environment variables. "
              "Please set it to use LLM functionalities."),
-            level="error")
+            level="error",
+        )
         raise ValueError(
             "API key must be provided as an argument or in the environment"
         ) from err
@@ -74,13 +76,17 @@ def generate_json(
                 response_format={"type": "json_object"})
         except RuntimeError as err:
             err_msg = str(err)
-            log(f"Failed to generate json: trial {trial_idx}: {err_msg}: ",
-                level="error")
+            log(
+                f"Failed to generate json: trial {trial_idx}: {err_msg}: ",
+                level="error",
+            )
             continue
         try:
             generated_json = json.loads(generated_content)
-            log(f"Text generated successfully: {json.dumps(generated_json)[:50]}...",
-                level="info")
+            log(
+                f"Text generated successfully: {json.dumps(generated_json)[:50]}...",
+                level="info",
+            )
             return generated_json
         except json.JSONDecodeError as err:
             err_msg = str(err)
@@ -118,8 +124,10 @@ def generate_response(
             response_format=response_format,
         )
         generated_content = response.choices[0].message.content
-        log(f"Response generated successfully: {generated_content[:50]}...",
-            level="info")
+        log(
+            f"Response generated successfully: {generated_content[:50]}...",
+            level="info",
+        )
         return generated_content
     except RuntimeError as err:
         log(f"Failed to generate response: {err}", level="error")

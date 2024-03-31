@@ -6,9 +6,11 @@ import services.github
 import services.llm
 from utils.logging_utils import log
 
-from .code_generator import (generate_code_from_issue,
-                             generate_code_from_issue_and_reply,
-                             generate_readme)
+from .code_generator import (
+    generate_code_from_issue,
+    generate_code_from_issue_and_reply,
+    generate_readme,
+)
 
 
 def send_messages_to_system(messages, system_instruction):
@@ -49,14 +51,14 @@ def add_issue(
 
 文体と文法: 文章は明瞭で、文法的に正しいですか？専門用語は適切に使用されていますか？読みやすさを向上させるための提案はありますか？
 
-全体的な印象: 論文全体として、研究の貢献とオリジナリティをどのように評価しますか？論文の強みと弱点は何ですか？"""
+全体的な印象: 論文全体として、研究の貢献とオリジナリティをどのように評価しますか？論文の強みと弱点は何ですか？""",
     }
 
     prompt_summarizing_issue_from_code_lang = {
         "python":
         "You are a programmer of the highest caliber. Please summarize the above GitHub issue text to one sentense as an issue title.",
         "tex":
-        "You are a reviewer of the highest caliber. Please summarize the above issue text to one sentense as an issue title."
+        "You are a reviewer of the highest caliber. Please summarize the above issue text to one sentense as an issue title.",
     }
 
     prompt_generating_issue = prompt_generating_issue_from_code_lang[code_lang]

@@ -23,11 +23,13 @@ def setup_github():
         mocker.patch("services.github.create_issue", return_value=True)
         mocker.patch("services.github.commit", return_value=True)
         mocker.patch("services.github.push_repository", return_value=True)
-        mocker.patch("services.github.get_issue_by_id",
-                     return_value=schemas.Issue(id=1,
-                                                title="test",
-                                                body="test",
-                                                comments=[]))
+        mocker.patch(
+            "services.github.get_issue_by_id",
+            return_value=schemas.Issue(id=1,
+                                       title="test",
+                                       body="test",
+                                       comments=[]),
+        )
         mocker.patch("services.github.reply_issue", return_value=True)
         mocker.patch("services.github.checkout_new_branch", return_value=True)
         mocker.patch("services.github.checkout_branch", return_value=True)
@@ -77,7 +79,7 @@ def setup_llm_detail():
             self.model = model
             self.messages = messages
             if response_format["type"] == "json_object":
-                self.content = "{\"type\": [{\"content\": \"test\"}]}"
+                self.content = '{"type": [{"content": "test"}]}'
             return self
 
         def __str__(self):

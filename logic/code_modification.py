@@ -11,6 +11,7 @@ from . import logic_utils
 @dataclasses.dataclass
 class CodeModification:
     """A class to represent a code modification."""
+
     file_path: str
     before_code: str
     after_code: str
@@ -43,7 +44,7 @@ def generate_modification_from_issue(
         "role":
         "system",
         "content":
-        "Propose a new code modification as JSON format from the whole code and issues. Do not duplicate output if the code has already been changed. The JSON modification includes keys such as 'file_path', 'before_code', 'after_code'. 'before_code' is a part of file.\ne.g.\n```{file_path: 'path/to/file', before_code: 'def func1(aaa: int):\n\"\"\"Output an argment\"\"\"\nprint(aaa)\n', after_code: 'def func1(aaa: int, bbb: int):\n\"\"\"Output two argments\"\"\"\nprint(aaa)\nprint(bbb)\n'}```\n"
+        "Propose a new code modification as JSON format from the whole code and issues. Do not duplicate output if the code has already been changed. The JSON modification includes keys such as 'file_path', 'before_code', 'after_code'. 'before_code' is a part of file.\ne.g.\n```{file_path: 'path/to/file', before_code: 'def func1(aaa: int):\n\"\"\"Output an argment\"\"\"\nprint(aaa)\n', after_code: 'def func1(aaa: int, bbb: int):\n\"\"\"Output two argments\"\"\"\nprint(aaa)\nprint(bbb)\n'}```\n",
     })
     openai_client = services.llm.get_openai_client()
     generated_json = services.llm.generate_json(messages, openai_client)
@@ -70,20 +71,20 @@ def generate_commit_message(repo, issue, modification: CodeModification):
         "role":
         "assistant",
         "content":
-        f"Before:\n{modification.before_code}\nAfter:\n{modification.after_code}"
+        f"Before:\n{modification.before_code}\nAfter:\n{modification.after_code}",
     })
     messages.append({
         "role":
         "system",
         "content":
-        "Output commit message from the issue and the modification."
+        "Output commit message from the issue and the modification.",
     })
     openai_client = services.llm.get_openai_client()
     commit_message: str = services.llm.generate_text(messages, openai_client)
     if "\n" in commit_message:
-        commit_message = commit_message.split("\n")[0].strip("\"")
+        commit_message = commit_message.split("\n")[0].strip('"')
     elif ". " in commit_message:
-        commit_message = commit_message.split(". ")[0].strip("\"")
+        commit_message = commit_message.split(". ")[0].strip('"')
     elif len(commit_message) > 72:
         commit_message = commit_message[:72]
     commit_message += f" (#{issue.id})"

@@ -104,19 +104,25 @@ def test_get_issue_by_id(mocker):
     def get_mock_object2():
         """Return mock object."""
         mock_object = type("MockObject", (object, ), {})
-        setattr(mock_object, "stdout", ("author:\ttest\n"
-                                        "association:\ttest\n"
-                                        "edited:\ttest\n"
-                                        "status:\ttest\n"
-                                        "--\n"
-                                        "body:\ttest_body\n"
-                                        "--").encode("utf-8"))
+        setattr(
+            mock_object,
+            "stdout",
+            ("author:\ttest\n"
+             "association:\ttest\n"
+             "edited:\ttest\n"
+             "status:\ttest\n"
+             "--\n"
+             "body:\ttest_body\n"
+             "--").encode("utf-8"),
+        )
         return mock_object
 
-    mocker.patch("services.github.subprocess.run",
-                 side_effect=[
-                     get_mock_object(),
-                     get_mock_object2(),
-                 ])
+    mocker.patch(
+        "services.github.subprocess.run",
+        side_effect=[
+            get_mock_object(),
+            get_mock_object2(),
+        ],
+    )
     issue = services.github.get_issue_by_id("test/test", 101)
     assert issue
