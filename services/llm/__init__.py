@@ -70,30 +70,33 @@ def generate_json(
         raise ValueError("Retry must be a non-negative integer")
     for trial_idx in range(retry + 1):
         try:
-            generated_content = generate_response(
+            generated_json = generate_json_without_error_handling(
                 messages,
                 openai_client,
-                response_format={"type": "json_object"})
-        except RuntimeError as err:
-            err_msg = str(err)
-            log(
-                f"Failed to generate json: trial {trial_idx}: {err_msg}: ",
-                level="error",
             )
-            continue
-        try:
-            generated_json = json.loads(generated_content)
             log(
                 f"Text generated successfully: {json.dumps(generated_json)[:50]}...",
                 level="info",
             )
             return generated_json
-        except json.JSONDecodeError as err:
-            err_msg = str(err)
-            log(f"Failed to generate json: trial {trial_idx}: {err_msg}",
-                level="error")
+        except (RuntimeError, json.JSONDecodeError) as err:
+            log(
+                f"Failed to generate json: trial {trial_idx}: {err}: ",
+                level="error",
+            )
             continue
     raise RuntimeError("Failed to generate json after multiple retries")
+
+
+def generate_json_without_error_handling(
+    messages: list[dict[str, str]],
+    openai_client: openai.OpenAI,
+) -> dict:
+    """Generates json using the OpenAI API without error handling."""
+    generated_content = generate_response(
+        messages, openai_client, response_format={"type": "json_object"})
+    generated_json = json.loads(generated_content)
+    return generated_json
 
 
 def generate_response(
