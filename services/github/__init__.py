@@ -7,7 +7,6 @@ from typing import List
 from config import config
 from schemas import Issue, IssueComment
 from services.github import exceptions, github_utils
-from utils.logging_utils import exception_handler
 
 DEFAULT_PATH = config["repository_path"]
 
@@ -60,7 +59,6 @@ def create_issue(repo: str, title: str, body: str) -> bool:
     )
 
 
-@exception_handler
 def list_issue_ids(repo: str) -> List[int]:
     """issue idを取得する"""
 
