@@ -286,3 +286,23 @@ def pull_request(
         repo,
         ["gh", "pr", "-B", to_branch, "-b", body, "-t", title],
     )
+
+
+def get_branch(repo: str) -> str:
+    """ブランチを取得する"""
+    res = github_utils.exec_command(
+        repo,
+        ["git", "branch", "--show-current"],
+        capture_output=True,
+    )
+    return res.stdout.decode().strip()
+
+
+def get_default_branch(repo: str) -> str:
+    """デフォルトブランチを取得する"""
+    res = github_utils.exec_command(
+        repo,
+        ["git", "symbolic-ref", "--short", "HEAD"],
+        capture_output=True,
+    )
+    return res.stdout.decode().strip()
