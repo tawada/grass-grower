@@ -25,7 +25,7 @@ class MissingIssueIDError(Exception):
 def parse_git_repo(value: str) -> str:
     """Parse the repository argument"""
     # Username and repository regex (simplified)
-    valid_pattern = r"^[a-zA-Z0-9-]+/[a-zA-Z0-9-_]+$"
+    valid_pattern = r"^[a-zA-Z0-9-]+/(?!.*\.\.)(?!.*\.$)(?!^\.)[a-zA-Z0-9_.-]{1,100}$"
     if not re.match(valid_pattern, value):
         raise ArgumentTypeError("Invalid repository format. Use 'owner/repo'.")
     return value
