@@ -78,7 +78,3 @@ Future updates aim to address existing limitations and introduce:
 ## Contributing
 
 We welcome contributions from the community! Please see the repository guidelines for more information on how to contribute.
-
-## License
-
-Grass Grower is open-sourced under the MIT License. See the LICENSE file for legal information.
