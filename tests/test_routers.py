@@ -11,6 +11,9 @@ def test_add_issue(
     """Test add_issue() function."""
     setup(mocker)
     mocker.patch("builtins.open", mocker.mock_open(read_data="test"))
+    mocker.patch("logic.logic_utils.os.walk",
+                 return_value=[("test_dir", ["test_dir2"], ["test_file.py"]),
+                               ("test_dir/test_dir2", [], ["test_file2.py"])])
     routers.add_issue("test_owner/test_repo", "python")
 
 
