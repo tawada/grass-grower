@@ -1,25 +1,26 @@
 """ Logging utilities for the project. """
-import logging
-from functools import wraps
-from logging import getLogger
+from loguru import logger
 
 
 def setup_logging():
     """Setup logging for the project."""
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(levelname)s - %(process)d - %(threadName)s - %(message)s",
-        handlers=[
-            logging.FileHandler("debug.log"),  # Log to a file
-            logging.StreamHandler(),  # Log to standard output
-        ],
-    )
+    logger.remove()  # Remove default handler
+    logger.add(
+        # Log file path
+        "debug.log",
+        # New file is created each time the log file reaches 100 MB
+        rotation="100 MB",
+        # Logs older than 10 days are deleted
+        retention="10 days",
+        level="INFO")
+    # You can also add stdout logging with custom format
+    logger.add(sink=lambda msg: print(msg, flush=True),
+               format="{time} - {level} - {message}",
+               level="INFO")
 
 
 def log(message, level="info", **kwargs):
     """Log a message to the logger."""
-    logger = getLogger(__name__)
-
     extra_info = " ".join(f"{key}={value}" for key, value in kwargs.items())
     full_message = f"{message} {extra_info}".strip()
 
