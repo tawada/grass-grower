@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 openai = "*"
+loguru = "*"
 
 [dev-packages]
 codecov = "*"
