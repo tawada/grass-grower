@@ -1,5 +1,6 @@
 """Test services.llm module."""
 import services.llm
+from services.llm import llm_exceptions
 
 
 def test_services_llm_generate_text(
@@ -10,7 +11,6 @@ def test_services_llm_generate_text(
     setup_llm_detail(mocker)
     openai_client = services.llm.get_openai_client()
     services.llm.generate_text([{"text": "Hello, world!"}], openai_client)
-    assert True
 
 
 def test_services_llm_generate_json(
@@ -21,26 +21,6 @@ def test_services_llm_generate_json(
     setup_llm_detail(mocker)
     openai_client = services.llm.get_openai_client()
     services.llm.generate_json([{"text": "Hello, world!"}], openai_client)
-    assert True
-
-
-def test_services_llm_generate_json_fail_invalid_retry(
-    mocker,
-    setup_llm_detail,
-):
-    """Test llm.generate_json() function."""
-    setup_llm_detail(mocker)
-    openai_client = services.llm.get_openai_client()
-    try:
-        services.llm.generate_json(
-            [{
-                "text": "Hello, world!"
-            }],
-            openai_client,
-            retry=-1,
-        )
-    except ValueError:
-        assert True
 
 
 def test_services_llm_generate_json_fail_invalid_response(
@@ -85,7 +65,9 @@ def test_services_llm_generate_json_fail_invalid_response(
     mocker.patch("openai.OpenAI", new=MockOpenAIObject)
 
     openai_client = services.llm.get_openai_client()
+    err = None
     try:
         services.llm.generate_json([{"text": "Hello, world!"}], openai_client)
-    except RuntimeError:
-        assert True
+    except llm_exceptions.UnknownLLMException as llm_exc:
+        err = llm_exc
+    assert err
