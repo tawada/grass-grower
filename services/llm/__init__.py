@@ -8,6 +8,8 @@ import openai
 from config import config
 from utils.logging_utils import log
 
+from . import llm_exceptions
+
 MODEL_NAME = config["openai_model_name"]
 
 
@@ -23,11 +25,12 @@ def get_openai_client(api_key: str = None) -> openai.OpenAI:
              "Please set it to use LLM functionalities."),
             level="error",
         )
-        raise ValueError(
+        raise llm_exceptions.NotFoundAPIKeyException(
             "API key must be provided as an argument or in the environment"
         ) from err
 
 
+@llm_exceptions.retry_handler(0)
 def generate_text(
     messages: List[Dict[str, str]],
     openai_client: openai.OpenAI,
@@ -46,10 +49,10 @@ def generate_text(
                              response_format={"type": "text"})
 
 
+@llm_exceptions.retry_handler(3)
 def generate_json(
     messages: List[Dict[str, str]],
     openai_client: openai.OpenAI,
-    retry: int = 0,
 ) -> dict[str, str]:
     """Generates json using the OpenAI API.
 
@@ -66,26 +69,23 @@ def generate_json(
         RuntimeError: If the request fails after multiple retries.
     """
     log(f"Generating json with model: {MODEL_NAME}", level="info")
-    if retry < 0:
-        raise ValueError("Retry must be a non-negative integer")
-    for trial_idx in range(retry + 1):
-        try:
-            generated_json = generate_json_without_error_handling(
-                messages,
-                openai_client,
-            )
-            log(
-                f"Text generated successfully: {json.dumps(generated_json)[:50]}...",
-                level="info",
-            )
-            return generated_json
-        except (RuntimeError, json.JSONDecodeError) as err:
-            log(
-                f"Failed to generate json: trial {trial_idx}: {err}: ",
-                level="error",
-            )
-            continue
-    raise RuntimeError("Failed to generate json after multiple retries")
+    try:
+        generated_json = generate_json_without_error_handling(
+            messages,
+            openai_client,
+        )
+        log(
+            f"Text generated successfully: {json.dumps(generated_json)[:50]}...",
+            level="info",
+        )
+        return generated_json
+    except (RuntimeError, json.JSONDecodeError) as err:
+        log(
+            f"Failed to generate json: {err}: ",
+            level="error",
+        )
+        raise llm_exceptions.UnknownLLMException(
+            "An unknown error occurred while generating the response") from err
 
 
 def generate_json_without_error_handling(
