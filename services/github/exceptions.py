@@ -34,6 +34,17 @@ class GitNothingToCommitException(GitException):
     message = "nothing to commit, working tree clean"
 
 
+class GitNoRefFetchedException(GitException):
+    """
+    Exception raised for errors in the Git API.
+
+    Your configuration specifies to merge with the ref 'refs/heads/
+    <branch-name>' from the remote, but no such ref was fetched.
+    """
+
+    message = "no such ref was fetched"
+
+
 class GitHubException(CommandExecutionException):
     """Base exception raised for errors in the GitHub API."""
 
@@ -41,7 +52,7 @@ class GitHubException(CommandExecutionException):
 class GitHubConnectionException(GitHubException):
     """Exception raised for errors in the GitHub API connection."""
 
-    message = "Could not resolve hostname github.com: Name or service not known"
+    message = "Could not resolve hostname github.com"
 
 
 class GitHubRepoNotFoundException(GitHubException):
@@ -54,6 +65,7 @@ exception_keywords: dict[str, type[CommandExecutionException]] = {}
 _src: list[type[CommandExecutionException]] = [
     GitBranchAlreadyExistsException,
     GitNothingToCommitException,
+    GitNoRefFetchedException,
     GitHubConnectionException,
     GitHubRepoNotFoundException,
 ]
