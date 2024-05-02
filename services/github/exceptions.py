@@ -45,6 +45,24 @@ class GitNoRefFetchedException(GitException):
     message = "no such ref was fetched"
 
 
+class GitNoRemoteException(GitException):
+    """Exception raised for errors in the Git API."""
+
+    message = "No remote"
+
+
+class GitNoUpstreamException(GitException):
+    """Exception raised for errors in the Git API."""
+
+    message = "No upstream"
+
+
+class GitNoBranchException(GitException):
+    """Exception raised for errors in the Git API."""
+
+    message = "No branch"
+
+
 class GitHubException(CommandExecutionException):
     """Base exception raised for errors in the GitHub API."""
 
@@ -59,6 +77,24 @@ class GitHubRepoNotFoundException(GitHubException):
     """Exception raised for errors in the GitHub API connection."""
 
     message = "Repository not found."
+
+
+class GitHubNoChangesException(GitHubException):
+    """Exception raised for errors in the GitHub API connection."""
+
+    message = "No changes"
+
+
+class GitHubNoPullRequestException(GitHubException):
+    """Exception raised for errors in the GitHub API connection."""
+
+    message = "No pull request found"
+
+
+class GitHubNoIssuesException(GitHubException):
+    """Exception raised for errors in the GitHub API connection."""
+
+    message = "No issues found"
 
 
 exception_keywords: dict[str, type[CommandExecutionException]] = {}
