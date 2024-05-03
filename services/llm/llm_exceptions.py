@@ -23,15 +23,10 @@ class NotFoundAPIKeyException(LLMException):
     message = "API key must"
 
 
-def retry_handler(retry_or_func=0):
-    """Decorator to retry a function call."""
+def get_retry_decorator(retry: int):
+    """Get a retry decorator with a specified number of retries."""
 
-    if callable(retry_or_func):
-        func = retry_or_func
-        return retry_handler()(func)
-    retry = retry_or_func
-
-    def decorator(func):
+    def retry_decorator(func):
 
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -44,4 +39,14 @@ def retry_handler(retry_or_func=0):
 
         return wrapper
 
-    return decorator
+    return retry_decorator
+
+
+def retry_handler(retry_or_func=0):
+    """Decorator to retry a function call."""
+
+    if callable(retry_or_func):
+        func = retry_or_func
+        return retry_handler()(func)
+    retry = retry_or_func
+    return get_retry_decorator(retry)
