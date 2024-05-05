@@ -39,4 +39,8 @@ jobs:
     - name: After build
       if: ${{ always() }}
       run: |
-        ./cc-test-reporter after-build --exit-code ${{ job.status }} --id ${{ secrets.CC_TEST_REPORTER_ID }} --coverage-input-type coverage.xml
+        EXIT_STATUS=0  # デフォルトを成功（0）に設定
+        if [ "${{ job.status }}" != "success" ]; then
+          EXIT_STATUS=1  # 失敗した場合は1に設定
+        fi
+        ./cc-test-reporter after-build --exit-code $EXIT_STATUS --id ${{ secrets.CC_TEST_REPORTER_ID }} --coverage-input-type coverage.xml
