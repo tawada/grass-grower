@@ -15,6 +15,7 @@ pytest-cov = "*"
 isort = "*"
 black = "*"
 pytest-mock = "*"
+coverage = "*"
 
 [requires]
 python_version = "3.11"
