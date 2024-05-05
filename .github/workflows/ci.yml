@@ -43,4 +43,4 @@ jobs:
         if [ "${{ job.status }}" != "success" ]; then
           EXIT_STATUS=1  # 失敗した場合は1に設定
         fi
-        ./cc-test-reporter after-build --exit-code $EXIT_STATUS --id ${{ secrets.CC_TEST_REPORTER_ID }} --coverage-input-type coverage.xml
+        ./cc-test-reporter after-build --exit-code $EXIT_STATUS --id ${{ secrets.CC_TEST_REPORTER_ID }} --coverage-input-type coverage.py
