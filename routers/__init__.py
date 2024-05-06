@@ -1,4 +1,5 @@
 """Router for the API."""
+import random
 from datetime import datetime
 
 import logic
@@ -141,5 +142,14 @@ def grow_grass(repo: str, branch: str = "main", code_lang: str = "python"):
         repo, branch)
     if last_commit_datetime.date() == datetime.now().date():
         return
+
+    issue_ids: list[int] = services.github.list_issue_ids(repo)
+    random_id: int = random.randint(0, len(issue_ids) - 1)
+    try:
+        generate_code_from_issue_and_reply(issue_ids[random_id], repo, branch,
+                                           code_lang)
+        return
+    except Exception as err:
+        pass
     # add_issueする
     add_issue(repo, branch, code_lang)
