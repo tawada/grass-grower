@@ -2,6 +2,8 @@
 import random
 from datetime import datetime
 
+from loguru import logger
+
 import logic
 import services.github
 import services.llm
@@ -140,6 +142,8 @@ def grow_grass(repo: str, branch: str = "main", code_lang: str = "python"):
     # 最後のコミットの日付を取得する
     last_commit_datetime = services.github.get_datetime_of_last_commit(
         repo, branch)
+    logger.info(f"Last commit datetime: {last_commit_datetime}")
+    logger.info(f"Today's date: {datetime.now()}")
     if last_commit_datetime.date() == datetime.now().date():
         return
 

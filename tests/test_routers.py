@@ -75,6 +75,16 @@ def test_grow_grass_yesterday(mocker, setup):
         "services.github.get_datetime_of_last_commit",
         return_value=datetime.now() - timedelta(days=1),
     )
+    mocker.patch("builtins.open", mocker.mock_open(read_data="test"))
+    mocker.patch(
+        "services.llm.generate_json",
+        return_value={
+            "file_path": "test_file_path",
+            "before_code": "test",
+            "after_code": "test_after_code",
+        },
+    )
+    mocker.patch("services.github.list_issue_ids", return_value=[1])
     routers.grow_grass("test_owner/test_repo", "main", "python")
 
 
