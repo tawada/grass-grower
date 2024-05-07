@@ -1,0 +1,29 @@
+# Run script in the action
+
+inputs:
+  action:
+    description: 'Action to perform'
+    required: true
+    default: 'add_issue'
+  owner:
+    description: 'Owner of the repository'
+    required: true
+  repository:
+    description: 'Repository name'
+    required: true
+  branch:
+    description: 'Branch name'
+    required: false
+    default: 'main'
+  issue:
+    description: 'Issue number'
+    required: false
+    default: '0'
+
+runs:
+  using: 'ubuntu-latest'
+  steps:
+    - uses: actions/checkout@v2
+    - name: Run script
+      run: |
+        python3 main.py ${{ inputs.action }} --repo {{ inputs.owner }}/{{ inputs.repository }} --branch ${{ inputs.branch }} --issue-id ${{ inputs.issue }}
