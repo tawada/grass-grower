@@ -23,6 +23,12 @@ class NotFoundAPIKeyException(LLMException):
     message = "API key must"
 
 
+class LLMJSONParseException(LLMException):
+    """Exception raised for errors in the LLM package."""
+
+    message = "Failed to parse JSON response."
+
+
 def retry_wrapper(func, retry: int, args, kwargs):
     """Retry a function call."""
 

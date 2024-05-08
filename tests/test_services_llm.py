@@ -68,6 +68,6 @@ def test_services_llm_generate_json_fail_invalid_response(
     err = None
     try:
         services.llm.generate_json([{"text": "Hello, world!"}], openai_client)
-    except llm_exceptions.UnknownLLMException as llm_exc:
+    except llm_exceptions.LLMJSONParseException as llm_exc:
         err = llm_exc
     assert err
