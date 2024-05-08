@@ -70,7 +70,7 @@ def generate_json(
     """
     log(f"Generating json with model: {MODEL_NAME}", level="info")
     try:
-        generated_json = generate_json_without_error_handling(
+        generated_json = generate_json_with_parsing(
             messages,
             openai_client,
         )
@@ -79,7 +79,9 @@ def generate_json(
             level="info",
         )
         return generated_json
-    except (RuntimeError, json.JSONDecodeError) as err:
+    # except llm_exceptions.LLMJSONParseException:
+    #     raise
+    except RuntimeError as err:
         log(
             f"Failed to generate json: {err}: ",
             level="error",
@@ -88,15 +90,27 @@ def generate_json(
             "An unknown error occurred while generating the response") from err
 
 
-def generate_json_without_error_handling(
+def generate_json_with_parsing(
     messages: list[dict[str, str]],
     openai_client: openai.OpenAI,
 ) -> dict:
-    """Generates json using the OpenAI API without error handling."""
+    """Generates json using the OpenAI API and parses the response."""
     generated_content = generate_response(
         messages, openai_client, response_format={"type": "json_object"})
-    generated_json = json.loads(generated_content)
-    return generated_json
+    return parse_json_response(generated_content)
+
+
+def parse_json_response(generated_content: str) -> dict:
+    """Parses the json response from a string.
+
+    Handles JSONDecodeError by logging an error message and returning
+    an empty dict or raising a more specific exception.
+    """
+    try:
+        return json.loads(generated_content)
+    except json.JSONDecodeError as err:
+        log(f"Failed to parse JSON response: {err}", level="error")
+        raise llm_exceptions.LLMJSONParseException("Invalid JSON response.")
 
 
 def generate_response(
