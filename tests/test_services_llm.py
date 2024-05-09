@@ -1,4 +1,6 @@
 """Test services.llm module."""
+import pytest
+
 import services.llm
 from services.llm import llm_exceptions
 
@@ -65,9 +67,5 @@ def test_services_llm_generate_json_fail_invalid_response(
     mocker.patch("openai.OpenAI", new=MockOpenAIObject)
 
     openai_client = services.llm.get_openai_client()
-    err = None
-    try:
+    with pytest.raises(llm_exceptions.LLMJSONParseException):
         services.llm.generate_json([{"text": "Hello, world!"}], openai_client)
-    except llm_exceptions.LLMJSONParseException as llm_exc:
-        err = llm_exc
-    assert err

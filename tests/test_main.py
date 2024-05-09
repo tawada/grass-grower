@@ -1,4 +1,5 @@
 """Test main.py"""
+import pytest
 
 import main
 from main import MissingIssueIDError
@@ -15,34 +16,22 @@ def test_parse_arguments_valid():
 def test_parse_arguments_invalid_action():
     """Test parse_arguments() with invalid action"""
     args = ["invalid_action"]
-    has_err = None
-    try:
+    with pytest.raises(SystemExit):
         main.parse_arguments(args)
-    except SystemExit as err:
-        has_err = err
-    assert has_err
 
 
 def test_parse_arguments_invalid_issue_id():
     """Test parse_arguments() with invalid issue_id"""
     args = ["update_issue"]
-    has_err = None
-    try:
+    with pytest.raises(MissingIssueIDError):
         main.parse_arguments(args)
-    except MissingIssueIDError as err:
-        has_err = err
-    assert has_err
 
 
 def test_parse_arguments_invalid_repository():
     """Test parse_arguments() with invalid repository"""
     args = ["add_issue", "--repo", "unparsable_repository"]
-    has_err = None
-    try:
+    with pytest.raises(SystemExit):
         main.parse_arguments(args)
-    except SystemExit as err:
-        has_err = err
-    assert has_err
 
 
 def test_main_add_issue(mocker, setup):
@@ -56,21 +45,13 @@ def test_main_update_issue_fail_without_issue_id(mocker, setup):
     """Test main() with action 'update_issue'"""
     setup(mocker)
     args = ["update_issue"]
-    has_err = None
-    try:
+    with pytest.raises(SystemExit):
         main.main(args)
-    except SystemExit as err:
-        has_err = err
-    assert has_err
 
 
 def test_main_update_issue_fail_invalid_issue_id(mocker, setup):
     """Test main() with action 'update_issue'"""
     setup(mocker)
     args = ["update_issue", "--issue-id", "invalid_issue_id"]
-    has_err = None
-    try:
+    with pytest.raises(SystemExit):
         main.main(args)
-    except SystemExit as err:
-        has_err = err
-    assert has_err

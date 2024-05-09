@@ -1,6 +1,8 @@
 """Test routers.py module."""
 from datetime import datetime, timedelta
 
+import pytest
+
 import routers
 
 
@@ -117,10 +119,6 @@ def test_generate_code_from_issue_and_reply_failed(mocker, setup):
             "after_code": "test",
         },
     )
-    err = None
-    try:
+    with pytest.raises(RuntimeError):
         routers.generate_code_from_issue_and_reply(1, "test_owner/test_repo",
                                                    "main", "python")
-    except RuntimeError as runtime_err:
-        err = runtime_err
-    assert err is not None

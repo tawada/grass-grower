@@ -1,6 +1,8 @@
 """Test services.github module."""
 import subprocess
 
+import pytest
+
 import services.github
 import services.github.exceptions
 
@@ -16,7 +18,6 @@ def test_services_github_setup_repository_exist(mocker):
         return_value=True,
     )
     services.github.setup_repository("test/test")
-    assert True
 
 
 def test_services_github_setup_repository_not_exist(mocker):
@@ -30,7 +31,6 @@ def test_services_github_setup_repository_not_exist(mocker):
         return_value=True,
     )
     services.github.setup_repository("test/test")
-    assert True
 
 
 def test_services_github_setup_repository_clone_fail(mocker):
@@ -43,11 +43,8 @@ def test_services_github_setup_repository_clone_fail(mocker):
         "services.github.subprocess.run",
         side_effect=subprocess.CalledProcessError(402, "test"),
     )
-    try:
+    with pytest.raises(services.github.exceptions.CommandExecutionException):
         services.github.setup_repository("test/test")
-        assert False
-    except services.github.exceptions.CommandExecutionException:
-        assert True
 
 
 def test_services_github_create_issue(mocker):
@@ -61,7 +58,6 @@ def test_services_github_create_issue(mocker):
         return_value=True,
     )
     services.github.create_issue("test/test", "test", "test")
-    assert True
 
 
 def test_services_github_list_issue_ids_exec_command_success(mocker):
