@@ -5,14 +5,14 @@ import schemas
 from config import config
 
 
-def enumarate_target_file_paths(repo_path: str, target_extension: list[str]):
+def enumerate_target_file_paths(repo_path: str, target_extension: list[str]):
     """Enumerate target files in the repository."""
-    for file_path in enumarate_file_paths(repo_path):
+    for file_path in enumerate_file_paths(repo_path):
         if is_target_file(file_path, target_extension):
             yield file_path
 
 
-def enumarate_file_paths(repo_path: str):
+def enumerate_file_paths(repo_path: str):
     """Enumerate all files in the repository."""
     for root, dirs, files in os.walk(repo_path):
         # Limit the directories to explore
@@ -81,7 +81,7 @@ def generate_messages_from_files(repo: str, code_lang: str):
     messages = []
     repo_path = get_repo_path(repo)
 
-    for file_path in enumarate_target_file_paths(repo_path, target_extension):
+    for file_path in enumerate_target_file_paths(repo_path, target_extension):
         with open(file_path, "r") as file_object:
             content = file_object.read()
         filename = file_path[len(repo_path) + 1:]
