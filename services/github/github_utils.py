@@ -9,9 +9,10 @@ from utils.logging_utils import log
 DEFAULT_PATH = config["repository_path"]
 
 
-def exec_command(repo: str,
-                 command: list[str],
-                 capture_output: bool = False) -> subprocess.CompletedProcess:
+def exec_git_command(
+        repo: str,
+        command: list[str],
+        capture_output: bool = False) -> subprocess.CompletedProcess:
     """
     Execute a shell command within the specified git repository path.
     If capture_output is True, the function returns a subprocess.CompletedProcess object.
@@ -40,11 +41,11 @@ def exec_command(repo: str,
         raise exception(error_message) from err
 
 
-def exec_command_and_response_bool(repo: str,
-                                   command: list[str],
-                                   capture_output: bool = False) -> bool:
+def exec_git_command_and_response_bool(repo: str,
+                                       command: list[str],
+                                       capture_output: bool = False) -> bool:
     """This function executes a shell command within the specified git repository path."""
-    return bool(exec_command(repo, command, capture_output))
+    return bool(exec_git_command(repo, command, capture_output))
 
 
 def exists_repo(base_path: str, repo: str) -> bool:

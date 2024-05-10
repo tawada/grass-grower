@@ -28,7 +28,7 @@ def clone_repository(repo: str) -> bool:
     """Clone the repository."""
     github_utils.make_owner_dir(DEFAULT_PATH, repo)
     try:
-        return github_utils.exec_command_and_response_bool(
+        return github_utils.exec_git_command_and_response_bool(
             repo[:repo.index("/")],
             ["git", "clone", "git@github.com:" + repo],
             True,
@@ -41,7 +41,7 @@ def clone_repository(repo: str) -> bool:
 def pull_repository(repo: str) -> bool:
     """リポジトリをpullする"""
     try:
-        return github_utils.exec_command_and_response_bool(
+        return github_utils.exec_git_command_and_response_bool(
             repo,
             ["git", "pull"],
             True,
@@ -53,7 +53,7 @@ def pull_repository(repo: str) -> bool:
 
 def create_issue(repo: str, title: str, body: str) -> bool:
     """Create a new issue on GitHub."""
-    return github_utils.exec_command_and_response_bool(
+    return github_utils.exec_git_command_and_response_bool(
         repo,
         ["gh", "issue", "create", "-t", title, "-b", body],
     )
@@ -62,7 +62,7 @@ def create_issue(repo: str, title: str, body: str) -> bool:
 def list_issue_ids(repo: str) -> List[int]:
     """issue idを取得する"""
 
-    res = github_utils.exec_command(
+    res = github_utils.exec_git_command(
         repo,
         ["gh", "issue", "list"],
         capture_output=True,
@@ -83,10 +83,10 @@ def get_issue_by_id(repo: str, issue_id: int) -> Issue:
     return issue
 
 
-def exec_get_issue_body(repo: str, issue_id: int) -> str:
+def get_issue_body_content(repo: str, issue_id: int) -> str:
     """issueの本文を取得する"""
     try:
-        res = github_utils.exec_command(
+        res = github_utils.exec_git_command(
             repo,
             ["gh", "issue", "view", str(issue_id)],
             capture_output=True,
@@ -107,13 +107,13 @@ def parse_issue_body(issue_id: int, issue_body: str) -> Issue:
 
 def get_issue_body(repo: str, issue_id: int) -> Issue:
     """issueの本文を取得する"""
-    issue_body = exec_get_issue_body(repo, issue_id)
+    issue_body = get_issue_body_content(repo, issue_id)
     return parse_issue_body(issue_id, issue_body)
 
 
-def exec_get_issue_comments(repo: str, issue_id: int) -> str:
+def get_issue_comments_content(repo: str, issue_id: int) -> str:
     """issueのコメントを取得する"""
-    res = github_utils.exec_command(
+    res = github_utils.exec_git_command(
         repo,
         ["gh", "issue", "view", str(issue_id), "-c"],
         capture_output=True,
@@ -188,13 +188,13 @@ def split_text_by_borderlines(text: str) -> List[str]:
 
 def get_issue_comments(repo: str, issue_id: int) -> List[IssueComment]:
     """issueのコメントを取得する"""
-    issue_comments = exec_get_issue_comments(repo, issue_id)
+    issue_comments = get_issue_comments_content(repo, issue_id)
     return parse_issue_comments(issue_comments)
 
 
 def reply_issue(repo: str, issue_id: int, body: str) -> bool:
     """issueに返信する"""
-    return github_utils.exec_command_and_response_bool(
+    return github_utils.exec_git_command_and_response_bool(
         repo,
         ["gh", "issue", "comment",
          str(issue_id), "-b", body],
@@ -203,7 +203,7 @@ def reply_issue(repo: str, issue_id: int, body: str) -> bool:
 
 def checkout_branch(repo: str, branch_name: str) -> bool:
     """ブランチをチェックアウトする"""
-    return github_utils.exec_command_and_response_bool(
+    return github_utils.exec_git_command_and_response_bool(
         repo,
         ["git", "checkout", branch_name],
     )
@@ -212,7 +212,7 @@ def checkout_branch(repo: str, branch_name: str) -> bool:
 def checkout_new_branch(repo: str, branch_name: str) -> bool:
     """新しいブランチを作成する"""
     try:
-        return github_utils.exec_command_and_response_bool(
+        return github_utils.exec_git_command_and_response_bool(
             repo,
             ["git", "checkout", "-b", branch_name],
             capture_output=True,
@@ -224,7 +224,7 @@ def checkout_new_branch(repo: str, branch_name: str) -> bool:
 
 def commit(repo: str, message: str) -> bool:
     """コミットする"""
-    return github_utils.exec_command_and_response_bool(
+    return github_utils.exec_git_command_and_response_bool(
         repo,
         ["git", "commit", "-a", "-m", message],
     )
@@ -233,7 +233,7 @@ def commit(repo: str, message: str) -> bool:
 def push_repository(repo: str, branch_name: str) -> bool:
     """リポジトリをpushする"""
     try:
-        return github_utils.exec_command_and_response_bool(
+        return github_utils.exec_git_command_and_response_bool(
             repo,
             ["git", "push", "origin", branch_name],
             capture_output=True,
@@ -245,7 +245,7 @@ def push_repository(repo: str, branch_name: str) -> bool:
 
 def delete_branch(repo: str, branch_name: str) -> bool:
     """ブランチを削除する"""
-    return github_utils.exec_command_and_response_bool(
+    return github_utils.exec_git_command_and_response_bool(
         repo,
         ["git", "branch", "-D", branch_name],
     )
@@ -282,7 +282,7 @@ def pull_request(
     body: str,
 ) -> bool:
     """プルリクエストを作成する"""
-    return github_utils.exec_command_and_response_bool(
+    return github_utils.exec_git_command_and_response_bool(
         repo,
         ["gh", "pr", "-B", to_branch, "-b", body, "-t", title],
     )
@@ -290,7 +290,7 @@ def pull_request(
 
 def get_branch(repo: str) -> str:
     """ブランチを取得する"""
-    res = github_utils.exec_command(
+    res = github_utils.exec_git_command(
         repo,
         ["git", "branch", "--show-current"],
         capture_output=True,
@@ -300,7 +300,7 @@ def get_branch(repo: str) -> str:
 
 def get_default_branch(repo: str) -> str:
     """デフォルトブランチを取得する"""
-    res = github_utils.exec_command(
+    res = github_utils.exec_git_command(
         repo,
         ["git", "symbolic-ref", "--short", "HEAD"],
         capture_output=True,
