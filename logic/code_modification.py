@@ -17,9 +17,9 @@ class CodeModification:
     after_code: str
 
 
-def apply_modification(repo, modification: CodeModification):
+def apply_modification(repo_name: str, modification: CodeModification) -> bool:
     """Apply modification"""
-    repo_path = logic_utils.get_repo_path(repo)
+    repo_path = logic_utils.get_repo_path(repo_name)
     file_path = os.path.join(repo_path, modification.file_path)
     with open(file_path, "r", newline="") as file_object:
         before_code = file_object.read()

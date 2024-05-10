@@ -70,7 +70,7 @@ def generate_json(
     """
     log(f"Generating json with model: {MODEL_NAME}", level="info")
     try:
-        generated_json = generate_json_with_parsing(
+        generated_json = generate_and_parse_json(
             messages,
             openai_client,
         )
@@ -90,7 +90,7 @@ def generate_json(
             "An unknown error occurred while generating the response") from err
 
 
-def generate_json_with_parsing(
+def generate_and_parse_json(
     messages: list[dict[str, str]],
     openai_client: openai.OpenAI,
 ) -> dict:
