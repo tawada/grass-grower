@@ -19,6 +19,11 @@ def setup_repository(repo: str, branch_name: str = "main"):
         clone_repository(repo)
     else:
         # リポジトリが存在する場合はpullする
+        branch = get_branch(repo)
+        default_branch = get_default_branch(repo)
+        if branch != default_branch:
+            # ブランチが異なる場合はデフォルトブランチに戻す
+            checkout_branch(repo, default_branch)
         pull_repository(repo)
     # リポジトリのブランチを指定する
     checkout_branch(repo, branch_name)
