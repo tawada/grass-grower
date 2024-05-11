@@ -1,5 +1,6 @@
 """Router for the API."""
 import random
+import re
 from datetime import datetime
 
 from loguru import logger
@@ -9,11 +10,7 @@ import services.github
 import services.llm
 from utils.logging_utils import log
 
-from .code_generator import (
-    generate_code_from_issue,
-    generate_code_from_issue_and_reply,
-    generate_readme,
-)
+from .code_generator import generate_code_from_issue_and_reply
 
 
 def send_messages_to_system(messages, system_instruction):
@@ -68,6 +65,12 @@ def add_issue(
     prompt_summarizing_issue = prompt_summarizing_issue_from_code_lang[
         code_lang]
 
+    if not validate_repo_name(repo):
+        log("Invalid repository format. The expected format is 'owner/repo'.",
+            level="error")
+        raise ValueError(
+            "Invalid repository format. The expected format is 'owner/repo'.")
+
     services.github.setup_repository(repo, branch)
     messages = logic.generate_messages_from_files(repo, code_lang)
     issue_body = send_messages_to_system(
@@ -83,6 +86,12 @@ def add_issue(
     )
     issue_title = issue_title.strip().strip('"`').strip("'")
     services.github.create_issue(repo, issue_title, issue_body)
+
+
+def validate_repo_name(repo: str) -> bool:
+    """Validate the GitHub repository name format."""
+    pattern = r"^[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+$"
+    return re.match(pattern, repo) is not None
 
 
 def update_issue(
@@ -154,6 +163,6 @@ def grow_grass(repo: str, branch: str = "main", code_lang: str = "python"):
                                            code_lang)
         return
     except Exception as err:
-        pass
+        logger.error(err)
     # add_issueする
     add_issue(repo, branch, code_lang)
