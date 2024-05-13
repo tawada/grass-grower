@@ -15,7 +15,16 @@ def test_services_github_setup_repository_exist(mocker):
     )
     mocker.patch(
         "services.github.subprocess.run",
-        return_value=True,
+        side_effect=[
+            subprocess.CompletedProcess(
+                args=["git", "branch", "--show-current"],
+                returncode=0,
+                stdout=b'test_branch'),
+            subprocess.CompletedProcess(
+                args=["git", "symbolic-ref", "--short", "HEAD"],
+                returncode=0,
+                stdout=b'test_branch'), True, True
+        ],
     )
     services.github.setup_repository("test/test")
 
