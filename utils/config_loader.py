@@ -35,5 +35,5 @@ def get_default_config():
     return {
         "repository_path": "downloads",
         "exclude_dirs": ["__pycache__", ".git", "downloads"],
-        "openai_model_name": "gpt-4-0125-preview",
+        "openai_model_name": "gpt-4o",
     }
