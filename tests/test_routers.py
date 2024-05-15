@@ -39,8 +39,8 @@ def test_generate_code_from_issue(mocker, setup):
     """Test generate_code_from_issue() function."""
     setup(mocker)
     mocker.patch("builtins.open", mocker.mock_open(read_data="test"))
-    routers.code_generator.generate_code_from_issue(1, "test_owner/test_repo", "main",
-                                     "python")
+    routers.code_generator.generate_code_from_issue(1, "test_owner/test_repo",
+                                                    "main", "python")
 
 
 def test_summarize_issue(mocker, setup):
@@ -53,14 +53,17 @@ def test_generate_readme(mocker, setup):
     """Test generate_readme() function."""
     setup(mocker)
     mocker.patch("builtins.open", mocker.mock_open(read_data="test"))
-    routers.code_generator.generate_readme("test_owner/test_repo", "main", "python")
+    routers.code_generator.generate_readme("test_owner/test_repo", "main",
+                                           "python")
 
 
 def test_generate_readme_failed(mocker, setup):
     """Test generate_readme() function."""
     setup(mocker)
     mocker.patch("builtins.open", mocker.mock_open(read_data="test"))
-    routers.code_generator.generate_readme("test_owner/test_repo", "main", "python")
+    mocker.patch("services.llm.generate_text", return_value="```Test```")
+    routers.code_generator.generate_readme("test_owner/test_repo", "main",
+                                           "python")
 
 
 def test_grow_grass_now(mocker, setup):
