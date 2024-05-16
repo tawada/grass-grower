@@ -57,13 +57,22 @@ def test_generate_readme(mocker, setup):
                                            "python")
 
 
-def test_generate_readme_failed(mocker, setup):
+def test_generate_readme_validate_text(mocker, setup):
     """Test generate_readme() function."""
     setup(mocker)
     mocker.patch("builtins.open", mocker.mock_open(read_data="test"))
     mocker.patch("services.llm.generate_text", return_value="```Test```")
     routers.code_generator.generate_readme("test_owner/test_repo", "main",
                                            "python")
+
+
+def test_generate_readme_failed_file_not_found(mocker, setup):
+    """Test generate_readme() function."""
+    setup(mocker)
+    mocker.patch("builtins.open", side_effect=FileNotFoundError)
+    with pytest.raises(FileNotFoundError):
+        routers.code_generator.generate_readme("test_owner/test_repo", "main",
+                                               "python")
 
 
 def test_grow_grass_now(mocker, setup):
