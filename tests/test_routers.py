@@ -53,6 +53,10 @@ def test_generate_readme(mocker, setup):
     """Test generate_readme() function."""
     setup(mocker)
     mocker.patch("builtins.open", mocker.mock_open(read_data="test"))
+    # for checkout_new_branch
+    mocker.patch(
+        "services.github.github_utils.exec_git_command_and_response_bool",
+        return_value=True)
     routers.code_generator.generate_readme("test_owner/test_repo", "main",
                                            "python")
 
@@ -62,6 +66,10 @@ def test_generate_readme_validate_text(mocker, setup):
     setup(mocker)
     mocker.patch("builtins.open", mocker.mock_open(read_data="test"))
     mocker.patch("services.llm.generate_text", return_value="```Test```")
+    # for checkout_new_branch
+    mocker.patch(
+        "services.github.github_utils.exec_git_command_and_response_bool",
+        return_value=True)
     routers.code_generator.generate_readme("test_owner/test_repo", "main",
                                            "python")
 
@@ -115,6 +123,10 @@ def test_generate_code_from_issue_and_reply(mocker, setup):
             "after_code": "test_after_code",
         },
     )
+    # for checkout_new_branch
+    mocker.patch(
+        "services.github.github_utils.exec_git_command_and_response_bool",
+        return_value=True)
 
     routers.generate_code_from_issue_and_reply(1, "test_owner/test_repo",
                                                "main", "python")
@@ -132,6 +144,10 @@ def test_generate_code_from_issue_and_reply_failed(mocker, setup):
             "after_code": "test",
         },
     )
+    # for checkout_new_branch
+    mocker.patch(
+        "services.github.github_utils.exec_git_command_and_response_bool",
+        return_value=True)
     with pytest.raises(RuntimeError):
         routers.generate_code_from_issue_and_reply(1, "test_owner/test_repo",
                                                    "main", "python")
