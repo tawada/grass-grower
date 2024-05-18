@@ -15,6 +15,13 @@ def test_services_llm_generate_text(
     services.llm.generate_text([{"text": "Hello, world!"}], openai_client)
 
 
+def test_services_llm_get_openai_client_failed_key_error(mocker):
+    """Test llm.get_openai_client() function."""
+    mocker.patch.dict("os.environ", {}, clear=True)
+    with pytest.raises(llm_exceptions.NotFoundAPIKeyException):
+        services.llm.get_openai_client()
+
+
 def test_services_llm_generate_json(
     mocker,
     setup_llm_detail,
