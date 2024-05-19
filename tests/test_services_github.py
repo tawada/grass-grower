@@ -131,3 +131,25 @@ def test_get_issue_by_id(mocker):
     )
     issue = services.github.get_issue_by_id("test/test", 101)
     assert issue
+
+
+def test_setup_repository_exist(mocker):
+    """Test services.github.setup_repository."""
+    mocker.patch(
+        "os.path.exists",
+        return_value=True,
+    )
+    mocker.patch(
+        "services.github.subprocess.run",
+        side_effect=[
+            subprocess.CompletedProcess(
+                args=["git", "branch", "--show-current"],
+                returncode=0,
+                stdout=b'test_branch'),
+            subprocess.CompletedProcess(
+                args=["git", "symbolic-ref", "--short", "HEAD"],
+                returncode=0,
+                stdout=b'test_branch2'), True, True, True
+        ],
+    )
+    services.github.setup_repository("test/test")
