@@ -3,6 +3,7 @@ from typing import Union
 
 import logic
 import services.github
+import services.github.exceptions
 import services.llm
 from logic import logic_utils
 from utils.logging_utils import log
@@ -76,6 +77,9 @@ def generate_readme(
     # Checkout to the a new branch
     try:
         services.github.checkout_new_branch(repo, "update-readme")
+    except services.github.exceptions.GitBranchAlreadyExistsException as err:
+        log(f"Error while checking out a new branch: {err}", level="error")
+        raise
     except FileNotFoundError as err:
         log(f"Error while checking out a new branch: {err}", level="error")
         raise
