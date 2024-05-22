@@ -5,6 +5,7 @@ import pytest
 
 import routers
 import routers.code_generator
+import services.github.exceptions
 
 
 def test_add_issue(
@@ -86,6 +87,19 @@ def test_generate_readme_failed_file_not_found(mocker, setup):
     setup(mocker)
     mocker.patch("builtins.open", side_effect=FileNotFoundError)
     with pytest.raises(FileNotFoundError):
+        routers.code_generator.generate_readme("test_owner/test_repo", "main",
+                                               "python")
+
+
+def test_generate_readme_failed_branch_already_exists(mocker, setup):
+    """Test generate_readme() function."""
+    setup(mocker)
+    mocker.patch("builtins.open", mocker.mock_open(read_data="test"))
+    mocker.patch(
+        "services.github.github_utils.exec_git_command_and_response_bool",
+        side_effect=services.github.exceptions.GitBranchAlreadyExistsException)
+    with pytest.raises(
+            services.github.exceptions.GitBranchAlreadyExistsException):
         routers.code_generator.generate_readme("test_owner/test_repo", "main",
                                                "python")
 
