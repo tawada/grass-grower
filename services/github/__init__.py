@@ -75,8 +75,10 @@ def list_issue_ids(repo: str) -> List[int]:
     if not res:
         return []
 
-    issue_row = res.stdout.decode().split("\t")
-    return list(map(int, issue_row))
+    issue_rows = res.stdout.decode().split("\n")
+    return list(
+        map(lambda line: int(line.split("\t")[0]),
+            filter(lambda x: x, issue_rows)))
 
 
 def get_issue_by_id(repo: str, issue_id: int) -> Issue:
