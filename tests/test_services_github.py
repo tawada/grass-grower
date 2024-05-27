@@ -75,7 +75,8 @@ def test_services_github_list_issue_ids_exec_command_success(mocker):
     def get_mock_object():
         """Return mock object."""
         mock_object = type("MockObject", (object, ), {})
-        setattr(mock_object, "stdout", "101\t202\t303".encode("utf-8"))
+        setattr(mock_object, "stdout",
+                "101\ttest\n202\ttest\n303\ttest".encode("utf-8"))
         return mock_object
 
     mocker.patch(
