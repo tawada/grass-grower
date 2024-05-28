@@ -1,4 +1,4 @@
-"""データ構造を定義するモジュール"""
+"""Module to define data structures"""
 
 from dataclasses import dataclass, field
 from typing import List
@@ -6,7 +6,7 @@ from typing import List
 
 @dataclass
 class IssueComment:
-    """IssueCommentのデータ構造"""
+    """Data structure for an issue comment"""
 
     author: str
     association: str
@@ -17,7 +17,7 @@ class IssueComment:
 
 @dataclass
 class Issue:
-    """Issueのデータ構造"""
+    """Data structure for an issue"""
 
     id: int
     title: str
