@@ -77,8 +77,11 @@ def generate_readme(
     except FileNotFoundError as err:
         log(f"Error while checking out a new branch: {err}", level="error")
         raise
+    except (PermissionError, IOError) as err:
+        log(f"File operation error: {err}", level="error")
+        raise
     except Exception as err:
-        log(f"Error to checkout a new branch: {err}", level="error")
+        log(f"Unexpected error during branch checkout: {err}", level="error")
         raise
 
     validated_text = logic.validate_text(generated_text)
