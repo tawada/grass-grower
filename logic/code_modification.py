@@ -4,6 +4,7 @@ import os
 
 import schemas
 import services.llm
+from utils.logging_utils import log
 
 from . import logic_utils
 
@@ -81,6 +82,11 @@ def generate_commit_message(repo, issue, modification: CodeModification):
     })
     openai_client = services.llm.get_openai_client()
     commit_message: str = services.llm.generate_text(messages, openai_client)
+
+    if not commit_message or len(commit_message) == 0:
+        log("Generated commit message is empty.", level="error")
+        raise ValueError("Generated commit message cannot be empty.")
+
     if "\n" in commit_message:
         commit_message = commit_message.split("\n")[0].strip('"')
     elif ". " in commit_message:
