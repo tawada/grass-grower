@@ -87,7 +87,8 @@ def generate_json(
             level="error",
         )
         raise llm_exceptions.UnknownLLMException(
-            "An unknown error occurred while generating the response") from err
+            f"An unknown error occurred while generating the response {err}"
+        ) from err
 
 
 def generate_and_parse_json(
