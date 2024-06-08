@@ -19,7 +19,19 @@ class CodeModification:
 
 
 def apply_modification(repo_name: str, modification: CodeModification) -> bool:
-    """Apply modification"""
+    """
+    Apply modification
+
+    Args:
+        repo_name: The name of the repository.
+        modification: The modification to apply.
+
+    Returns:
+        True if the modification was applied successfully.
+
+    Raises:
+        RuntimeError: If the code has no changes.
+    """
     repo_path = logic_utils.get_repo_path(repo_name)
     file_path = os.path.join(repo_path, modification.file_path)
     with open(file_path, "r", newline="") as file_object:
