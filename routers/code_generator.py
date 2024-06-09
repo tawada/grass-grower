@@ -5,7 +5,7 @@ import logic
 import services.github
 import services.github.exceptions
 import services.llm
-from logic import logic_utils
+from logic import logic_exceptions, logic_utils
 from utils.logging_utils import log
 
 from .routers_utils import send_messages_to_system
@@ -133,6 +133,9 @@ def generate_code_from_issue_and_reply(
         issue_message = logic.generate_issue_reply_message(
             repo, issue, modification, msg)
         services.github.reply_issue(repo, issue.id, issue_message)
+    except logic_exceptions.CodeNotModifiedError as err:
+        log(f"Code has no changes: {err}", level="info")
+        raise
     finally:
         if branch != new_branch:
             services.github.checkout_branch(repo, branch)

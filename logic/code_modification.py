@@ -6,7 +6,7 @@ import schemas
 import services.llm
 from utils.logging_utils import log
 
-from . import logic_utils
+from . import logic_exceptions, logic_utils
 
 
 @dataclasses.dataclass
@@ -30,7 +30,7 @@ def apply_modification(repo_name: str, modification: CodeModification) -> bool:
         True if the modification was applied successfully.
 
     Raises:
-        RuntimeError: If the code has no changes.
+        CodeNotModifiedError: If the code has not been modified.
     """
     repo_path = logic_utils.get_repo_path(repo_name)
     file_path = os.path.join(repo_path, modification.file_path)
@@ -39,7 +39,7 @@ def apply_modification(repo_name: str, modification: CodeModification) -> bool:
     after_code = before_code.replace(modification.before_code,
                                      modification.after_code)
     if before_code == after_code:
-        raise RuntimeError("Code has no changes")
+        raise logic_exceptions.CodeNotModifiedError("Code has no changes")
     with open(file_path, "w", newline="") as file_object:
         file_object.write(after_code)
     return True
