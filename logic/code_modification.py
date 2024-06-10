@@ -34,14 +34,12 @@ def apply_modification(repo_name: str, modification: CodeModification) -> bool:
     """
     repo_path = logic_utils.get_repo_path(repo_name)
     file_path = os.path.join(repo_path, modification.file_path)
-    with open(file_path, "r", newline="") as file_object:
-        before_code = file_object.read()
+    before_code = logic_utils.get_file_content(file_path, newline="")
     after_code = before_code.replace(modification.before_code,
                                      modification.after_code)
     if before_code == after_code:
         raise logic_exceptions.CodeNotModifiedError("Code has no changes")
-    with open(file_path, "w", newline="") as file_object:
-        file_object.write(after_code)
+    logic_utils.write_to_file(file_path, after_code, newline="")
     return True
 
 
@@ -72,8 +70,7 @@ def verify_modification(repo: str, modification: CodeModification):
     """Verify modification"""
     repo_path = logic_utils.get_repo_path(repo)
     file_path = os.path.join(repo_path, modification.file_path)
-    with open(file_path, "r") as file_object:
-        before_code = file_object.read()
+    before_code = logic_utils.get_file_content(file_path)
     return modification.before_code in before_code
 
 

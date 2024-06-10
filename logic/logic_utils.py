@@ -32,9 +32,9 @@ def is_target_file(file_name: str, target_extension: list[str]):
     return file_name.endswith(tuple(target_extension))
 
 
-def get_file_content(file_path: str):
+def get_file_content(file_path: str, newline: str|None = None):
     """Get the content of a file."""
-    with open(file_path, "r") as file_object:
+    with open(file_path, "r", newline=newline) as file_object:
         return file_object.read()
 
 
@@ -48,9 +48,9 @@ def get_repo_path(repo: str):
     return os.path.join(config["repository_path"], repo)
 
 
-def write_to_file(file_path: str, content: str):
+def write_to_file(file_path: str, content: str, newline: str|None = None):
     """Write content to a file."""
-    with open(file_path, "w") as file_object:
+    with open(file_path, "w", newline=newline) as file_object:
         file_object.write(content)
 
 
