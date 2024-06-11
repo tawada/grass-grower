@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
+import logic.logic_exceptions
 import routers
 import routers.code_generator
 import services.github.exceptions
@@ -169,6 +170,6 @@ def test_generate_code_from_issue_and_reply_failed(mocker, setup):
     mocker.patch(
         "services.github.github_utils.exec_git_command_and_response_bool",
         return_value=True)
-    with pytest.raises(RuntimeError):
+    with pytest.raises(logic.logic_exceptions.CodeNotModifiedError):
         routers.generate_code_from_issue_and_reply(1, "test_owner/test_repo",
                                                    "main", "python")
