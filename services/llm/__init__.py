@@ -7,6 +7,7 @@ import openai
 
 from config import config
 from utils.logging_utils import log
+from utils.retry_util import retry_on_exception
 
 from . import llm_exceptions
 
@@ -30,7 +31,7 @@ def get_openai_client(api_key: str = None) -> openai.OpenAI:
         ) from err
 
 
-@llm_exceptions.retry_handler(0)
+@retry_on_exception(llm_exceptions.LLMException, tries=3, delay=2, backoff=2)
 def generate_text(
     messages: List[Dict[str, str]],
     openai_client: openai.OpenAI,
