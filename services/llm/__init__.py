@@ -19,7 +19,8 @@ def get_openai_client(api_key: str = None) -> openai.OpenAI:
     try:
         if api_key is None:
             api_key = os.environ["OPENAI_API_KEY"]
-        return openai.OpenAI(api_key=api_key)
+        openai.api_key = api_key
+        return openai
     except KeyError as err:
         log(
             ("OPENAI_API_KEY is not set in environment variables. "
