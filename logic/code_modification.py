@@ -34,11 +34,16 @@ def apply_modification(repo_name: str, modification: CodeModification) -> bool:
     """
     repo_path = logic_utils.get_repo_path(repo_name)
     file_path = os.path.join(repo_path, modification.file_path)
-    before_code = logic_utils.get_file_content(file_path, newline="")
-    after_code = before_code.replace(modification.before_code,
-                                     modification.after_code)
-    if before_code == after_code:
-        raise logic_exceptions.CodeNotModifiedError("Code has no changes")
+
+    if os.path.exists(file_path):
+        # Check if the code has already been modified
+        before_code = logic_utils.get_file_content(file_path, newline="")
+        after_code = before_code.replace(modification.before_code,
+                                         modification.after_code)
+        if before_code == after_code:
+            raise logic_exceptions.CodeNotModifiedError("Code has no changes")
+    else:
+        after_code = modification.after_code
     logic_utils.write_to_file(file_path, after_code, newline="")
     return True
 
