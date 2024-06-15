@@ -158,6 +158,7 @@ def test_generate_code_from_issue_and_reply_failed(mocker, setup):
     """Test generate_code_from_issue_and_reply() function."""
     setup(mocker)
     mocker.patch("builtins.open", mocker.mock_open(read_data="test"))
+    mocker.patch("os.path.exists", return_value=True)
     mocker.patch(
         "services.llm.generate_json",
         return_value={
