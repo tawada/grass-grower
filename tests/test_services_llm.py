@@ -71,7 +71,7 @@ def test_services_llm_generate_json_fail_invalid_response(
             """Mock __str__ function."""
             return self.content
 
-    mocker.patch("openai.OpenAI", new=MockOpenAIObject)
+    mocker.patch("services.llm.openai", new=MockOpenAIObject())
 
     openai_client = services.llm.get_openai_client()
     with pytest.raises(llm_exceptions.LLMJSONParseException):

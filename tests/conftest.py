@@ -87,6 +87,6 @@ def setup_llm_detail():
 
     def inner(mocker):
         mocker.patch.dict("os.environ", {"OPENAI_API_KEY": "test"})
-        mocker.patch("openai.OpenAI", new=MockOpenAIObject)
+        mocker.patch("services.llm.openai", new=MockOpenAIObject())
 
     return inner
