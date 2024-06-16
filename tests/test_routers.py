@@ -26,7 +26,7 @@ def test_add_issue(
     routers.add_issue("test_owner/test_repo", "python")
 
 
-def add_issue_failed(mocker, setup):
+def test_add_issue_failed(mocker, setup):
     """Test add_issue() function."""
     setup(mocker)
     with pytest.raises(ValueError):
