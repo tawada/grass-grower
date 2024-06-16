@@ -30,7 +30,7 @@ def test_add_issue_failed(mocker, setup):
     """Test add_issue() function."""
     setup(mocker)
     with pytest.raises(ValueError):
-        routers.add_issue("test_owner/-invalid_test_repo", "python")
+        routers.add_issue("test_owner/#invalid_test_repo", "python")
 
 
 def test_update_issue(
