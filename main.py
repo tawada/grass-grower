@@ -4,7 +4,9 @@ import re
 import sys
 from argparse import ArgumentParser, ArgumentTypeError
 
-import routers
+from routers import (add_issue, generate_code_from_issue,
+                     generate_code_from_issue_and_reply, generate_readme,
+                     grow_grass, update_issue)
 from utils.logging_utils import log, setup_logging
 
 # Establish a dictionary that maps actions to whether they need an issue_id
@@ -15,6 +17,15 @@ actions_needing_issue_id = {
     "add_issue": False,
     "generate_readme": False,
     "grow_grass": False,
+}
+
+action_functions = {
+    "add_issue": add_issue,
+    "generate_code_from_issue": generate_code_from_issue,
+    "generate_code_from_issue_and_reply": generate_code_from_issue_and_reply,
+    "generate_readme": generate_readme,
+    "grow_grass": grow_grass,
+    "update_issue": update_issue,
 }
 
 
@@ -90,7 +101,8 @@ def main(args=None):
         _args = [args.repo, args.branch, args.code_lang]
         if actions_needing_issue_id[args.action]:
             _args.insert(0, args.issue_id)
-        getattr(routers, args.action)(*_args)
+        # getattr(routers, args.action)(*_args)
+        action_functions[args.action](*_args)
     except AttributeError as err:
         log(f"Action not implemented: {err}", level="error")
         sys.exit(1)

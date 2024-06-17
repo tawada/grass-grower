@@ -10,7 +10,8 @@ import services.github
 import services.llm
 from utils.logging_utils import log
 
-from .code_generator import (generate_code_from_issue_and_reply,
+from .code_generator import (generate_code_from_issue,
+                             generate_code_from_issue_and_reply,
                              generate_readme)
 from .routers_utils import send_messages_to_system
 
