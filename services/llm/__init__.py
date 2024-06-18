@@ -7,7 +7,7 @@ import openai
 
 from config import config
 from utils.logging_utils import log
-from utils.retry_util import retry_on_exception
+from utils.retry_utils import retry_on_exception
 
 from . import llm_exceptions
 
