@@ -6,7 +6,8 @@ from typing import List
 
 from config import config
 from schemas import Issue, IssueComment
-from services.github import exceptions, github_utils
+from services.github import exceptions
+from utils import github_utils
 
 DEFAULT_PATH = config["repository_path"]
 
