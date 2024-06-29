@@ -43,6 +43,8 @@ def parse_git_repo(value: str) -> str:
 
 
 def parse_arguments(args=None):
+    """Parse command line arguments and validate them"""
+    try:
     """Parse command line arguments"""
     parser = ArgumentParser(
         description="Tool to automate issue handling on GitHub")
