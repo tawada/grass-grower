@@ -31,6 +31,19 @@ def setup_repository(repo: str, branch_name: str = "main"):
 
 
 def clone_repository(repo: str) -> bool:
+    try:
+        github_utils.make_owner_dir(DEFAULT_PATH, repo)
+        return github_utils.exec_git_command_and_response_bool(
+            repo[:repo.index("/")],
+            ["git", "clone", "git@github.com:" + repo],
+            True,
+        )
+    except (exceptions.GitHubRepoNotFoundException, exceptions.GitHubConnectionException) as err:
+        raise exceptions.GitHubRepoNotFoundException(
+            f"Invalid repository or connection issue: {repo}") from err
+    except subprocess.CalledProcessError as err:
+        log(f"Command failed: {err}", level="error")
+        raise exceptions.CommandExecutionException(f"Command execution failed: {err}") from err
     """Clone the repository."""
     github_utils.make_owner_dir(DEFAULT_PATH, repo)
     try:
