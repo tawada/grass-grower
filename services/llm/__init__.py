@@ -7,7 +7,9 @@ import openai
 
 from config import config
 from utils.logging_utils import log
-from utils.retry_utils import retry_on_exception
+from tenacity import retry, stop_after_attempt, wait_exponential
+
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=120))
 
 from . import llm_exceptions
 
