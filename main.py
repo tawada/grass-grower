@@ -94,17 +94,28 @@ def main(args=None):
         log(f"Argument error: {str(err)}", level="error")
         sys.exit(1)
     except SystemExit as err:
-        log(f"Argument parsing error: {err}", level="error")
+        error_msg = str(err)
+        if 'invalid choice' in error_msg:
+            log(f"無効なアクションが指定されました: {error_msg}", level="error")
+        elif 'unrecognized arguments' in error_msg:
+            log(f"認識できない引数が指定されました: {error_msg}", level="error")
+        else:
+            log(f"引数解析エラー: {error_msg}", level="error")
+        sys.exit(1)
+    except Exception as err:
+        log(f"引数解析中に予期せぬエラーが発生しました: {err}", level="error")
         sys.exit(1)
 
     try:
         _args = [args.repo, args.branch, args.code_lang]
         if actions_needing_issue_id[args.action]:
             _args.insert(0, args.issue_id)
-        # getattr(routers, args.action)(*_args)
         action_functions[args.action](*_args)
     except AttributeError as err:
-        log(f"Action not implemented: {err}", level="error")
+        log(f"アクションが実装されていません: {err}", level="error")
+        sys.exit(1)
+    except Exception as err:
+        log(f"アクション実行中に予期せぬエラーが発生しました: {err}", level="error")
         sys.exit(1)
 
 

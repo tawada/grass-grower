@@ -55,3 +55,23 @@ def test_main_update_issue_fail_invalid_issue_id(mocker, setup):
     args = ["update_issue", "--issue-id", "invalid_issue_id"]
     with pytest.raises(SystemExit):
         main.main(args)
+
+
+def test_main_unexpected_error(mocker):
+    """Test main() with unexpected error"""
+    mocker.patch("main.parse_arguments",
+                 side_effect=Exception("Unexpected error"))
+    with pytest.raises(SystemExit):
+        main.main([])
+
+
+def test_main_invalid_action(mocker):
+    """Test main() with invalid action"""
+    with pytest.raises(SystemExit):
+        main.main(["invalid_action"])
+
+
+def test_main_unrecognized_argument(mocker):
+    """Test main() with unrecognized argument"""
+    with pytest.raises(SystemExit):
+        main.main(["add_issue", "--invalid-arg"])
