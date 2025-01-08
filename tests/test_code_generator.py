@@ -1,16 +1,14 @@
+"""Test module for code_generator.py."""
 from unittest.mock import MagicMock
 
 import pytest
 
-import services.github
-import services.llm
 from routers.code_generator import generate_code_from_issue, generate_readme
 from utils.config_loader import get_default_config
 
 
 def test_generate_code_from_issue(mocker):
     """Test generate_code_from_issue function."""
-    # setupフィクスチャを使用せず、必要なモックを直接設定
     issue_id = 1
     repo = "test_owner/test_repo"
     branch = "main"
@@ -19,8 +17,8 @@ def test_generate_code_from_issue(mocker):
     mock_issue = MagicMock()
     mock_issue.id = issue_id
 
-    # OpenAIクライアントのモックを設定
-    class MockOpenAIObject:
+    class MockOpenAIClient:
+        """Mock OpenAI client for testing."""
 
         def __init__(self):
             self.chat = self
@@ -29,19 +27,18 @@ def test_generate_code_from_issue(mocker):
             self.message = self
             self.content = "生成されたコード"
 
-        def create(self, model, messages, response_format={"type": "text"}):
+        def create(self, *args, **kwargs):
+            """Mock create method."""
             return self
 
     mocker.patch.dict("os.environ", {"OPENAI_API_KEY": "test"})
-    mocker.patch("services.llm.openai", new=MockOpenAIObject())
+    mocker.patch("services.llm.openai", new=MockOpenAIClient())
 
-    mock_setup = mocker.patch("services.github.setup_repository")
-    mock_get_issue = mocker.patch("services.github.get_issue_by_id",
+    mock_setup = mocker.patch('services.github.setup_repository')
+    mock_get_issue = mocker.patch('services.github.get_issue_by_id',
                                   return_value=mock_issue)
-    mock_generate_messages = mocker.patch("logic.generate_messages_from_files",
-                                          return_value=[])
-    mock_generate_messages_issue = mocker.patch(
-        "logic.generate_messages_from_issue", return_value=[])
+    mocker.patch('logic.generate_messages_from_files', return_value=[])
+    mocker.patch('logic.generate_messages_from_issue', return_value=[])
 
     generated_code = generate_code_from_issue(issue_id, repo, branch,
                                               code_lang)
@@ -57,8 +54,8 @@ def test_generate_readme_success(mocker):
     branch = "main"
     code_lang = "python"
 
-    # OpenAIクライアントのモックを設定
-    class MockOpenAIObject:
+    class MockOpenAIClient:
+        """Mock OpenAI client for testing."""
 
         def __init__(self):
             self.chat = self
@@ -67,25 +64,24 @@ def test_generate_readme_success(mocker):
             self.message = self
             self.content = "生成されたREADME"
 
-        def create(self, model, messages, response_format={"type": "text"}):
+        def create(self, *args, **kwargs):
+            """Mock create method."""
             return self
 
     mocker.patch.dict("os.environ", {"OPENAI_API_KEY": "test"})
-    mocker.patch("services.llm.openai", new=MockOpenAIObject())
+    mocker.patch("services.llm.openai", new=MockOpenAIClient())
 
-    # その他のモックを設定
-    mocker.patch("os.path.exists", return_value=True)
-    mocker.patch("logic.logic_utils.get_file_content",
+    mocker.patch('os.path.exists', return_value=True)
+    mocker.patch('logic.logic_utils.get_file_content',
                  return_value="現在のREADME")
-    mocker.patch("logic.logic_utils.write_to_file")
-    mock_setup = mocker.patch("services.github.setup_repository")
-    mock_checkout_new = mocker.patch("services.github.checkout_new_branch")
-    mock_commit = mocker.patch("services.github.commit")
-    mock_push = mocker.patch("services.github.push_repository")
-    mock_checkout = mocker.patch("services.github.checkout_branch")
+    mocker.patch('logic.logic_utils.write_to_file')
+    mock_setup = mocker.patch('services.github.setup_repository')
+    mock_checkout_new = mocker.patch('services.github.checkout_new_branch')
+    mock_commit = mocker.patch('services.github.commit')
+    mock_push = mocker.patch('services.github.push_repository')
+    mock_checkout = mocker.patch('services.github.checkout_branch')
 
-    # デフォルトのconfig pathを使用
-    mocker.patch("config.config", get_default_config())
+    mocker.patch('config.config', get_default_config())
 
     result = generate_readme(repo, branch, code_lang)
 
@@ -101,10 +97,10 @@ def test_generate_readme_file_not_found(mocker):
     """Test generate_readme function with FileNotFoundError."""
     repo = "test_owner/test_repo"
 
-    mocker.patch("os.path.exists", return_value=True)
-    mocker.patch("logic.logic_utils.get_file_content",
+    mocker.patch('os.path.exists', return_value=True)
+    mocker.patch('logic.logic_utils.get_file_content',
                  side_effect=FileNotFoundError)
-    mocker.patch("config.config", get_default_config())
+    mocker.patch('config.config', get_default_config())
 
     with pytest.raises(FileNotFoundError):
         generate_readme(repo)
