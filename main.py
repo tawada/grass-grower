@@ -1,12 +1,18 @@
 """Tool to automate issue handling on GitHub"""
+
 import os
 import re
 import sys
 from argparse import ArgumentParser, ArgumentTypeError
 
-from routers import (add_issue, generate_code_from_issue,
-                     generate_code_from_issue_and_reply, generate_readme,
-                     grow_grass, update_issue)
+from routers import (
+    add_issue,
+    generate_code_from_issue,
+    generate_code_from_issue_and_reply,
+    generate_readme,
+    grow_grass,
+    update_issue,
+)
 from utils.logging_utils import log, setup_logging
 
 # Establish a dictionary that maps actions to whether they need an issue_id
@@ -95,9 +101,9 @@ def main(args=None):
         sys.exit(1)
     except SystemExit as err:
         error_msg = str(err)
-        if 'invalid choice' in error_msg:
+        if "invalid choice" in error_msg:
             log(f"無効なアクションが指定されました: {error_msg}", level="error")
-        elif 'unrecognized arguments' in error_msg:
+        elif "unrecognized arguments" in error_msg:
             log(f"認識できない引数が指定されました: {error_msg}", level="error")
         else:
             log(f"引数解析エラー: {error_msg}", level="error")

@@ -1,4 +1,5 @@
 """Module for loading configuration from a JSON file."""
+
 import json
 
 from utils.logging_utils import log

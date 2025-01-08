@@ -1,4 +1,5 @@
 """Router for the API."""
+
 import random
 import re
 from datetime import datetime
@@ -10,9 +11,11 @@ import services.github
 import services.llm
 from utils.logging_utils import log
 
-from .code_generator import (generate_code_from_issue,
-                             generate_code_from_issue_and_reply,
-                             generate_readme)
+from .code_generator import (
+    generate_code_from_issue,
+    generate_code_from_issue_and_reply,
+    generate_readme,
+)
 from .routers_utils import send_messages_to_system
 
 
@@ -61,8 +64,10 @@ def add_issue(
         code_lang]
 
     if not validate_repo_name(repo):
-        log("Invalid repository format. The expected format is 'owner/repo'.",
-            level="error")
+        log(
+            "Invalid repository format. The expected format is 'owner/repo'.",
+            level="error",
+        )
         raise ValueError(
             "Invalid repository format. The expected format is 'owner/repo'.")
 

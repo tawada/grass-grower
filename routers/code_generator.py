@@ -1,4 +1,5 @@
 """Router for the API."""
+
 from typing import Union
 
 import logic

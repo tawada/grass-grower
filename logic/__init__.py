@@ -1,4 +1,5 @@
 """This module provides functions to generate a modification from an issue and a codebase."""
+
 from .code_modification import (
     apply_modification,
     generate_commit_message,

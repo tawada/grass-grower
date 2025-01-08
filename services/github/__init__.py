@@ -1,4 +1,5 @@
 """GitHub API service."""
+
 import os
 import subprocess
 from datetime import datetime

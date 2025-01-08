@@ -1,4 +1,5 @@
 """Test routers.py module."""
+
 from datetime import datetime, timedelta
 
 import pytest
@@ -65,7 +66,8 @@ def test_generate_readme(mocker, setup):
     # for checkout_new_branch
     mocker.patch(
         "services.github.github_utils.exec_git_command_and_response_bool",
-        return_value=True)
+        return_value=True,
+    )
     routers.code_generator.generate_readme("test_owner/test_repo", "main",
                                            "python")
 
@@ -78,7 +80,8 @@ def test_generate_readme_validate_text(mocker, setup):
     # for checkout_new_branch
     mocker.patch(
         "services.github.github_utils.exec_git_command_and_response_bool",
-        return_value=True)
+        return_value=True,
+    )
     routers.code_generator.generate_readme("test_owner/test_repo", "main",
                                            "python")
 
@@ -98,7 +101,8 @@ def test_generate_readme_failed_branch_already_exists(mocker, setup):
     mocker.patch("builtins.open", mocker.mock_open(read_data="test"))
     mocker.patch(
         "services.github.github_utils.exec_git_command_and_response_bool",
-        side_effect=services.github.exceptions.GitBranchAlreadyExistsException)
+        side_effect=services.github.exceptions.GitBranchAlreadyExistsException,
+    )
     with pytest.raises(
             services.github.exceptions.GitBranchAlreadyExistsException):
         routers.code_generator.generate_readme("test_owner/test_repo", "main",
@@ -148,7 +152,8 @@ def test_generate_code_from_issue_and_reply(mocker, setup):
     # for checkout_new_branch
     mocker.patch(
         "services.github.github_utils.exec_git_command_and_response_bool",
-        return_value=True)
+        return_value=True,
+    )
 
     routers.generate_code_from_issue_and_reply(1, "test_owner/test_repo",
                                                "main", "python")
@@ -170,7 +175,8 @@ def test_generate_code_from_issue_and_reply_failed(mocker, setup):
     # for checkout_new_branch
     mocker.patch(
         "services.github.github_utils.exec_git_command_and_response_bool",
-        return_value=True)
+        return_value=True,
+    )
     with pytest.raises(logic.logic_exceptions.CodeNotModifiedError):
         routers.generate_code_from_issue_and_reply(1, "test_owner/test_repo",
                                                    "main", "python")
