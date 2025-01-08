@@ -1,4 +1,5 @@
 """Exceptions for the package."""
+
 import subprocess
 
 

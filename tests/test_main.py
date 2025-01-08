@@ -1,4 +1,5 @@
 """Test main.py"""
+
 import pytest
 
 import main

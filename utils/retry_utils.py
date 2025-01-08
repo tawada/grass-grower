@@ -3,6 +3,7 @@ This file contains the retry_on_exception decorator
 which can be used to retry a function in case of
 a specific exception.
 """
+
 import functools
 import logging
 from time import sleep

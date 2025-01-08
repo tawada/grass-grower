@@ -1,4 +1,5 @@
 """Test utils.config_loader module."""
+
 from pytest_mock import MockFixture
 
 import utils.config_loader

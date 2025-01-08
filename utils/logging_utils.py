@@ -1,4 +1,5 @@
 """ Logging utilities for the project. """
+
 from loguru import logger
 
 

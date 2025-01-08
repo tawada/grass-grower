@@ -1,4 +1,5 @@
 """Test services.github module."""
+
 import subprocess
 
 import pytest
@@ -19,11 +20,15 @@ def test_services_github_setup_repository_exist(mocker):
             subprocess.CompletedProcess(
                 args=["git", "branch", "--show-current"],
                 returncode=0,
-                stdout=b'test_branch'),
+                stdout=b"test_branch",
+            ),
             subprocess.CompletedProcess(
                 args=["git", "symbolic-ref", "--short", "HEAD"],
                 returncode=0,
-                stdout=b'test_branch'), True, True
+                stdout=b"test_branch",
+            ),
+            True,
+            True,
         ],
     )
     services.github.setup_repository("test/test")
@@ -146,11 +151,16 @@ def test_setup_repository_exist(mocker):
             subprocess.CompletedProcess(
                 args=["git", "branch", "--show-current"],
                 returncode=0,
-                stdout=b'test_branch'),
+                stdout=b"test_branch",
+            ),
             subprocess.CompletedProcess(
                 args=["git", "symbolic-ref", "--short", "HEAD"],
                 returncode=0,
-                stdout=b'test_branch2'), True, True, True
+                stdout=b"test_branch2",
+            ),
+            True,
+            True,
+            True,
         ],
     )
     services.github.setup_repository("test/test")
