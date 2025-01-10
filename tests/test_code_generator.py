@@ -3,7 +3,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from routers.code_generator import generate_code_from_issue, generate_readme
+import logic.code_modification
+from routers.code_generator import (generate_code_from_issue, generate_readme,
+                                    generate_code_from_issue_and_reply)
 from utils.config_loader import get_default_config
 
 
@@ -104,3 +106,37 @@ def test_generate_readme_file_not_found(mocker):
 
     with pytest.raises(FileNotFoundError):
         generate_readme(repo)
+
+
+def test_generate_code_from_issue_and_reply_code_not_found(mocker):
+    """Test generate_code_from_issue_and_reply() function when code is not found."""
+    issue_id = 1
+    repo = "test_owner/test_repo"
+    branch = "main"
+
+    # モックの設定
+    mock_issue = MagicMock()
+    mock_issue.id = issue_id
+
+    mocker.patch("services.github.setup_repository")
+    mocker.patch("services.github.get_issue_by_id", return_value=mock_issue)
+    mocker.patch("services.github.checkout_new_branch")
+    mocker.patch("services.github.checkout_branch")
+    mocker.patch("services.github.delete_branch")
+
+    # CodeModificationオブジェクトを使用
+    mock_modification = logic.code_modification.CodeModification(
+        file_path="test_file.py", before_code="存在しないコード", after_code="新しいコード")
+
+    mocker.patch("logic.generate_modification_from_issue",
+                 return_value=mock_modification)
+    mocker.patch("logic.verify_modification", return_value=True)
+    mocker.patch("os.path.exists", return_value=True)
+    mocker.patch("logic.logic_utils.get_file_content",
+                 return_value="実際のファイルの内容")
+
+    with pytest.raises(
+            logic.logic_exceptions.CodeNotModifiedError) as exc_info:
+        generate_code_from_issue_and_reply(issue_id, repo, branch)
+
+    assert str(exc_info.value) == "対象のコードが見つかりませんでした"
