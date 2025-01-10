@@ -2,6 +2,7 @@
 
 import dataclasses
 import os
+import re
 
 import schemas
 import services.llm
@@ -21,17 +22,17 @@ class CodeModification:
 
 def apply_modification(repo_name: str, modification: CodeModification) -> bool:
     """
-    Apply modification
+    指定されたコード修正を適用する
 
     Args:
-        repo_name: The name of the repository.
-        modification: The modification to apply.
+        repo_name: リポジトリ名
+        modification: コード修正の内容
 
     Returns:
-        True if the modification was applied successfully.
+        bool: 修正が成功したかどうか
 
     Raises:
-        CodeNotModifiedError: If the code has not been modified.
+        CodeNotModifiedError: コードの変更がない場合
     """
     repo_path = logic_utils.get_repo_path(repo_name)
     file_path = os.path.join(repo_path, modification.file_path)
@@ -39,12 +40,20 @@ def apply_modification(repo_name: str, modification: CodeModification) -> bool:
     if os.path.exists(file_path):
         # Check if the code has already been modified
         before_code = logic_utils.get_file_content(file_path, newline="")
-        after_code = before_code.replace(modification.before_code,
-                                         modification.after_code)
+
+        # 正規表現を使用して正確な置換を行う
+        pattern = re.compile(re.escape(modification.before_code))
+        if not pattern.search(before_code):
+            raise logic_exceptions.CodeNotModifiedError("対象のコードが見つかりませんでした")
+
+        after_code = pattern.sub(modification.after_code, before_code, count=1)
+
+        # 変更がない場合もエラーを発生させる
         if before_code == after_code:
-            raise logic_exceptions.CodeNotModifiedError("Code has no changes")
+            raise logic_exceptions.CodeNotModifiedError("コードに変更がありません")
     else:
         after_code = modification.after_code
+
     logic_utils.write_to_file(file_path, after_code, newline="")
     return True
 
