@@ -114,6 +114,24 @@ def test_generate_code_from_issue_and_reply_code_not_found(mocker):
     repo = "test_owner/test_repo"
     branch = "main"
 
+    # OpenAIのモックを設定
+    class MockOpenAIClient:
+        """Mock OpenAI client for testing."""
+
+        def __init__(self):
+            self.chat = self
+            self.completions = self
+            self.choices = [self]
+            self.message = self
+            self.content = "テスト応答"
+
+        def create(self, *args, **kwargs):
+            """Mock create method."""
+            return self
+
+    mocker.patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"})
+    mocker.patch("services.llm.openai", new=MockOpenAIClient())
+
     # モックの設定
     mock_issue = MagicMock()
     mock_issue.id = issue_id
