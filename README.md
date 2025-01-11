@@ -58,7 +58,7 @@ In addition to Python 3.11, ensure the following are installed and correctly con
 - OpenAI Python client library.
 - GitHub CLI (`gh`).
 
-Refer to the `requirements.txt` file for a detailed list of Python dependencies.
+Refer to the `Pipfile` file for a detailed list of Python dependencies.
 
 ## Limitations
 
