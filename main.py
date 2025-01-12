@@ -5,6 +5,8 @@ import re
 import sys
 from argparse import ArgumentParser, ArgumentTypeError
 
+# ローカルモジュールのインポート
+import logging_config  # noqa: F401
 from routers import (
     add_issue,
     generate_code_from_issue,
@@ -14,6 +16,7 @@ from routers import (
     update_issue,
 )
 from utils.logging_utils import log, setup_logging
+import logging_config  # このインポートだけでロギング設定が完了します
 
 # Establish a dictionary that maps actions to whether they need an issue_id
 actions_needing_issue_id = {
