@@ -89,8 +89,6 @@ def parse_arguments(args=None):
 
 def main(args=None):
     """Main function"""
-    # Set up logging
-    setup_logging()
 
     try:
         args = parse_arguments(args)
