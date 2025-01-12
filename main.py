@@ -5,6 +5,9 @@ import re
 import sys
 from argparse import ArgumentParser, ArgumentTypeError
 
+# ローカルモジュールのインポート
+import logging_config  # noqa: F401
+from utils.logging_utils import log
 from routers import (
     add_issue,
     generate_code_from_issue,
@@ -13,7 +16,6 @@ from routers import (
     grow_grass,
     update_issue,
 )
-from utils.logging_utils import log, setup_logging
 
 # Establish a dictionary that maps actions to whether they need an issue_id
 actions_needing_issue_id = {
@@ -87,8 +89,6 @@ def parse_arguments(args=None):
 
 def main(args=None):
     """Main function"""
-    # Set up logging
-    setup_logging()
 
     try:
         args = parse_arguments(args)
