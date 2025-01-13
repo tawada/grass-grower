@@ -14,7 +14,22 @@ DEFAULT_PATH = config["repository_path"]
 
 
 def setup_repository(repo: str, branch_name: str = "main"):
-    """Set up the repository to point to a specific branch."""
+    """リポジトリを特定のブランチに設定します。
+
+    このメソッドは、指定されたリポジトリがローカルファイルシステムに存在するかを確認します。
+    存在しない場合はGitHubからクローンし、存在する場合は最新の変更をプルします。
+    その後、指定されたブランチをチェックアウトします。
+
+    Args:
+        repo (str): 'オーナー名/リポジトリ名' 形式のリポジトリ名
+        branch_name (str, optional): チェックアウトするブランチ名。デフォルトは'main'
+
+    Raises:
+        exceptions.GitHubRepoNotFoundException: リポジトリが無効または見つからない場合
+
+    Returns:
+        None
+    """
     # リポジトリが存在するか確認する
     if not github_utils.exists_repo(DEFAULT_PATH, repo):
         # リポジトリが存在しない場合はcloneする
