@@ -9,6 +9,7 @@ from config import config
 from schemas import Issue, IssueComment
 from services.github import exceptions
 from utils import github_utils
+from utils.logging_utils import log
 
 DEFAULT_PATH = config["repository_path"]
 
@@ -26,24 +27,30 @@ def setup_repository(repo: str, branch_name: str = "main"):
 
     Raises:
         exceptions.GitHubRepoNotFoundException: リポジトリが無効または見つからない場合
-
-    Returns:
-        None
+        exceptions.GitHubConnectionException: GitHub接続エラーの場合
+        exceptions.GitException: その他のGit操作エラーの場合
     """
-    # リポジトリが存在するか確認する
-    if not github_utils.exists_repo(DEFAULT_PATH, repo):
-        # リポジトリが存在しない場合はcloneする
-        clone_repository(repo)
-    else:
-        # リポジトリが存在する場合はpullする
-        branch = get_branch(repo)
-        default_branch = get_default_branch(repo)
-        if branch != default_branch:
-            # ブランチが異なる場合はデフォルトブランチに戻す
-            checkout_branch(repo, default_branch)
-        pull_repository(repo)
-    # リポジトリのブランチを指定する
-    checkout_branch(repo, branch_name)
+    try:
+        if not github_utils.exists_repo(DEFAULT_PATH, repo):
+            log(f"リポジトリ {repo} が存在しないため、クローンを試みます", level="info")
+            clone_repository(repo)
+        else:
+            branch = get_branch(repo)
+            default_branch = get_default_branch(repo)
+            if branch != default_branch:
+                log(f"ブランチを {default_branch} に切り替えます", level="info")
+                checkout_branch(repo, default_branch)
+            pull_repository(repo)
+        checkout_branch(repo, branch_name)
+    except exceptions.GitHubConnectionException as err:
+        log(f"GitHubへの接続に失敗しました: {str(err)}", level="error")
+        raise
+    except exceptions.GitHubRepoNotFoundException as err:
+        log(f"リポジトリが見つかりません: {str(err)}", level="error")
+        raise
+    except exceptions.GitException as err:
+        log(f"Git操作でエラーが発生しました: {str(err)}", level="error")
+        raise
 
 
 def clone_repository(repo: str) -> bool:
