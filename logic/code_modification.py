@@ -32,8 +32,21 @@ def apply_modification(repo_name: str, modification: CodeModification) -> bool:
         bool: 修正が成功したかどうか
 
     Raises:
+        ValueError: repo_nameまたはmodificationが無効な場合
         CodeNotModifiedError: コードの変更がない場合
     """
+    if not repo_name or not isinstance(repo_name, str):
+        raise ValueError("リポジトリ名は必須で、文字列である必要があります")
+
+    if not modification or not isinstance(modification, CodeModification):
+        raise ValueError("modificationは必須で、CodeModificationインスタンスである必要があります")
+
+    if not modification.file_path:
+        raise ValueError("file_pathは必須です")
+
+    if not modification.after_code:
+        raise ValueError("after_codeは必須です")
+
     repo_path = logic_utils.get_repo_path(repo_name)
     file_path = os.path.join(repo_path, modification.file_path)
 
@@ -70,7 +83,14 @@ def generate_modification_from_issue(
         "role":
         "system",
         "content":
-        "Propose a new code modification as JSON format from the whole code and issues. Do not duplicate output if the code has already been changed. The JSON modification includes keys such as 'file_path', 'before_code', 'after_code'. 'before_code' is a part of file.\ne.g.\n```{file_path: 'path/to/file', before_code: 'def func1(aaa: int):\n\"\"\"Output an argment\"\"\"\nprint(aaa)\n', after_code: 'def func1(aaa: int, bbb: int):\n\"\"\"Output two argments\"\"\"\nprint(aaa)\nprint(bbb)\n'}```\n",
+        ("Propose a new code modification as JSON format from the whole code "
+         "and issues. Do not duplicate output if the code has already been "
+         "changed. The JSON modification includes keys such as 'file_path', "
+         "'before_code', 'after_code'. 'before_code' is a part of file.\n"
+         "e.g.\n```{file_path: 'path/to/file', before_code: 'def func1(aaa: "
+         "int):\n\"\"\"Output an argment\"\"\"\nprint(aaa)\n', after_code: "
+         "'def func1(aaa: int, bbb: int):\n\"\"\"Output two argments\"\"\"\n"
+         "print(aaa)\nprint(bbb)\n'}```\n"),
     })
     openai_client = services.llm.get_openai_client()
     generated_json = services.llm.generate_json(messages, openai_client)
@@ -91,6 +111,8 @@ def verify_modification(repo: str, modification: CodeModification):
 
 def generate_commit_message(repo, issue, modification: CodeModification):
     """Generate a commit message from an issue and a modification."""
+    log(f"Generate commit message from issue and modification: {repo} {issue.id}"
+        )
     messages = logic_utils.generate_messages_from_issue(issue)
     messages.append({
         "role":
@@ -124,6 +146,9 @@ def generate_commit_message(repo, issue, modification: CodeModification):
 def generate_issue_reply_message(repo, issue, modification: CodeModification,
                                  commit_message):
     """Generate a reply message."""
+    log(f"Generate issue reply message: {repo} {issue.id}")
     message = "The following changes have been completed.\n\n" + commit_message + "\n"
-    message += f"`{modification.file_path}`\nBefore:\n```\n{modification.before_code}\n```\nAfter:\n```\n{modification.after_code}\n```"
+    message += f"`{modification.file_path}`\n"
+    message += f"Before:\n```\n{modification.before_code}\n```\n"
+    message += f"After:\n```\n{modification.after_code}\n```"
     return message
