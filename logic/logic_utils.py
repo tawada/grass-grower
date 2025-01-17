@@ -4,6 +4,7 @@ import os
 
 import schemas
 from config import config
+from utils.path_utils import safe_join, safe_open
 
 
 def enumerate_target_file_paths(repo_path: str, target_extension: list[str]):
@@ -40,18 +41,18 @@ def get_file_content(file_path: str, newline: str | None = None):
 
 
 def get_file_path(repo: str, file_name: str):
-    """Get the file path in the repository."""
-    return os.path.join(get_repo_path(repo), file_name)
+    """リポジトリ内のファイルパスを取得します。"""
+    return safe_join(get_repo_path(repo), file_name)
 
 
 def get_repo_path(repo: str):
-    """Get repo path"""
-    return os.path.join(config["repository_path"], repo)
+    """リポジトリパスを取得します"""
+    return safe_join(config["repository_path"], repo)
 
 
 def write_to_file(file_path: str, content: str, newline: str | None = None):
-    """Write content to a file."""
-    with open(file_path, "w", newline=newline) as file_object:
+    """ファイルに内容を書き込みます。"""
+    with safe_open(file_path, "w", newline=newline) as file_object:
         file_object.write(content)
 
 

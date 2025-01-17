@@ -149,6 +149,8 @@ def test_generate_code_from_issue_and_reply(mocker, setup):
             "after_code": "test_after_code",
         },
     )
+    # ディレクトリの存在確認をモック
+    mocker.patch("os.path.exists", return_value=True)
     # for checkout_new_branch
     mocker.patch(
         "services.github.github_utils.exec_git_command_and_response_bool",
