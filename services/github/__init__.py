@@ -11,7 +11,7 @@ from services.github import exceptions
 from utils import github_utils
 from utils.logging_utils import log
 
-DEFAULT_PATH = config["repository_path"]
+DEFAULT_PATH = os.getenv('REPOSITORY_PATH', config["repository_path"])
 
 
 def setup_repository(repo: str, branch_name: str = "main"):
