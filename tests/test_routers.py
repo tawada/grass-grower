@@ -36,10 +36,12 @@ def test_add_issue_failed(mocker, setup):
 
 def test_update_issue(
     mocker,
-    setup,
+    setup_github,
+    setup_llm,
 ):
     """Test update_issue() function."""
-    setup(mocker)
+    setup_github(mocker)
+    setup_llm(mocker)
 
     mocker.patch("builtins.open", mocker.mock_open(read_data="test"))
     routers.update_issue(1, "test_owner/test_repo", "main", "python")
