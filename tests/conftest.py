@@ -6,18 +6,8 @@ import schemas
 
 
 @pytest.fixture()
-def setup():
-    """Setup mock functions."""
-
-    def inner(mocker):
-        setup_github()(mocker)
-        setup_llm()(mocker)
-
-    return inner
-
-
 def setup_github():
-    """Setup mock functions."""
+    """Setup mock functions for GitHub."""
 
     def inner(mocker):
         mocker.patch("services.github.setup_repository", return_value=True)
@@ -38,13 +28,25 @@ def setup_github():
     return inner
 
 
+@pytest.fixture()
 def setup_llm():
-    """Setup mock functions."""
+    """Setup mock functions for LLM."""
 
     def inner(mocker):
         mocker.patch.dict("os.environ", {"OPENAI_API_KEY": "test"})
         mocker.patch("services.llm.generate_text",
                      return_value="Hello, world!")
+
+    return inner
+
+
+@pytest.fixture()
+def setup(setup_github, setup_llm):
+    """Setup both GitHub and LLM mock functions for backward compatibility."""
+
+    def inner(mocker):
+        setup_github(mocker)
+        setup_llm(mocker)
 
     return inner
 
