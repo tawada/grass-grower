@@ -36,7 +36,9 @@ def generate_code_from_issue(
     messages.extend(logic.generate_messages_from_issue(issue))
     generated_text = send_messages_to_system(
         messages,
-        "You are a programmer of the highest caliber.Please read the code of the existing program and rewrite any one based on the issue.",
+        ("You are a programmer of the highest caliber."
+         "Please read the code of the existing program "
+         "and rewrite any one based on the issue."),
     )
     print(generated_text)
     return generated_text
@@ -56,7 +58,8 @@ def generate_readme(
         readme_content = logic_utils.get_file_content(file_path)
     except FileNotFoundError:
         log(
-            "README.md file does not exist. A new README.md will be created with generated content.",
+            ("README.md file does not exist. "
+             "A new README.md will be created with generated content."),
             level="warning",
         )
         raise
@@ -66,7 +69,9 @@ def generate_readme(
     messages.append({"role": "user", "content": readme_message})
     generated_text = send_messages_to_system(
         messages,
-        "You are a programmer of the highest caliber.Please read the code of the existing program and generate README.md.",
+        ("You are a programmer of the highest caliber."
+         "Please read the code of the existing program and generate README.md."
+         ),
     )
 
     # Checkout to the a new branch
@@ -106,38 +111,86 @@ def generate_code_from_issue_and_reply(
     code_lang: str = "python",
 ):
     """Generate code from an issue and reply the generated code to the repository."""
-
-    # Checkout to the branch
-    services.github.setup_repository(repo, branch)
-
-    new_branch = f"update-issue-#{issue_id}"
-    if new_branch != branch:
-        # Checkout to the a new branch
-        services.github.checkout_new_branch(repo, new_branch)
-
-    issue = services.github.get_issue_by_id(repo, issue_id)
-
-    modification = logic.generate_modification_from_issue(
-        repo, issue, code_lang)
-    is_valid = logic.verify_modification(repo, modification)
+    new_branch = None
     try:
-        if not is_valid:
-            raise ValueError(f"Invalid modification {modification}")
+        # リポジトリのセットアップ
+        try:
+            services.github.setup_repository(repo, branch)
+        except Exception as err:
+            log(f"リポジトリのセットアップに失敗しました: {err}", level="error")
+            raise
 
-        msg = logic.generate_commit_message(repo, issue, modification)
-        logic.apply_modification(repo, modification)
-        success = services.github.commit(repo, msg)
-        if not success:
-            log(str(modification), level="info")
-            raise ValueError(f"Failed to commit {msg}")
-        services.github.push_repository(repo, new_branch)
-        issue_message = logic.generate_issue_reply_message(
-            repo, issue, modification, msg)
-        services.github.reply_issue(repo, issue.id, issue_message)
-    except logic_exceptions.CodeNotModifiedError as err:
-        log(f"Code has no changes: {err}", level="info")
-        raise
+        # 新しいブランチの作成
+        new_branch = f"update-issue-#{issue_id}"
+        if new_branch != branch:
+            try:
+                services.github.checkout_new_branch(repo, new_branch)
+            except services.github.exceptions.GitBranchAlreadyExistsException:
+                log(f"ブランチ {new_branch} は既に存在します", level="warning")
+                services.github.checkout_branch(repo, new_branch)
+            except Exception as err:
+                log(f"新しいブランチの作成に失敗しました: {err}", level="error")
+                raise
+
+        # issueの取得
+        try:
+            issue = services.github.get_issue_by_id(repo, issue_id)
+        except Exception as err:
+            log(f"Issueの取得に失敗しました: {err}", level="error")
+            raise
+
+        # コード修正の生成と検証
+        try:
+            modification = logic.generate_modification_from_issue(
+                repo, issue, code_lang)
+            is_valid = logic.verify_modification(repo, modification)
+            if not is_valid:
+                raise ValueError(f"無効な修正です: {modification}")
+        except Exception as err:
+            log(f"コード修正の生成と検証に失敗しました: {err}", level="error")
+            raise
+
+        # コミットメッセージの生成と修正の適用
+        try:
+            msg = logic.generate_commit_message(repo, issue, modification)
+            logic.apply_modification(repo, modification)
+        except logic_exceptions.CodeNotModifiedError as err:
+            log(f"コードに変更がありません: {err}", level="info")
+            raise
+        except Exception as err:
+            log(f"修正の適用に失敗しました: {err}", level="error")
+            raise
+
+        # 変更のコミット
+        try:
+            if not services.github.commit(repo, msg):
+                raise ValueError(f"コミットに失敗しました: {msg}")
+        except Exception as err:
+            log(f"変更のコミットに失敗しました: {err}", level="error")
+            raise
+
+        # リポジトリへのプッシュ
+        try:
+            services.github.push_repository(repo, new_branch)
+        except Exception as err:
+            log(f"変更のプッシュに失敗しました: {err}", level="error")
+            raise
+
+        # issueへの返信
+        try:
+            issue_message = logic.generate_issue_reply_message(
+                repo, issue, modification, msg)
+            services.github.reply_issue(repo, issue.id, issue_message)
+        except Exception as err:
+            log(f"Issueへの返信に失敗しました: {err}", level="error")
+            raise
+
     finally:
-        if branch != new_branch:
-            services.github.checkout_branch(repo, branch)
-            services.github.delete_branch(repo, new_branch)
+        # ブランチのクリーンアップ
+        if new_branch and branch != new_branch:
+            try:
+                services.github.checkout_branch(repo, branch)
+                services.github.delete_branch(repo, new_branch)
+            except Exception as err:
+                log(f"ブランチのクリーンアップに失敗しました: {err}", level="error")
+                # クリーンアップの失敗は警告のみとし、メイン処理の結果には影響させない
